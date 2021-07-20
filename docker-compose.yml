@@ -1,19 +1,19 @@
 version: '3'
 
 services:
-  pictor-db:
+  db:
     image: postgres:10.4
     volumes:
       - pictordb:/var/lib/postgresql/data/
   pictor-web:
     build: .
-    # entrypoint: /code/entrypoint.sh
+    entrypoint: /code/entrypoint.sh
     volumes:
       - .:/code
     ports:
       - "8000:8000"
     depends_on:
-      - pictor-db
+      - db
 
 volumes:
   pictordb:
