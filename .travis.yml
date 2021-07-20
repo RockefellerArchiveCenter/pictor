@@ -10,9 +10,9 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - cp pleiades/config.py.example pleiades/config.py
+  # - cp pleiades/config.py.example pleiades/config.py
   - docker-compose up -d
   - sleep 20s
 install: true
 script:
-  - docker-compose exec web python manage.py test
+  - docker-compose exec pictor-web python manage.py test
