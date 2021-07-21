@@ -1,4 +1,5 @@
-Django
-djangorestframework
-health-check
-psycopg2-binary
+ArchivesSnake==0.9.1
+Django==3.2.5
+djangorestframework==3.12.4
+health-check==3.4.1
+psycopg2-binary==2.9.1
