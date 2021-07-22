@@ -4,7 +4,7 @@ services:
   db:
     image: postgres:10.4
     volumes:
-      - pictordb:/var/lib/postgresql/data/
+      - db:/var/lib/postgresql/data/
   pictor-web:
     build: .
     entrypoint: /code/entrypoint.sh
@@ -16,4 +16,4 @@ services:
       - db
 
 volumes:
-  pictordb:
+  db:
