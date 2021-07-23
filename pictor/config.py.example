@@ -1,3 +1,4 @@
+SECRET_KEY = 'ny033+z#r)$cpjl9gnbi*v=p8rjl2(%3-f&*v(mhi4#^eur9u8'
 DEBUG = True
 
 DATABASES = {
