@@ -96,7 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'pictor.User'
+AUTH_USER_MODEL = 'create_derivatives.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
