@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = CF.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = CF.DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = CF.ALLOWED_HOSTS
 
 
 # Application definition
