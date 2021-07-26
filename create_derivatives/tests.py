@@ -51,15 +51,25 @@ class BagPreparerTestCase(TestCase):
                     bag.bag_identifier).exists())
             self.assertEqual(
                 created, str(
-                    Path(
-                        settings.TMP_DIR, bag.bag_identifier)))
+                    Path(settings.TMP_DIR, bag.bag_identifier)))
 
     def test_run(self):
-        BagPreparer().run()
-        # assert bags in tmp
-        # assert bag.bag_path, bag.as_data, bag.dimes_identifier, bag.process_status
-        # assert return value
-        pass
+        """Asserts that run method produces the desired results.
+
+        Tests that the correct number of bags was processsed, and that the
+        attributes of each have been correctly set.
+        """
+        created_len = len(Bag.objects.filter(process_status=Bag.CREATED))
+        prepared = BagPreparer().run()
+        self.assertTrue(isinstance(prepared, tuple))
+        self.assertEqual(prepared[0], "Bags successfully prepared")
+        self.assertEqual(len(prepared[1]), created_len)
+        self.assertTrue(len(Path(settings.TMP_DIR).iterdir()), created_len)
+        for bag in Bag.objects.all():
+            self.assertEqual(bag.process_status, Bag.PREPARED)
+            self.assertIsNot(bag.bag_path, None)
+            self.assertIsNot(bag.as_data, None)
+            self.assertIsNot(bag.dimes_identifier, None)
 
     def tearDown(self):
         for f in Path(settings.SRC_DIR).iterdir():
