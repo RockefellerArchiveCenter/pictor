@@ -21,3 +21,10 @@ DEST_DIR = '{}/dest'.format(BASE_DIR)
 
 STATIC_ROOT = "/static"
 
+# baseurl, username, password, repo_id
+ARCHIVESSPACE = (
+  "http://localhost:8089/",
+  "admin",
+  "admin",
+  2,
+)
