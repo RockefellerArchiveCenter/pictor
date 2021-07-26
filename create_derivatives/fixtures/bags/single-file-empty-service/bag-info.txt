@@ -1,0 +1,15 @@
+Bag-Software-Agent: bagit.py <http://github.com/libraryofcongress/bagit-python>
+BagIt-Profile-Identifier: http://localhost:8000/api/bagit_profiles/1/
+Bagging-Date: 2017-12-11T20:26:04.201734
+Date-End: 2001-06-30
+Date-Start: 1982-07-06
+External-Identifier: records-2017-12-11T20:26:04.201734
+Internal-Sender-Description: Communications and publications from the foundation's communications department
+Language: eng
+Language: spa
+Origin: digitization
+Payload-Oxum: 1131930.1
+Record-Creators: Communications staff
+Record-Type: communications and publications
+Source-Organization: Test Organization
+Title: Press Releases

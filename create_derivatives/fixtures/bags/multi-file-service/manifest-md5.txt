@@ -1,0 +1,5 @@
+194577a7e20bdcc7afbb718f502c134c  data/.DS_Store
+df87217e2c181ae6674898dff27e5a56  data/file_example_TIFF_1MB.tiff
+afad5225cdc263b484d7b8416a04a26d  data/file_example_TIFF_5MB.tiff
+df87217e2c181ae6674898dff27e5a56  data/service/file_example_TIFF_1MB.tiff
+afad5225cdc263b484d7b8416a04a26d  data/service/file_example_TIFF_5MB.tiff
