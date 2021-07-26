@@ -1,2 +1,0 @@
-df87217e2c181ae6674898dff27e5a56  data/file_example_TIFF_1MB.tiff
-afad5225cdc263b484d7b8416a04a26d  data/file_example_TIFF_5MB.tiff
