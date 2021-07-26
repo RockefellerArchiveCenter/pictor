@@ -1,8 +1,12 @@
+import os
+import subprocess
+from os.path import join
 from pathlib import Path
 
 import bagit
 import shortuuid
 from asterism.file_helpers import anon_extract_all
+
 from pictor import settings
 
 from .clients import ArchivesSpaceClient
@@ -69,7 +73,47 @@ class JP2Maker:
 
 class PDFMaker:
     # TO DO: make PDF derivates, compress, OCR
-    pass
+    def __init__(self):
+        self.pdf_dir = "/some/path/"
+
+    def run(self):
+        # TODO: ADD UUID TO BAG MODEL
+        for bag in Bag.objects.filter(process_status=Bag.JPG2000):
+            files = "some files"  # TODO: figure out how i'm finding JPEG2000 files
+            self.pdf_path = self.create_pdf(files)
+            self.compress_pdf()
+            self.ocr_pdf()
+
+    def create_pdf(self, files):
+        """Creates concatenated PDF from JPEG2000 files."""
+        pdf_path = "{}.pdf".format(join(self.pdf_dir, self.content_uuid))
+        subprocess.run(["/usr/local/bin/img2pdf"] + files + ["-o", pdf_path])
+        return pdf_path
+
+    def compress_pdf(self):
+        """Compress PDF via Ghostscript command line interface.
+
+        Original PDF is replaced with compressed PDF.
+        """
+        source_pdf_path = self.pdf_path
+        output_pdf_path = "{}_compressed.pdf".format(
+            join(self.pdf_dir, self.content_uuid))
+        subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS={}'.format('/screen'),
+                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), source_pdf_path])
+        os.remove(source_pdf_path)
+        os.rename(output_pdf_path, source_pdf_path)
+
+    def ocr_pdf(self):
+        """Add OCR layer using ocrmypdf."""
+        pdf_path = "{}.pdf".format(join(self.pdf_dir, self.content_uuid))
+        subprocess.run(["/usr/local/bin/ocrmypdf",
+                        pdf_path,
+                        pdf_path,
+                        "--output-type",
+                        "pdf",
+                        "--optimize",
+                        "0",
+                        "--quiet"])
 
 
 class ManifestMaker:
