@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  db:
+  pictor-db:
     image: postgres:10.4
     volumes:
       - db:/var/lib/postgresql/data/
@@ -13,7 +13,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      - pictor-db
 
 volumes:
   db:
