@@ -13,7 +13,7 @@ DATABASES = {
 
 ALLOWED_HOSTS = ['pictor-web', 'localhost']
 
-BASE_DIR = ''
+BASE_DIR = '/pictor'
 
 SRC_DIR = '{}/src'.format(BASE_DIR)
 TMP_DIR = '{}/tmp'.format(BASE_DIR)
