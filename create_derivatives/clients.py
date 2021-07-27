@@ -15,25 +15,17 @@ class ArchivesSpaceClient:
             repository=repository).client
         self.repository = repository
 
-    def get_object(self, ref_id):
-        """Gets archival object title and date from an ArchivesSpace refid.
+    def get_object(self, uri):
+        """Gets archival object title and date.
 
         Args:
-            ident (str): an ArchivesSpace refid.
+            uri (str): an ArchivesSpace URI.
         Returns:
             obj (dict): A dictionary representation of an archival object from ArchivesSpace.
         """
-        results = self.client.get(
-            'repositories/{}/find_by_id/archival_objects?ref_id[]={}'.format(
-                self.repository, ref_id)).json()
-        if not results.get("archival_objects"):
-            raise Exception(
-                "Could not find an ArchivesSpace object matching refid: {}".format(ref_id))
-        else:
-            obj_ref = results["archival_objects"][0]["ref"]
-            obj = self.client.get(obj_ref).json()
-            obj["dates"] = utils.find_closest_value(obj, 'dates', self.client)
-            return self.format_data(obj)
+        obj = self.client.get(uri).json()
+        obj["dates"] = utils.find_closest_value(obj, 'dates', self.client)
+        return self.format_data(obj)
 
     def format_data(self, data):
         """Parses ArchivesSpace data.

@@ -60,7 +60,7 @@ class BagPreparerTestCase(TestCase):
         attributes of each have been correctly set.
         """
         mock_init.return_value = None
-        as_data = {"uri": "foobar"}
+        as_data = {"uri": "foobar", "title": "baz", "dates": "January 1, 2020"}
         mock_get_object.return_value = as_data
         created_len = len(Bag.objects.filter(process_status=Bag.CREATED))
         prepared = BagPreparer().run()

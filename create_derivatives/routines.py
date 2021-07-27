@@ -34,9 +34,10 @@ class BagPreparer:
             if bag.origin != "digitization":
                 raise Exception("Bags from origin {} cannot be processed".format(bag.origin), bag.bag_identifier)
             unpacked_path = self.unpack_bag(bag.bag_identifier)
+            as_uri = self.get_as_uri(unpacked_path)
             bag.bag_path = unpacked_path
-            bag.as_data = self.as_client.get_object(self.get_ref_id(unpacked_path))
-            bag.dimes_identifier = shortuuid.uuid(bag.as_data["uri"])
+            bag.as_data = self.as_client.get_object(as_uri)
+            bag.dimes_identifier = shortuuid.uuid(as_uri)
             bag.process_status = Bag.PREPARED
             bag.save()
             processed_bags.append(bag.bag_identifier)
@@ -50,14 +51,14 @@ class BagPreparer:
         else:
             raise Exception("Unable to extract bag", bag_identifier)
 
-    def get_ref_id(self, bag_filepath):
+    def get_as_uri(self, bag_filepath):
         """Gets the ArchivesSpace RefID from bag-info.txt."""
         bag = bagit.Bag(bag_filepath)
         try:
-            return bag.info["ArchivesSpace-RefID"]
+            return bag.info["ArchivesSpace-URI"]
         except KeyError as e:
             raise Exception(
-                "ArchivesSpace RefID not found in bag-info.txt file",
+                "ArchivesSpace URI not found in bag-info.txt file",
                 bag_filepath) from e
 
 
