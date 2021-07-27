@@ -77,3 +77,30 @@ class BagPreparerTestCase(TestCase):
     def tearDown(self):
         for f in Path(settings.SRC_DIR).iterdir():
             f.unlink()
+
+
+class PDFMakerTestCase(TestCase):
+
+    def setUp(self):
+        """docstring for setUp"""
+    pass
+
+    def test_create_pdf(self):
+        """docstring for test_create_pdf"""
+    pass
+
+    def test_compress_pdf(self):
+        """docstring for test_compress_pdf"""
+    pass
+
+    def test_ocr_pdf(self):
+        """docstring for test_ocr_pdf"""
+    pass
+
+    def test_run(self):
+        """docstring for test_run"""
+    pass
+
+    def tearDown(self):
+        """docstring for tearDown"""
+    pass
