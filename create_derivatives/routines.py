@@ -73,21 +73,20 @@ class JP2Maker:
 
 class PDFMaker:
     # TO DO: make PDF derivates, compress, OCR
-    def __init__(self):
-        self.pdf_dir = "/some/path/"
 
     def run(self):
         # TODO: ADD UUID TO BAG MODEL
         for bag in Bag.objects.filter(process_status=Bag.JPG2000):
-            files = "some files"  # TODO: figure out how i'm finding JPEG2000 files
-            self.pdf_path = self.create_pdf(files)
+            jp2_files_dir = join(bag.bag_path, "JP2")
+            self.pdf_path = self.create_pdf(bag, jp2_files_dir)
             self.compress_pdf()
             self.ocr_pdf()
 
-    def create_pdf(self, bag, files):
+    def create_pdf(self, bag, jp2_files_dir):
         """Creates concatenated PDF from JPEG2000 files."""
-        pdf_path = "{}.pdf".format(join(self.pdf_dir, bag.dimes_identifier))
-        subprocess.run(["/usr/local/bin/img2pdf"] + files + ["-o", pdf_path])
+        jp2_files = os.listdir(jp2_files_dir)
+        pdf_path = "{}.pdf".format(join(bag.bag_path, bag.dimes_identifier))
+        subprocess.run(["/usr/local/bin/img2pdf", jp2_files, "-o", pdf_path])
         return pdf_path
 
     def compress_pdf(self, bag):
