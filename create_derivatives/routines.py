@@ -29,18 +29,13 @@ class BagPreparer:
     def run(self):
         processed_bags = []
         for bag in Bag.objects.filter(process_status=Bag.CREATED):
-            # TODO: presumes bag.data, bag.bag_identifier, bag.origin are all set by this point
+            # TODO: presumes bag.bag_identifier and bag.origin are already set
             # TODO: we should also be sure that Ursa Major is delivering to two directories, or we will run into conflicts with Fornax
-            # TODO: presumes the presence of ArchivesSpace-RefID in
-            # bag-info.txt; currently not implemented in Zorya
             if bag.origin != "digitization":
-                raise Exception(
-                    "Bags from origin {} cannot be processed".format(
-                        bag.origin), bag.bag_identifier)
+                raise Exception("Bags from origin {} cannot be processed".format(bag.origin), bag.bag_identifier)
             unpacked_path = self.unpack_bag(bag.bag_identifier)
             bag.bag_path = unpacked_path
-            bag.as_data = self.as_client.get_object(
-                self.get_ref_id(unpacked_path))  # TODO: where is this?
+            bag.as_data = self.as_client.get_object(self.get_ref_id(unpacked_path))
             bag.dimes_identifier = shortuuid.uuid(bag.as_data["uri"])
             bag.process_status = Bag.PREPARED
             bag.save()
