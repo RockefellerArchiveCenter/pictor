@@ -28,3 +28,11 @@ ARCHIVESSPACE = (
   "admin",
   2,
 )
+
+# region_name, access_key, secret_key, bucket
+AWS = (
+  "us-east-1",
+  "123456789",
+  "987654321",
+  "rac-iiif",
+)

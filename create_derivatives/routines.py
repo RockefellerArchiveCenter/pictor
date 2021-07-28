@@ -5,10 +5,9 @@ import shortuuid
 from asterism.file_helpers import anon_extract_all
 from pictor import settings
 
-from .clients import ArchivesSpaceClient
+from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import check_dir_exists
 from .models import Bag
-
 
 class BagPreparer:
     """Prepares bags for derivative creation.
@@ -78,7 +77,14 @@ class ManifestMaker:
 
 
 class AWSUpload:
-    # TO DO: upload files and PDFs
+
+    def __init__(self):
+        self.aws_client = AWSClient(*settings.AWS)
+
+    def run(self):
+        for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED)
+        bag.process_status = Bag.UPLOADED
+        pass
     pass
 
 
