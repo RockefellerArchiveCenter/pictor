@@ -16,7 +16,7 @@ class BagViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Renames attributes in request data."""
-        request.data["bag_identifier"] = request.data["identifier"]
-        request.data["data"] = request.data["bag_data"]
+        request.data["bag_identifier"] = request.data.get("identifier")
+        request.data["data"] = request.data.get("bag_data")
         request.data["process_status"] = Bag.CREATED
         return super().create(request, *args, **kwargs)
