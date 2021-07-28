@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Bag(BasePackage):
+    CREATED = 0
     PREPARED = 1
     JPG2000 = 2
     PDF = 3
@@ -10,6 +11,8 @@ class Bag(BasePackage):
     UPLOADED = 5
     CLEANED_UP = 6
     PROCESS_STATUS_CHOICES = (
+        (CREATED,
+        "Created"),
         (PREPARED,
          "Prepared"),
         (JPG2000,
