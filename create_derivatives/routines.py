@@ -6,8 +6,7 @@ from asterism.file_helpers import anon_extract_all
 from pictor import settings
 
 from .clients import ArchivesSpaceClient, AWSClient
-from .helpers import check_dir_exists
-from .models import Bag
+from .helpers import check_dir_exists, matching_files
 
 class BagPreparer:
     """Prepares bags for derivative creation.
@@ -82,10 +81,25 @@ class AWSUpload:
         self.aws_client = AWSClient(*settings.AWS)
 
     def run(self):
-        for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED)
-        bag.process_status = Bag.UPLOADED
-        pass
-    pass
+        uploaded_bags = []
+        for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
+            pdf_dir = '{}/{}'.format(bag.bag_path, 'pdf')
+            jp2_dir = '{}/{}'.format(bag.bag_path, 'jp2')
+            manifest_dir = '{}/{}'.format(bag.bag_path, 'manifest')
+            check_dir_exists(pdf_dir)
+            check_dir_exists(jp2_dir)
+            check_dir_exists(manifest_dir)
+            for src_dir, target_dir, file_type in [
+                        (pdf_dir, "pdfs", "PDF file"),
+                        (jp2_dir, "images", "JPEG2000 files"),
+                        (manifest_dir, "manifests", "Manifest file")]:
+                uploads = matching_files(
+                        src_dir, prefix=identifier, prepend=True)
+                aws_client.upload_files(uploads, target_dir, replace)
+            bag.process_status = Bag.UPLOADED
+            bag.save()
+            uploaded_bags.append(bag.bag_identifier)
+        return "Bags successfully uploaded", uploaded_bags
 
 
 class CleanupRoutine:
