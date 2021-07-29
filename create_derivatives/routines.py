@@ -75,18 +75,20 @@ class PDFMaker:
     # TO DO: make PDF derivates, compress, OCR
 
     def run(self):
-        # TODO: ADD UUID TO BAG MODEL
         for bag in Bag.objects.filter(process_status=Bag.JPG2000):
-            jp2_files_dir = join(bag.bag_path, "JP2")
+            jp2_files_dir = join(bag.bag_path, "data", "JP2")
             self.pdf_path = self.create_pdf(bag, jp2_files_dir)
             self.compress_pdf()
             self.ocr_pdf()
+            bag.process_status = Bag.PDF
+            bag.save()
+            return True
 
     def create_pdf(self, bag, jp2_files_dir):
         """Creates concatenated PDF from JPEG2000 files."""
         jp2_files = os.listdir(jp2_files_dir)
-        pdf_path = "{}.pdf".format(join(bag.bag_path, bag.dimes_identifier))
-        subprocess.run(["/usr/local/bin/img2pdf", jp2_files, "-o", pdf_path])
+        pdf_path = "{}.pdf".format(join(bag.bag_path, "data", "pdf", bag.dimes_identifier))
+        subprocess.run(["/usr/local/bin/img2pdf"] + jp2_files + ["-o", pdf_path])
         return pdf_path
 
     def compress_pdf(self, bag):

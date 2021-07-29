@@ -1,13 +1,16 @@
 import shutil
+from os import listdir
+from os.path import join
 from pathlib import Path
 from unittest.mock import patch
 
 from django.test import TestCase
+
 from pictor import settings
 
 from .helpers import check_dir_exists
 from .models import Bag
-from .routines import BagPreparer
+from .routines import BagPreparer, PDFMaker
 
 
 class HelpersTestCase(TestCase):
@@ -82,25 +85,39 @@ class BagPreparerTestCase(TestCase):
 class PDFMakerTestCase(TestCase):
 
     def setUp(self):
-        """docstring for setUp"""
-    pass
+        tmp_path = Path(settings.TMP_DIR)
+        if not tmp_path.exists():
+            tmp_path.mkdir(parents=True)
+        self.set_up_bag()
 
-    def test_create_pdf(self):
-        """docstring for test_create_pdf"""
-    pass
+    def set_up_bag(self):
+        for directory in listdir(join("create_derivatives", "fixtures", "unpacked_bag_with_jp2")):
+            bag_path = join(settings.TMP_DIR, directory)
+            if not Path(bag_path).exists():
+                shutil.copytree(join("create_derivatives", "fixtures", "unpacked_bag_with_jp2", directory), bag_path)
+                new_bag = Bag.objects.create(
+                    bag_identifier="sdfjldskj",
+                    bag_path=bag_path,
+                    origin="digitization",
+                    as_data="sdjfkldsjf",
+                    dimes_identifier=directory,
+                    process_status=Bag.JPG2000)
 
-    def test_compress_pdf(self):
-        """docstring for test_compress_pdf"""
-    pass
+    # def test_create_pdf(self):
+    #     bag = Bag.objects.all()[0]
+    #     create_pdf = PDFMaker().create_pdf(bag, jp2_files_dir)
 
-    def test_ocr_pdf(self):
-        """docstring for test_ocr_pdf"""
-    pass
+    # def test_compress_pdf(self):
+    #     """docstring for test_compress_pdf"""
+    # pass
+    #
+    # def test_ocr_pdf(self):
+    #     """docstring for test_ocr_pdf"""
+    # pass
 
     def test_run(self):
-        """docstring for test_run"""
-    pass
+        make_pdf = PDFMaker().run()
+        self.assertTrue(make_pdf)
 
     def tearDown(self):
-        """docstring for tearDown"""
-    pass
+        shutil.rmtree(settings.TMP_DIR)
