@@ -7,7 +7,7 @@ from pictor import settings
 
 from .helpers import check_dir_exists
 from .models import Bag
-from .routines import BagPreparer
+from .routines import BagPreparer, AWSUpload
 
 
 class HelpersTestCase(TestCase):
