@@ -77,7 +77,7 @@ class PDFMaker:
         for bag in Bag.objects.filter(process_status=Bag.JPG2000):
             jp2_files_dir = join(bag.bag_path, "data", "JP2")
             self.pdf_path = self.create_pdf(bag, jp2_files_dir)
-            self.compress_pdf()
+            self.compress_pdf(bag)
             self.ocr_pdf()
             bag.process_status = Bag.PDF
             bag.save()
@@ -100,18 +100,17 @@ class PDFMaker:
         """
         source_pdf_path = self.pdf_path
         output_pdf_path = "{}_compressed.pdf".format(
-            join(self.pdf_dir, bag.dimes_identifier))
+            join(bag.bag_path, "data", "PDF", bag.dimes_identifier))
         subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS={}'.format('/screen'),
-                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), source_pdf_path])
+                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), source_pdf_path], stderr=subprocess.PIPE)
         os.remove(source_pdf_path)
         os.rename(output_pdf_path, source_pdf_path)
 
-    def ocr_pdf(self, bag):
+    def ocr_pdf(self):
         """Add OCR layer using ocrmypdf."""
-        pdf_path = "{}.pdf".format(join(self.pdf_dir, bag.dimes_identifier))
-        subprocess.run(["/usr/local/bin/ocrmypdf",
-                        pdf_path,
-                        pdf_path,
+        subprocess.run(["ocrmypdf",
+                        self.pdf_path,
+                        self.pdf_path,
                         "--output-type",
                         "pdf",
                         "--optimize",
