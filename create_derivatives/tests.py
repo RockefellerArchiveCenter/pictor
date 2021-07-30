@@ -1,11 +1,9 @@
 import shutil
-from os import listdir
 from os.path import join
 from pathlib import Path
 from unittest.mock import patch
 
 from django.test import TestCase
-
 from pictor import settings
 
 from .helpers import check_dir_exists
