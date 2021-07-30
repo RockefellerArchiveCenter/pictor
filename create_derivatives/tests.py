@@ -10,7 +10,6 @@ from pictor import settings
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
 from .routines import AWSUpload, BagPreparer
-from .test_helpers import copy_sample_files, random_string
 
 
 class HelpersTestCase(TestCase):
@@ -107,22 +106,17 @@ class BagPreparerTestCase(TestCase):
 
 class AWSUploadTestCase(TestCase):
 
-    def setUp(self):
-        MANIFEST_FIXTURES = join("create_derivatives", "fixtures", "manifests")
-        self.MANIFEST_DIR = join("/", "manifests")
-        DERIVATIVE_FIXTURES = join("create_derivatives", "fixtures", "jp2")
-        self.DERIVATIVE_DIR = join("/", "derivatives")
-        UUIDS = [random_string() for x in range(random.randint(1, 3))]
-        PAGE_COUNT = random.randint(1, 5)
-        for d in [self.MANIFEST_DIR, self.DERIVATIVE_DIR]:
-            if isdir(d):
-                d.unlink()
-        shutil.copytree(DERIVATIVE_FIXTURES, self.DERIVATIVE_DIR)
-        shutil.copytree(MANIFEST_FIXTURES, self.MANIFEST_DIR)
-        copy_sample_files(self.DERIVATIVE_DIR, UUIDS, PAGE_COUNT, "jp2")
-        copy_sample_files(self.MANIFEST_DIR, UUIDS, PAGE_COUNT, "json")
-        routine = AWSUpload
-        print(routine)
+    #def setUp(self):
+        #routine = AWSUpload
+        #print(routine)
+
+    @patch("create_derivatives.clients.AWSClient.__init__")
+    @patch("create_derivatives.clients.AWSClient.upload_files")
+    def test_run(self, mock_upload_files, mock_init):
+        mock_init.return_value = None
+        routine = AWSUpload()
+        for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
+            pass
 
     def teardown(self):
         for d in [self.MANIFEST_DIR, self.DERIVATIVE_DIR]:
