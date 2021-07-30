@@ -10,6 +10,7 @@ RUN apt-get update -y && apt-get install -y wget \
   make \
   pkg-config \
   libtiff-dev \
+  libqpdf-dev \
   libmagic-dev \
   ghostscript \
   ocrmypdf
