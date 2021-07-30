@@ -91,6 +91,7 @@ class PDFMakerTestCase(TestCase):
         bag_path = join(settings.TMP_DIR, bag)
         if not Path(bag_path).exists():
             shutil.copytree(join("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            print(join("create_derivatives", "fixtures", fixture_directory, bag))
             Bag.objects.create(
                 bag_identifier="sdfjldskj",
                 bag_path=bag_path,
@@ -99,16 +100,20 @@ class PDFMakerTestCase(TestCase):
                 dimes_identifier=bag,
                 process_status=Bag.JPG2000)
 
-    # def test_create_pdf(self):
-    #     bag = Bag.objects.all()[0]
-    #     create_pdf = PDFMaker().create_pdf(bag, jp2_files_dir)
-
-    def test_compress_pdf(self):
-        bag_id = "75ddpuBHgPf2TmZRhZ2bKR"
-        self.set_up_bag("unpacked_bag_with_pdf", bag_id)
+    def test_create_pdf(self):
+        bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        self.set_up_bag("unpacked_bag_with_jp2", bag_id)
         bag = Bag.objects.get(dimes_identifier=bag_id)
-        compress_pdf = PDFMaker().compress_pdf(bag)
-        self.assertTrue(compress_pdf)
+        jp2_files_dir = join(bag.bag_path, "data", "JP2")
+        create_pdf = PDFMaker().create_pdf(bag, jp2_files_dir)
+        self.assertTrue(create_pdf)
+
+    # def test_compress_pdf(self):
+    #     bag_id = "75ddpuBHgPf2TmZRhZ2bKR"
+    #     self.set_up_bag("unpacked_bag_with_pdf", bag_id)
+    #     bag = Bag.objects.get(dimes_identifier=bag_id)
+    #     compress_pdf = PDFMaker().compress_pdf(bag)
+    #     self.assertTrue(compress_pdf)
 
     # def test_ocr_pdf(self):
     #     """docstring for test_ocr_pdf"""

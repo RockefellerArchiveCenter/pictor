@@ -6,11 +6,10 @@ from pathlib import Path
 import bagit
 import shortuuid
 from asterism.file_helpers import anon_extract_all
-
 from pictor import settings
 
 from .clients import ArchivesSpaceClient
-from .helpers import check_dir_exists
+from .helpers import check_dir_exists, matching_files
 from .models import Bag
 
 
@@ -86,8 +85,11 @@ class PDFMaker:
 
     def create_pdf(self, bag, jp2_files_dir):
         """Creates concatenated PDF from JPEG2000 files."""
-        jp2_files = os.listdir(jp2_files_dir)
-        pdf_path = "{}.pdf".format(join(bag.bag_path, "data", "PDF", bag.dimes_identifier))
+        jp2_files = matching_files(jp2_files_dir, prepend=True)
+        pdf_dir = join(bag.bag_path, "data", "PDF")
+        if not Path(pdf_dir).is_dir():
+            os.mkdir(pdf_dir)
+        pdf_path = "{}.pdf".format(join(pdf_dir, bag.dimes_identifier))
         subprocess.run(["/usr/local/bin/img2pdf"] + jp2_files + ["-o", pdf_path])
         return pdf_path
 
