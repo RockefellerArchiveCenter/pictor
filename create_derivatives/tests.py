@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from django.test import TestCase
+from os.path import join, isdir
 from pictor import settings
 
 from .helpers import check_dir_exists, matching_files
