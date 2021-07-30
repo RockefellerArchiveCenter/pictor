@@ -1,14 +1,18 @@
+import os
+import random
 import shutil
 from os.path import isdir, join
 from pathlib import Path
 from unittest.mock import patch
 
+from botocore.stub import ANY, Stubber
 from django.test import TestCase
 from pictor import settings
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
 from .routines import AWSUpload, BagPreparer
+from .test_helpers import copy_sample_files, random_string
 
 
 class HelpersTestCase(TestCase):
@@ -106,5 +110,23 @@ class BagPreparerTestCase(TestCase):
 class AWSUploadTestCase(TestCase):
 
     def setUp(self):
+        MANIFEST_FIXTURES = join("create_derivatives", "fixtures", "manifests")
+        MANIFEST_DIR = join("/", "manifests")
+        DERIVATIVE_FIXTURES = join("create_derivatives", "fixtures", "jp2")
+        DERIVATIVE_DIR = join("/", "derivatives")
+        UUIDS = [random_string() for x in range(random.randint(1, 3))]
+        PAGE_COUNT = random.randint(1, 5)
+        for d in [MANIFEST_DIR, DERIVATIVE_DIR]:
+            if isdir(d):
+                d.unlink()
+        shutil.copytree(DERIVATIVE_FIXTURES, DERIVATIVE_DIR)
+        shutil.copytree(MANIFEST_FIXTURES, MANIFEST_DIR)
+        copy_sample_files(DERIVATIVE_DIR, UUIDS, PAGE_COUNT, "jp2")
+        copy_sample_files(MANIFEST_DIR, UUIDS, PAGE_COUNT, "json")
         routine = AWSUpload
         print(routine)
+
+
+    def teardown():
+        for d in [MANIFEST_DIR, DERIVATIVE_DIR]:
+            shutil.rmtree(d)
