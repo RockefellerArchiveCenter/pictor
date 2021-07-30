@@ -78,6 +78,7 @@ class BagPreparerTestCase(TestCase):
         for f in Path(settings.SRC_DIR).iterdir():
             f.unlink()
 
+
 class AWSUploadTestCase(TestCase):
 
     def setUp(self):

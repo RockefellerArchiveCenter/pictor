@@ -1,4 +1,5 @@
-from os.path import isfile, join, listdir
+from os import listdir, remove
+from os.path import isfile, join
 from pathlib import Path
 
 
