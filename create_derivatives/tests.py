@@ -88,6 +88,7 @@ class PDFMakerTestCase(TestCase):
             tmp_path.mkdir(parents=True)
 
     def set_up_bag(self, fixture_directory, bag):
+        """Adds an uncompressed bag fixture to the temp directory and database"""
         bag_path = join(settings.TMP_DIR, bag)
         if not Path(bag_path).exists():
             shutil.copytree(join("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
