@@ -98,7 +98,7 @@ class AWSUpload:
                     (manifest_dir, "manifests", "Manifest file")]:
                 uploads = matching_files(
                     src_dir, prefix=bag.bag_identifier, prepend=True)
-                aws_client.upload_files(uploads, target_dir, replace)
+                self.aws_client.upload_files(uploads, target_dir, replace)
             bag.process_status = Bag.UPLOADED
             bag.save()
             uploaded_bags.append(bag.bag_identifier)
