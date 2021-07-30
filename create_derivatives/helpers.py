@@ -1,4 +1,4 @@
-from os.path import isdir, isfile, join, listdir
+from os.path import isfile, join, listdir
 from pathlib import Path
 
 
