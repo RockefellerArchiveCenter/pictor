@@ -109,9 +109,9 @@ class AWSUploadTestCase(TestCase):
 
     def setUp(self):
         MANIFEST_FIXTURES = join("create_derivatives", "fixtures", "manifests")
-        MANIFEST_DIR = join("/", "manifests")
+        self.MANIFEST_DIR = join("/", "manifests")
         DERIVATIVE_FIXTURES = join("create_derivatives", "fixtures", "jp2")
-        DERIVATIVE_DIR = join("/", "derivatives")
+        self.DERIVATIVE_DIR = join("/", "derivatives")
         UUIDS = [random_string() for x in range(random.randint(1, 3))]
         PAGE_COUNT = random.randint(1, 5)
         for d in [MANIFEST_DIR, DERIVATIVE_DIR]:
@@ -124,6 +124,6 @@ class AWSUploadTestCase(TestCase):
         routine = AWSUpload
         print(routine)
 
-    def teardown():
+    def teardown(self):
         for d in [self.MANIFEST_DIR, self.DERIVATIVE_DIR]:
             shutil.rmtree(d)
