@@ -71,6 +71,15 @@ class JP2Maker:
 
 
 class PDFMaker:
+    """Creates concatenated PDF file from JP2 derivatives.
+
+    Creates PDF directory in bag's data directory, creates PDF, then compresses and OCRs the PDF
+
+    Returns:
+        A tuple containing human-readable message along with list of bag identifiers.
+        Exceptions are raised for errors along the way.
+
+    """
 
     def run(self):
         bags_with_pdfs = []
