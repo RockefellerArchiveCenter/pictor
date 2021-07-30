@@ -71,9 +71,9 @@ class JP2Maker:
 
 
 class PDFMaker:
-    # TO DO: make PDF derivates, compress, OCR
 
     def run(self):
+        bags_with_pdfs = []
         for bag in Bag.objects.filter(process_status=Bag.JPG2000):
             jp2_files_dir = join(bag.bag_path, "data", "JP2")
             self.pdf_path = self.create_pdf(bag, jp2_files_dir)
@@ -81,7 +81,9 @@ class PDFMaker:
             self.ocr_pdf()
             bag.process_status = Bag.PDF
             bag.save()
-            return True
+            bags_with_pdfs.append(bag.bag_identifier)
+        msg = "PDFs created." if len(bags_with_pdfs) else "No JPG2000 files ready for PDF creation."
+        return msg, bags_with_pdfs
 
     def create_pdf(self, bag, jp2_files_dir):
         """Creates concatenated PDF from JPEG2000 files."""
