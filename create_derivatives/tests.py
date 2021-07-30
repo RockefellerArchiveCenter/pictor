@@ -5,7 +5,7 @@ from unittest.mock import patch
 from django.test import TestCase
 from pictor import settings
 
-from .helpers import check_dir_exists
+from .helpers import check_dir_exists, matching_files
 from .models import Bag
 from .routines import AWSUpload, BagPreparer
 
@@ -24,6 +24,29 @@ class HelpersTestCase(TestCase):
                 check_dir_exists(p)
             self.assertTrue(
                 p in str(context.exception), "Directory was not found in exception")
+
+    def test_matching_files(self):
+        MATCHING_FIXTURE_FILEPATH = os.path.join("fixtures", "matching")
+        MATCHING_SOURCE_DIR = os.path.join("/", "matching")
+        if os.path.isdir(MATCHING_SOURCE_DIR):
+            shutil.rmtree(MATCHING_SOURCE_DIR)
+        shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
+        matching = matching_files(MATCHING_SOURCE_DIR)
+        assert len(matching) == 4
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
+        assert len(matching) == 2
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="foo")
+        assert len(matching) == 0
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample", skip=True)
+        assert len(matching) == 2
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".jp2")
+        assert len(matching) == 1
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".tif")
+        assert len(matching) == 1
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".pdf")
+        assert len(matching) == 0
+        matching = matching_files(MATCHING_SOURCE_DIR, prepend=True)
+        assert matching[0].startswith(MATCHING_SOURCE_DIR)
 
 
 class BagPreparerTestCase(TestCase):
