@@ -1,4 +1,3 @@
-import random
 import shutil
 from os.path import isdir, join
 from pathlib import Path
@@ -106,15 +105,16 @@ class BagPreparerTestCase(TestCase):
 
 class AWSUploadTestCase(TestCase):
 
-    #def setUp(self):
-        #routine = AWSUpload
-        #print(routine)
+    # def setUp(self):
+    #routine = AWSUpload
+    # print(routine)
 
     @patch("create_derivatives.clients.AWSClient.__init__")
     @patch("create_derivatives.clients.AWSClient.upload_files")
     def test_run(self, mock_upload_files, mock_init):
         mock_init.return_value = None
         routine = AWSUpload()
+        print(routine)
         for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
             pass
 
