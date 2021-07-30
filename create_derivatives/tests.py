@@ -88,36 +88,37 @@ class PDFMakerTestCase(TestCase):
         tmp_path = Path(settings.TMP_DIR)
         if not tmp_path.exists():
             tmp_path.mkdir(parents=True)
-        self.set_up_bag()
 
-    def set_up_bag(self):
-        for directory in listdir(join("create_derivatives", "fixtures", "unpacked_bag_with_jp2")):
-            bag_path = join(settings.TMP_DIR, directory)
-            if not Path(bag_path).exists():
-                shutil.copytree(join("create_derivatives", "fixtures", "unpacked_bag_with_jp2", directory), bag_path)
-                new_bag = Bag.objects.create(
-                    bag_identifier="sdfjldskj",
-                    bag_path=bag_path,
-                    origin="digitization",
-                    as_data="sdjfkldsjf",
-                    dimes_identifier=directory,
-                    process_status=Bag.JPG2000)
+    def set_up_bag(self, fixture_directory, bag):
+        bag_path = join(settings.TMP_DIR, bag)
+        if not Path(bag_path).exists():
+            shutil.copytree(join("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            Bag.objects.create(
+                bag_identifier="sdfjldskj",
+                bag_path=bag_path,
+                origin="digitization",
+                as_data="sdjfkldsjf",
+                dimes_identifier=bag,
+                process_status=Bag.JPG2000)
 
     # def test_create_pdf(self):
     #     bag = Bag.objects.all()[0]
     #     create_pdf = PDFMaker().create_pdf(bag, jp2_files_dir)
 
-    # def test_compress_pdf(self):
-    #     """docstring for test_compress_pdf"""
-    # pass
-    #
+    def test_compress_pdf(self):
+        bag_id = "75ddpuBHgPf2TmZRhZ2bKR"
+        self.set_up_bag("unpacked_bag_with_pdf", bag_id)
+        bag = Bag.objects.get(dimes_identifier=bag_id)
+        compress_pdf = PDFMaker().compress_pdf(bag)
+        self.assertTrue(compress_pdf)
+
     # def test_ocr_pdf(self):
     #     """docstring for test_ocr_pdf"""
     # pass
 
-    def test_run(self):
-        make_pdf = PDFMaker().run()
-        self.assertTrue(make_pdf)
+    # def test_run(self):
+    #     make_pdf = PDFMaker().run()
+    #     self.assertTrue(make_pdf)
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)

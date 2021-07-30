@@ -87,7 +87,7 @@ class PDFMaker:
     def create_pdf(self, bag, jp2_files_dir):
         """Creates concatenated PDF from JPEG2000 files."""
         jp2_files = os.listdir(jp2_files_dir)
-        pdf_path = "{}.pdf".format(join(bag.bag_path, "data", "pdf", bag.dimes_identifier))
+        pdf_path = "{}.pdf".format(join(bag.bag_path, "data", "PDF", bag.dimes_identifier))
         subprocess.run(["/usr/local/bin/img2pdf"] + jp2_files + ["-o", pdf_path])
         return pdf_path
 
