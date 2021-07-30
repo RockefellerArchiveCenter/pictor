@@ -1,11 +1,9 @@
-import os
 import random
 import shutil
 from os.path import isdir, join
 from pathlib import Path
 from unittest.mock import patch
 
-from botocore.stub import ANY, Stubber
 from django.test import TestCase
 from pictor import settings
 
@@ -126,7 +124,6 @@ class AWSUploadTestCase(TestCase):
         routine = AWSUpload
         print(routine)
 
-
     def teardown():
-        for d in [MANIFEST_DIR, DERIVATIVE_DIR]:
+        for d in [self.MANIFEST_DIR, self.DERIVATIVE_DIR]:
             shutil.rmtree(d)
