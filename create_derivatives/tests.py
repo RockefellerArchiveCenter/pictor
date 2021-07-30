@@ -114,13 +114,13 @@ class AWSUploadTestCase(TestCase):
         self.DERIVATIVE_DIR = join("/", "derivatives")
         UUIDS = [random_string() for x in range(random.randint(1, 3))]
         PAGE_COUNT = random.randint(1, 5)
-        for d in [MANIFEST_DIR, DERIVATIVE_DIR]:
+        for d in [self.MANIFEST_DIR, self.DERIVATIVE_DIR]:
             if isdir(d):
                 d.unlink()
-        shutil.copytree(DERIVATIVE_FIXTURES, DERIVATIVE_DIR)
-        shutil.copytree(MANIFEST_FIXTURES, MANIFEST_DIR)
-        copy_sample_files(DERIVATIVE_DIR, UUIDS, PAGE_COUNT, "jp2")
-        copy_sample_files(MANIFEST_DIR, UUIDS, PAGE_COUNT, "json")
+        shutil.copytree(DERIVATIVE_FIXTURES, self.DERIVATIVE_DIR)
+        shutil.copytree(MANIFEST_FIXTURES, self.MANIFEST_DIR)
+        copy_sample_files(self.DERIVATIVE_DIR, UUIDS, PAGE_COUNT, "jp2")
+        copy_sample_files(self.MANIFEST_DIR, UUIDS, PAGE_COUNT, "json")
         routine = AWSUpload
         print(routine)
 
