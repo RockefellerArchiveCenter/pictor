@@ -106,7 +106,7 @@ class BagPreparerTestCase(TestCase):
 class AWSUploadTestCase(TestCase):
 
     # def setUp(self):
-    #routine = AWSUpload
+    # routine = AWSUpload
     # print(routine)
 
     @patch("create_derivatives.clients.AWSClient.__init__")
