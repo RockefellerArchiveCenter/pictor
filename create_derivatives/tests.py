@@ -1,5 +1,5 @@
 import shutil
-from os.path import join, isdir
+from os.path import isdir, join
 from pathlib import Path
 from unittest.mock import patch
 
@@ -27,7 +27,7 @@ class HelpersTestCase(TestCase):
                 p in str(context.exception), "Directory was not found in exception")
 
     def test_matching_files(self):
-        MATCHING_FIXTURE_FILEPATH = join("fixtures", "matching")
+        MATCHING_FIXTURE_FILEPATH = join("create_derivatives", "fixtures", "matching")
         MATCHING_SOURCE_DIR = join("/", "matching")
         if isdir(MATCHING_SOURCE_DIR):
             shutil.rmtree(MATCHING_SOURCE_DIR)
