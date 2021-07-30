@@ -7,6 +7,7 @@ def check_dir_exists(dir):
         raise Exception("Expected directory {} does not exist".format(dir))
     return True
 
+
 def matching_files(directory, prefix=None, suffix=None,
                    skip=False, prepend=False):
     """Get a list of files that start with a specific prefix, optionally removing

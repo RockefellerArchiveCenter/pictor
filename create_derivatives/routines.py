@@ -1,4 +1,3 @@
-import os
 from os.path import join
 from pathlib import Path
 
@@ -9,6 +8,7 @@ from pictor import settings
 
 from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import check_dir_exists, matching_files
+
 
 class BagPreparer:
     """Prepares bags for derivative creation.
@@ -82,7 +82,7 @@ class AWSUpload:
     def __init__(self):
         self.aws_client = AWSClient(*settings.AWS)
 
-    def run(self):
+    def run(self, replace):
         uploaded_bags = []
         for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
             pdf_dir = join(bag.bag_path, 'data', 'PDF')
@@ -92,11 +92,11 @@ class AWSUpload:
             check_dir_exists(jp2_dir)
             check_dir_exists(manifest_dir)
             for src_dir, target_dir, file_type in [
-                        (pdf_dir, "pdfs", "PDF file"),
-                        (jp2_dir, "images", "JPEG2000 files"),
-                        (manifest_dir, "manifests", "Manifest file")]:
+                (pdf_dir, "pdfs", "PDF file"),
+                (jp2_dir, "images", "JPEG2000 files"),
+                    (manifest_dir, "manifests", "Manifest file")]:
                 uploads = matching_files(
-                        src_dir, prefix=bag.bag_identifier, prepend=True)
+                    src_dir, prefix=bag.bag_identifier, prepend=True)
                 aws_client.upload_files(uploads, target_dir, replace)
             bag.process_status = Bag.UPLOADED
             bag.save()
