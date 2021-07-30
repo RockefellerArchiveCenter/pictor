@@ -1,9 +1,9 @@
 import shutil
+from os.path import join, isdir
 from pathlib import Path
 from unittest.mock import patch
 
 from django.test import TestCase
-from os.path import join, isdir
 from pictor import settings
 
 from .helpers import check_dir_exists, matching_files
@@ -27,9 +27,9 @@ class HelpersTestCase(TestCase):
                 p in str(context.exception), "Directory was not found in exception")
 
     def test_matching_files(self):
-        MATCHING_FIXTURE_FILEPATH = os.path.join("fixtures", "matching")
-        MATCHING_SOURCE_DIR = os.path.join("/", "matching")
-        if os.path.isdir(MATCHING_SOURCE_DIR):
+        MATCHING_FIXTURE_FILEPATH = join("fixtures", "matching")
+        MATCHING_SOURCE_DIR = join("/", "matching")
+        if isdir(MATCHING_SOURCE_DIR):
             shutil.rmtree(MATCHING_SOURCE_DIR)
         shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
         matching = matching_files(MATCHING_SOURCE_DIR)
