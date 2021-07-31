@@ -13,7 +13,7 @@ DATABASES = {
 
 ALLOWED_HOSTS = ['pictor-web', 'localhost']
 
-BASE_DIR = ''
+BASE_DIR = '/pictor'
 
 SRC_DIR = '{}/src'.format(BASE_DIR)
 TMP_DIR = '{}/tmp'.format(BASE_DIR)
@@ -21,3 +21,10 @@ DEST_DIR = '{}/dest'.format(BASE_DIR)
 
 STATIC_ROOT = "/static"
 
+# baseurl, username, password, repo_id
+ARCHIVESSPACE = (
+  "http://localhost:8089/",
+  "admin",
+  "admin",
+  2,
+)

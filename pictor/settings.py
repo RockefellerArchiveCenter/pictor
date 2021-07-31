@@ -123,3 +123,9 @@ STATIC_ROOT = str(Path(BASE_DIR, 'static'))
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SRC_DIR = CF.SRC_DIR
+TMP_DIR = CF.TMP_DIR
+DEST_DIR = CF.DEST_DIR
+
+ARCHIVESSPACE = CF.ARCHIVESSPACE
