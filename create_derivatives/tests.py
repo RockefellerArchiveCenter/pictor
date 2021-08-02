@@ -128,7 +128,8 @@ class AWSUploadTestCase(TestCase):
     def test_run(self, mock_upload_files, mock_init):
         bag_id = "3aai9usY3AZzCSFkB3RSQ9"
         self.set_up_bag("aws_upload_bag", bag_id)
-        file_upload = AWSUpload.run(True)
+        replace = True
+        file_upload = AWSUpload.run(replace)
         self.assertTrue(file_upload)
 
     def tearDown(self):
