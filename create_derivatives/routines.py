@@ -92,9 +92,9 @@ class AWSUpload:
             check_dir_exists(jp2_dir)
             check_dir_exists(manifest_dir)
             for src_dir, target_dir in [
-                (pdf_dir, "pdfs"),
-                (jp2_dir, "images"),
-                (manifest_dir, "manifests")]:
+                    (pdf_dir, "pdfs"),
+                    (jp2_dir, "images"),
+                    (manifest_dir, "manifests")]:
                 uploads = matching_files(
                     src_dir, prefix=bag.bag_identifier, prepend=True)
                 self.aws_client.upload_files(uploads, target_dir, replace)
