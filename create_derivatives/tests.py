@@ -130,7 +130,7 @@ class AWSUploadTestCase(TestCase):
         bag_id = "3aai9usY3AZzCSFkB3RSQ9"
         self.set_up_bag("aws_upload_bag", bag_id)
         routine = AWSUpload()
-        file_upload = AWSUpload.run(True)
+        file_upload = routine.run(True)
         self.assertTrue(file_upload)
 
     def tearDown(self):
