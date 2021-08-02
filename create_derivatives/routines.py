@@ -1,4 +1,3 @@
-from os.path import join
 from pathlib import Path
 
 import bagit
@@ -86,16 +85,16 @@ class AWSUpload:
     def run(self, replace):
         uploaded_bags = []
         for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
-            pdf_dir = join(bag.bag_path, 'data', 'PDF')
-            jp2_dir = join(bag.bag_path, 'data', 'JP2')
-            manifest_dir = join(bag.bag_path, 'data', 'MANIFEST')
+            pdf_dir = Path(bag.bag_path).joinpath('data').joinpath('PDF')
+            jp2_dir = Path(bag.bag_path).joinpath('data').joinpath('JP2')
+            manifest_dir = Path(bag.bag_path).joinpath('data').joinpath('MANIFEST')
             check_dir_exists(pdf_dir)
             check_dir_exists(jp2_dir)
             check_dir_exists(manifest_dir)
-            for src_dir, target_dir, file_type in [
-                (pdf_dir, "pdfs", "PDF file"),
-                (jp2_dir, "images", "JPEG2000 files"),
-                    (manifest_dir, "manifests", "Manifest file")]:
+            for src_dir, target_dir in [
+                (pdf_dir, "pdfs"),
+                (jp2_dir, "images"),
+                (manifest_dir, "manifests")]:
                 uploads = matching_files(
                     src_dir, prefix=bag.bag_identifier, prepend=True)
                 self.aws_client.upload_files(uploads, target_dir, replace)

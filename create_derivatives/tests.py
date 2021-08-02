@@ -1,5 +1,4 @@
 import shutil
-from os.path import isdir, join
 from pathlib import Path
 from unittest.mock import patch
 
@@ -27,9 +26,9 @@ class HelpersTestCase(TestCase):
                 p in str(context.exception), "Directory was not found in exception")
 
     def test_matching_files(self):
-        MATCHING_FIXTURE_FILEPATH = join("create_derivatives", "fixtures", "matching")
-        MATCHING_SOURCE_DIR = join("/", "matching")
-        if isdir(MATCHING_SOURCE_DIR):
+        MATCHING_FIXTURE_FILEPATH = Path("create_derivatives").joinpath("fixtures").joinpath("matching")
+        MATCHING_SOURCE_DIR = Path("matching")
+        if Path.is_dir(MATCHING_SOURCE_DIR):
             shutil.rmtree(MATCHING_SOURCE_DIR)
         shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
         matching = matching_files(MATCHING_SOURCE_DIR)
@@ -112,9 +111,9 @@ class AWSUploadTestCase(TestCase):
 
     def set_up_bag(self, fixture_directory, bag):
         """Adds an uncompressed bag fixture to the temp directory and database"""
-        bag_path = join(settings.TMP_DIR, bag)
+        bag_path = Path(settings.TMP_DIR).joinpath(bag)
         if not Path(bag_path).exists():
-            shutil.copytree(join("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            shutil.copytree(Path("create_derivatives").joinpath("fixtures").joinpath(fixture_directory).joinpath(bag), bag_path)
             Bag.objects.create(
                 bag_identifier="sdfjldskj",
                 bag_path=bag_path,
@@ -131,7 +130,7 @@ class AWSUploadTestCase(TestCase):
         self.set_up_bag("aws_upload_bag", bag_id)
         routine = AWSUpload()
         file_upload = routine.run(True)
-        self.assertEqual(routine[0], "Bags successfully uploaded")
+        self.assertEqual(file_upload[0], "Bags successfully uploaded")
         self.assertTrue(file_upload)
         for bag in Bag.objects.all().filter(bag_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
