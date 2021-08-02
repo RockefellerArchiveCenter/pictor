@@ -126,6 +126,7 @@ class AWSUploadTestCase(TestCase):
     @patch("create_derivatives.clients.AWSClient.__init__")
     @patch("create_derivatives.clients.AWSClient.upload_files")
     def test_run(self, mock_upload_files, mock_init):
+        mock_init.return_value = None
         bag_id = "3aai9usY3AZzCSFkB3RSQ9"
         self.set_up_bag("aws_upload_bag", bag_id)
         routine = AWSUpload()
