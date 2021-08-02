@@ -85,9 +85,9 @@ class AWSUpload:
     def run(self, replace):
         uploaded_bags = []
         for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
-            pdf_dir = Path(bag.bag_path).joinpath('data').joinpath('PDF')
-            jp2_dir = Path(bag.bag_path).joinpath('data').joinpath('JP2')
-            manifest_dir = Path(bag.bag_path).joinpath('data').joinpath('MANIFEST')
+            pdf_dir = str(Path(bag.bag_path, 'data', 'PDF'))
+            jp2_dir = str(Path(bag.bag_path, 'data', 'JP2'))
+            manifest_dir = str(Path(bag.bag_path, 'data', 'MANIFEST'))
             check_dir_exists(pdf_dir)
             check_dir_exists(jp2_dir)
             check_dir_exists(manifest_dir)

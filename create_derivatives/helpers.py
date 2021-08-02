@@ -21,7 +21,7 @@ def matching_files(directory, prefix=None, suffix=None,
         files (lst): a list of files that matched the identifier.
     """
     files = sorted([f for f in Path.iterdir(directory) if (
-        Path.is_file(Path(directory).joinpath(f)) and not f.startswith((".", "Thumbs")))])
+        Path(directory, f).is_file() and not f.startswith((".", "Thumbs")))])
     if prefix:
         files = sorted([f for f in files if f.startswith(prefix)])
     if suffix:
@@ -30,4 +30,4 @@ def matching_files(directory, prefix=None, suffix=None,
         for file in files:
             if file.split('.')[0].endswith('_001'):
                 files.remove(file)
-    return [Path(directory).joinpath(f) for f in files] if prepend else files
+    return [Path(directory, f) for f in files] if prepend else files
