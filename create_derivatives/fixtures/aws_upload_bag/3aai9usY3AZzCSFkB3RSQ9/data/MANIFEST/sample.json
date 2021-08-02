@@ -1,0 +1,56 @@
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "http://192.168.50.74:8182/manifests/05455c9f1d124413873a2f8f9599d00a.json",
+  "@type": "sc:Manifest",
+  "label": "Barr, Alfred",
+  "metadata": [
+    {
+      "label": "Date",
+      "value": "1954-1956"
+    }
+  ],
+  "thumbnail": {
+    "@id": "http://192.168.50.74:8182/iiif/2/05455c9f1d124413873a2f8f9599d00a_001/square/200,/0/default.jpg",
+    "@type": "dctypes:Image",
+    "format": "image/jpeg",
+    "height": 200,
+    "width": 200
+  },
+  "sequences": [
+    {
+      "@id": "http://192.168.50.74:8182/manifests/sequence/05455c9f1d124413873a2f8f9599d00a.json",
+      "@type": "sc:Sequence",
+      "canvases": [
+        {
+          "@id": "http://192.168.50.74:8182/manifests/canvas/05455c9f1d124413873a2f8f9599d00a_001.json",
+          "@type": "sc:Canvas",
+          "label": "Page 1",
+          "thumbnail": {
+            "@id": "http://192.168.50.74:8182/iiif/2/05455c9f1d124413873a2f8f9599d00a_001/square/200,/0/default.jpg",
+            "@type": "dctypes:Image",
+            "format": "image/jpeg",
+            "height": 200,
+            "width": 156
+          },
+          "height": 4478,
+          "width": 3503,
+          "images": [
+            {
+              "@id": "http://192.168.50.74:8182/manifests/annotation/05455c9f1d124413873a2f8f9599d00a_001.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "http://192.168.50.74:8182/iiif/2/05455c9f1d124413873a2f8f9599d00a_001/full/max/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 4478,
+                "width": 3503
+              },
+              "on": "http://192.168.50.74:8182/manifests/canvas/05455c9f1d124413873a2f8f9599d00a_001.json"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

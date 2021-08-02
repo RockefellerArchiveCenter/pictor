@@ -105,19 +105,31 @@ class BagPreparerTestCase(TestCase):
 
 class AWSUploadTestCase(TestCase):
 
-    # def setUp(self):
-    # routine = AWSUpload
-    # print(routine)
+    def setUp(self):
+        path = Path(settings.TMP_DIR)
+        if not path.exists():
+            path.mkdir(parents=True)
+
+    def set_up_bag(self, fixture_directory, bag):
+        """Adds an uncompressed bag fixture to the temp directory and database"""
+        bag_path = join(settings.TMP_DIR, bag)
+        if not Path(bag_path).exists():
+            shutil.copytree(join("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            Bag.objects.create(
+                bag_identifier="sdfjldskj",
+                bag_path=bag_path,
+                origin="digitization",
+                as_data="sdjfkldsjf",
+                dimes_identifier=bag,
+                process_status=Bag.MANIFESTS_CREATED)
 
     @patch("create_derivatives.clients.AWSClient.__init__")
     @patch("create_derivatives.clients.AWSClient.upload_files")
     def test_run(self, mock_upload_files, mock_init):
-        mock_init.return_value = None
-        routine = AWSUpload()
-        print(routine)
-        for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
-            pass
+        bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        self.set_up_bag("aws_upload_bag", bag_id)
+        file_upload = AWSUpload.run()
+        self.assertTrue(file_upload)
 
-    def teardown(self):
-        for d in [self.MANIFEST_DIR, self.DERIVATIVE_DIR]:
-            shutil.rmtree(d)
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
