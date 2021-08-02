@@ -21,7 +21,7 @@ def matching_files(directory, prefix=None, suffix=None,
         files (lst): a list of files that matched the identifier.
     """
     files = sorted([f for f in Path.iterdir(directory) if (
-        Path(directory, f).is_file() and not f.startswith((".", "Thumbs")))])
+        Path(directory, f).is_file() and not str(f).startswith((".", "Thumbs")))])
     if prefix:
         files = sorted([f for f in files if f.startswith(prefix)])
     if suffix:
