@@ -131,7 +131,10 @@ class AWSUploadTestCase(TestCase):
         self.set_up_bag("aws_upload_bag", bag_id)
         routine = AWSUpload()
         file_upload = routine.run(True)
+        self.assertEqual(routine[0], "Bags successfully uploaded")
         self.assertTrue(file_upload)
+        for bag in Bag.objects.all().filter(bag_identifier="sdfjldskj"):
+            self.assertEqual(bag.process_status, Bag.UPLOADED)
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
