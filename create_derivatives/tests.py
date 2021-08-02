@@ -102,12 +102,12 @@ class PDFMakerTestCase(TestCase):
                 process_status=Bag.JPG2000)
 
     def test_run(self):
-        # bag = Bag.objects.get(bag_path=str(Path(settings.TMP_DIR, self.bag_id)))
         pdfs = PDFMaker().run()
-        # make sure there is only one PDF
-        # make sure PDF has correct name
-        # self.assertTrue(pdfs)
-        # self.assertEqual(bag.process_status, Bag.PDF)
+        bag_path = Path(settings.TMP_DIR, self.bag_id)
+        bag = Bag.objects.get(bag_path=bag_path)
+        self.assertTrue(Path(bag_path, "data", "PDF", "{}.pdf".format(self.bag_id)).is_file())
+        self.assertEqual(len(list(Path(bag_path, "data", "PDF").glob('*'))), 1)
+        self.assertEqual(bag.process_status, Bag.PDF)
         self.assertEqual(pdfs[0], "PDFs created.")
 
     def tearDown(self):
