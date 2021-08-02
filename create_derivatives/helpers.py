@@ -1,6 +1,4 @@
-from os import listdir
-from os.path import isfile, join
-from pathlib import Path
+from pathlib import Path, PurePath
 
 
 def check_dir_exists(dir):
@@ -10,7 +8,7 @@ def check_dir_exists(dir):
 
 
 def matching_files(directory, prefix=None, suffix=None,
-                   skip=False, prepend=False):
+                   prepend=False):
     """Get a list of files that start with a specific prefix, optionally removing
     any files that end in `_001`.
 
@@ -23,14 +21,11 @@ def matching_files(directory, prefix=None, suffix=None,
     Returns:
         files (lst): a list of files that matched the identifier.
     """
-    files = sorted([f for f in listdir(directory) if (
-        isfile(join(directory, f)) and not f.startswith((".", "Thumbs")))])
+    directory_path = Path(directory)
+    files = sorted([f for f in directory_path.iterdir() if (
+        Path(PurePath(directory, f)).is_file() and not str(f).startswith((".", "Thumbs")))])
     if prefix:
-        files = sorted([f for f in files if f.startswith(prefix)])
+        files = sorted([f for f in files if str(f).startswith(prefix)])
     if suffix:
-        files = sorted([f for f in files if f.endswith(suffix)])
-    if skip:
-        for file in files:
-            if file.split('.')[0].endswith('_001'):
-                files.remove(file)
-    return [join(directory, f) for f in files] if prepend else files
+        files = sorted([f for f in files if str(f).endswith(suffix)])
+    return [PurePath(directory, f) for f in files] if prepend else files
