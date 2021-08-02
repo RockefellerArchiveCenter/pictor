@@ -27,7 +27,7 @@ class HelpersTestCase(TestCase):
 
     def test_matching_files(self):
         MATCHING_FIXTURE_FILEPATH = Path("create_derivatives").joinpath("fixtures").joinpath("matching")
-        MATCHING_SOURCE_DIR = Path("matching")
+        MATCHING_SOURCE_DIR = Path("/matching")
         if Path.is_dir(MATCHING_SOURCE_DIR):
             shutil.rmtree(MATCHING_SOURCE_DIR)
         shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
