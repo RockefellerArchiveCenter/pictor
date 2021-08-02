@@ -1,5 +1,4 @@
 import shutil
-from os.path import join
 from pathlib import Path
 from unittest.mock import patch
 
@@ -86,12 +85,14 @@ class PDFMakerTestCase(TestCase):
         tmp_path = Path(settings.TMP_DIR)
         if not tmp_path.exists():
             tmp_path.mkdir(parents=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        self.set_up_bag("unpacked_bag_with_jp2", self.bag_id)
 
     def set_up_bag(self, fixture_directory, bag):
         """Adds an uncompressed bag fixture to the temp directory and database"""
-        bag_path = join(settings.TMP_DIR, bag)
+        bag_path = str(Path(settings.TMP_DIR, bag))
         if not Path(bag_path).exists():
-            shutil.copytree(join("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
             Bag.objects.create(
                 bag_identifier="sdfjldskj",
                 bag_path=bag_path,
@@ -101,10 +102,13 @@ class PDFMakerTestCase(TestCase):
                 process_status=Bag.JPG2000)
 
     def test_run(self):
-        bag_id = "3aai9usY3AZzCSFkB3RSQ9"
-        self.set_up_bag("unpacked_bag_with_jp2", bag_id)
-        make_pdf = PDFMaker().run()
-        self.assertTrue(make_pdf)
+        # bag = Bag.objects.get(bag_path=str(Path(settings.TMP_DIR, self.bag_id)))
+        pdfs = PDFMaker().run()
+        # make sure there is only one PDF
+        # make sure PDF has correct name
+        # self.assertTrue(pdfs)
+        # self.assertEqual(bag.process_status, Bag.PDF)
+        self.assertEqual(pdfs[0], "PDFs created.")
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)

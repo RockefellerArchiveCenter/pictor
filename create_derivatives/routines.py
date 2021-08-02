@@ -1,5 +1,5 @@
 import subprocess
-from pathlib import Path, PurePath
+from pathlib import Path
 
 import bagit
 import shortuuid
@@ -82,7 +82,7 @@ class PDFMaker:
     def run(self):
         bags_with_pdfs = []
         for bag in Bag.objects.filter(process_status=Bag.JPG2000):
-            jp2_files_dir = PurePath(bag.bag_path, "data", "JP2")
+            jp2_files_dir = Path(bag.bag_path, "data", "JP2")
             self.pdf_path = self.create_pdf(bag, jp2_files_dir)
             self.compress_pdf(bag)
             self.ocr_pdf()
@@ -95,10 +95,10 @@ class PDFMaker:
     def create_pdf(self, bag, jp2_files_dir):
         """Creates concatenated PDF from JPEG2000 files."""
         jp2_files = matching_files(jp2_files_dir, prepend=True)
-        pdf_dir = Path(PurePath(bag.bag_path, "data", "PDF"))
+        pdf_dir = Path(Path(bag.bag_path, "data", "PDF"))
         if not pdf_dir.is_dir():
             pdf_dir.mkdir()
-        pdf_path = "{}.pdf".format(PurePath(pdf_dir, bag.dimes_identifier))
+        pdf_path = "{}.pdf".format(Path(pdf_dir, bag.dimes_identifier))
         subprocess.run(["/usr/local/bin/img2pdf"] + jp2_files + ["-o", pdf_path])
         return pdf_path
 
@@ -109,7 +109,7 @@ class PDFMaker:
         """
         source_pdf_path = self.pdf_path
         output_pdf_path = "{}_compressed.pdf".format(
-            PurePath(bag.bag_path, "data", "PDF", bag.dimes_identifier))
+            Path(bag.bag_path, "data", "PDF", bag.dimes_identifier))
         subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS={}'.format('/screen'),
                         '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), source_pdf_path], stderr=subprocess.PIPE)
         Path(source_pdf_path).unlink()

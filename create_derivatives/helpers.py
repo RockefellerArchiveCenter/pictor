@@ -1,4 +1,4 @@
-from pathlib import Path, PurePath
+from pathlib import Path
 
 
 def check_dir_exists(dir):
@@ -23,9 +23,9 @@ def matching_files(directory, prefix=None, suffix=None,
     """
     directory_path = Path(directory)
     files = sorted([f for f in directory_path.iterdir() if (
-        Path(PurePath(directory, f)).is_file() and not str(f).startswith((".", "Thumbs")))])
+        Path(directory, f).is_file() and not str(f).startswith((".", "Thumbs")))])
     if prefix:
         files = sorted([f for f in files if str(f).startswith(prefix)])
     if suffix:
         files = sorted([f for f in files if str(f).endswith(suffix)])
-    return [PurePath(directory, f) for f in files] if prepend else files
+    return [Path(directory, f) for f in files] if prepend else files
