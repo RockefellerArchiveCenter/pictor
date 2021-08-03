@@ -37,7 +37,7 @@ class HelpersTestCase(TestCase):
         assert len(matching) == 2
         matching = matching_files(MATCHING_SOURCE_DIR, prefix="foo")
         assert len(matching) == 0
-        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample", skip=True)
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
         assert len(matching) == 2
         matching = matching_files(MATCHING_SOURCE_DIR, suffix=".jp2")
         assert len(matching) == 1
@@ -46,7 +46,8 @@ class HelpersTestCase(TestCase):
         matching = matching_files(MATCHING_SOURCE_DIR, suffix=".pdf")
         assert len(matching) == 0
         matching = matching_files(MATCHING_SOURCE_DIR, prepend=True)
-        assert matching[0].startswith(MATCHING_SOURCE_DIR)
+        path = str(matching[0])
+        assert path.startswith(str(MATCHING_SOURCE_DIR))
 
 
 class BagPreparerTestCase(TestCase):
