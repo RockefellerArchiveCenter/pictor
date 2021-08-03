@@ -106,12 +106,12 @@ class BagPreparerTestCase(TestCase):
 class AWSUploadTestCase(TestCase):
 
     def setUp(self):
+        """Creates a temp directory and adds an uncompressed bag fixture to the temp directory and database"""
         path = Path(settings.TMP_DIR)
         if not path.exists():
             path.mkdir(parents=True)
-
-    def set_up_bag(self, fixture_directory, bag):
-        """Adds an uncompressed bag fixture to the temp directory and database"""
+        bag = "3aai9usY3AZzCSFkB3RSQ9"
+        fixture_directory = "aws_upload_bag"
         bag_path = Path(settings.TMP_DIR, bag)
         if not Path(bag_path).exists():
             shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
@@ -126,9 +126,11 @@ class AWSUploadTestCase(TestCase):
     @patch("create_derivatives.clients.AWSClient.__init__")
     @patch("create_derivatives.clients.AWSClient.upload_files")
     def test_run(self, mock_upload_files, mock_init):
+        """Asserts that the run method produces the desired results message.
+
+        Tests that the method updates the bag's process_status at the end.
+        """
         mock_init.return_value = None
-        bag_id = "3aai9usY3AZzCSFkB3RSQ9"
-        self.set_up_bag("aws_upload_bag", bag_id)
         routine = AWSUpload()
         file_upload = routine.run(True)
         self.assertEqual(file_upload[0], "Bags successfully uploaded")

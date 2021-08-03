@@ -88,9 +88,6 @@ class AWSUpload:
             pdf_dir = str(Path(bag.bag_path, 'data', 'PDF'))
             jp2_dir = str(Path(bag.bag_path, 'data', 'JP2'))
             manifest_dir = str(Path(bag.bag_path, 'data', 'MANIFEST'))
-            check_dir_exists(pdf_dir)
-            check_dir_exists(jp2_dir)
-            check_dir_exists(manifest_dir)
             for src_dir, target_dir in [
                     (pdf_dir, "pdfs"),
                     (jp2_dir, "images"),
