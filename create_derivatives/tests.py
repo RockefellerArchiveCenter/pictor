@@ -89,6 +89,7 @@ class HelpersTestCase(TestCase):
         matching = matching_files(MATCHING_SOURCE_DIR, prepend=True)
         path = str(matching[0])
         assert path.startswith(str(MATCHING_SOURCE_DIR))
+        shutil.rmtree(MATCHING_SOURCE_DIR)
 
 
 class BagPreparerTestCase(TestCase):
@@ -173,11 +174,13 @@ class AWSUploadTestCase(TestCase):
         """
         mock_init.return_value = None
         routine = AWSUpload()
-        file_upload = routine.run(True)
-        self.assertEqual(file_upload[0], "Bags successfully uploaded")
-        self.assertTrue(file_upload)
+        msg, object_list = routine.run(True)
+        self.assertEqual(msg, "Bags successfully uploaded")
+        self.assertTrue(isinstance(object_list, list))
+        self.assertEqual(len(object_list), 1)
         for bag in Bag.objects.all().filter(bag_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
+        self.assertEqual(mock_upload_files.call_count, 3)
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)

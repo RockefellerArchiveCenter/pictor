@@ -85,15 +85,15 @@ class AWSUpload:
     def run(self, replace):
         uploaded_bags = []
         for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
-            pdf_dir = str(Path(bag.bag_path, 'data', 'PDF'))
-            jp2_dir = str(Path(bag.bag_path, 'data', 'JP2'))
-            manifest_dir = str(Path(bag.bag_path, 'data', 'MANIFEST'))
+            pdf_dir = Path(bag.bag_path, "data", "PDF")
+            jp2_dir = Path(bag.bag_path, "data", "JP2")
+            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
             for src_dir, target_dir in [
                     (pdf_dir, "pdfs"),
                     (jp2_dir, "images"),
                     (manifest_dir, "manifests")]:
                 uploads = matching_files(
-                    src_dir, prefix=bag.bag_identifier, prepend=True)
+                    str(src_dir), prefix=bag.bag_identifier, prepend=True)
                 self.aws_client.upload_files(uploads, target_dir, replace)
             bag.process_status = Bag.UPLOADED
             bag.save()
