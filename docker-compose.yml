@@ -6,6 +6,7 @@ services:
     volumes:
       - db:/var/lib/postgresql/data/
   pictor-web:
+    platform: linux/amd64
     build: .
     entrypoint: /code/entrypoint.sh
     volumes:
