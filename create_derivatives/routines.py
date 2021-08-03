@@ -1,4 +1,5 @@
 from pathlib import Path
+from shutil import rmtree
 
 import bagit
 import shortuuid
@@ -102,4 +103,10 @@ class AWSUpload:
 
 
 class CleanupRoutine:
-    pass
+    def run(self):
+        cleaned_up = []
+        for bag in Bag.objects.filter(process_status=Bag.UPLOADED):
+            rmtree(bag.bag_path)
+            bag.save()
+            cleaned_up.append(bag.bag_identifier)
+        return "Bags successfully cleaned up", cleaned_up
