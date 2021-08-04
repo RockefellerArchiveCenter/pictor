@@ -9,7 +9,7 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
-from .routines import AWSUpload, BagPreparer, CleanupRoutine
+from .routines import AWSUpload, BagPreparer, CleanupRoutine, PDFMaker
 
 
 class ViewTestCase(TestCase):
@@ -145,6 +145,41 @@ class BagPreparerTestCase(TestCase):
             f.unlink()
 
 
+class PDFMakerTestCase(TestCase):
+
+    def setUp(self):
+        tmp_path = Path(settings.TMP_DIR)
+        if not tmp_path.exists():
+            tmp_path.mkdir(parents=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        self.set_up_bag("unpacked_bag_with_jp2", self.bag_id)
+
+    def set_up_bag(self, fixture_directory, bag):
+        """Adds an uncompressed bag fixture to the temp directory and database"""
+        bag_path = str(Path(settings.TMP_DIR, bag))
+        if not Path(bag_path).exists():
+            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            Bag.objects.create(
+                bag_identifier="sdfjldskj",
+                bag_path=bag_path,
+                origin="digitization",
+                as_data="sdjfkldsjf",
+                dimes_identifier=bag,
+                process_status=Bag.JPG2000)
+
+    def test_run(self):
+        pdfs = PDFMaker().run()
+        bag_path = Path(settings.TMP_DIR, self.bag_id)
+        bag = Bag.objects.get(bag_path=bag_path)
+        self.assertTrue(Path(bag_path, "data", "PDF", "{}.pdf".format(self.bag_id)).is_file())
+        self.assertEqual(len(list(Path(bag_path, "data", "PDF").glob('*'))), 1)
+        self.assertEqual(bag.process_status, Bag.PDF)
+        self.assertEqual(pdfs[0], "PDFs created.")
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
+
+
 class AWSUploadTestCase(TestCase):
     fixtures = ["uploaded.json"]
 
@@ -191,7 +226,7 @@ class CleanupRoutineTestCase(TestCase):
     def test_run(self):
         msg, object_list = CleanupRoutine().run()
         self.assertEqual(len(list(Path(settings.TMP_DIR).glob('*'))), 0)
-        self.assertEqual(message, "Bags successfully cleaned up.")
+        self.assertEqual(msg, "Bags successfully cleaned up.")
         self.assertTrue(isinstance(object_list), list)
         self.assertEqual(len(object_list), 1)
 
