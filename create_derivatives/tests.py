@@ -173,7 +173,7 @@ class CleanupRoutineTestCase(TestCase):
             shutil.rmtree(settings.TMP_DIR)
         tmp_path.mkdir(parents=True)
         self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
-        self.set_up_bag("unpacked_bag_with_jp2", self.bag_id)
+        self.set_up_bag("aws_upload_bag", self.bag_id)
 
     def set_up_bag(self, fixture_directory, bag):
         """Adds an uncompressed bag fixture to the temp directory and database"""
