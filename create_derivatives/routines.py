@@ -6,7 +6,8 @@ import shortuuid
 from asterism.file_helpers import anon_extract_all
 from pictor import settings
 
-from .clients import ArchivesSpaceClient
+
+from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
 
@@ -132,8 +133,27 @@ class ManifestMaker:
 
 
 class AWSUpload:
-    # TO DO: upload files and PDFs
-    pass
+
+    def __init__(self):
+        self.aws_client = AWSClient(*settings.AWS)
+
+    def run(self, replace):
+        uploaded_bags = []
+        for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
+            pdf_dir = Path(bag.bag_path, "data", "PDF")
+            jp2_dir = Path(bag.bag_path, "data", "JP2")
+            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+            for src_dir, target_dir in [
+                    (pdf_dir, "pdfs"),
+                    (jp2_dir, "images"),
+                    (manifest_dir, "manifests")]:
+                uploads = matching_files(
+                    str(src_dir), prefix=bag.bag_identifier, prepend=True)
+                self.aws_client.upload_files(uploads, target_dir, replace)
+            bag.process_status = Bag.UPLOADED
+            bag.save()
+            uploaded_bags.append(bag.bag_identifier)
+        return "Bags successfully uploaded", uploaded_bags
 
 
 class CleanupRoutine:

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'create_derivatives',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -116,6 +117,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = str(Path(BASE_DIR, 'static'))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -127,3 +129,4 @@ TMP_DIR = CF.TMP_DIR
 DEST_DIR = CF.DEST_DIR
 
 ARCHIVESSPACE = CF.ARCHIVESSPACE
+AWS = CF.AWS

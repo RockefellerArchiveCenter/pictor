@@ -7,25 +7,21 @@ def check_dir_exists(dir):
     return True
 
 
-def matching_files(directory, prefix=None, suffix=None,
-                   prepend=False):
-    """Get a list of files that start with a specific prefix, optionally removing
-    any files that end in `_001`.
 
+def matching_files(directory, prefix=None, suffix=None, prepend=False):
+    """Get a list of files that start with a specific prefix.
     Args:
         directory (str): The directory containing files.
         prefix (str): A prefix to match filenames against.
         suffix (str): A suffix (file extension) to match filenames against.
-        skip (bool): Flag indicating if files ending with `_001` should be removed.
         prepend (bool): Add the directory to the filepaths returned
     Returns:
         files (lst): a list of files that matched the identifier.
     """
-    directory_path = Path(directory)
-    files = sorted([f for f in directory_path.iterdir() if (
-        Path(directory, f).is_file() and not str(f).startswith((".", "Thumbs")))])
+    files = sorted([f for f in Path(directory).iterdir() if (
+        Path(directory, f).is_file() and not str(f.name).startswith((".", "Thumbs")))])
     if prefix:
-        files = sorted([f for f in files if str(f).startswith(prefix)])
+        files = sorted([f for f in files if str(f.name).startswith(prefix)])
     if suffix:
-        files = sorted([f for f in files if str(f).endswith(suffix)])
+        files = sorted([f for f in files if str(f.name).endswith(suffix)])
     return [Path(directory, f) for f in files] if prepend else files
