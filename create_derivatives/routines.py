@@ -107,6 +107,8 @@ class CleanupRoutine:
         cleaned_up = []
         for bag in Bag.objects.filter(process_status=Bag.UPLOADED):
             rmtree(bag.bag_path)
+            bag.process_status = Bag.CLEANED_UP
             bag.save()
             cleaned_up.append(bag.bag_identifier)
-        return "Bags successfully cleaned up", cleaned_up
+        msg = "Bags successfully cleaned up." if len(cleaned_up) else "No bags ready for cleanup."
+        return msg, cleaned_up
