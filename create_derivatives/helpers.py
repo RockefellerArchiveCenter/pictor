@@ -26,4 +26,3 @@ def matching_files(directory, prefix=None, suffix=None,
     if suffix:
         files = sorted([f for f in files if str(f).endswith(suffix)])
     return [Path(directory, f) for f in files] if prepend else files
-

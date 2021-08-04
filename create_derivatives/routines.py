@@ -1,3 +1,5 @@
+import math
+import subprocess
 from pathlib import Path
 
 import bagit
@@ -7,7 +9,7 @@ from pictor import settings
 from PIL import Image
 
 from .clients import ArchivesSpaceClient
-from .helpers import check_dir_exists, matching files
+from .helpers import check_dir_exists, matching_files
 from .models import Bag
 
 
@@ -74,64 +76,62 @@ class JP2Maker:
     """
 
     def run(self):
-    bags_with_jp2s = []
-    for bag in Bag.objects.filter(process_status=Bag.PREPARED):
-        if Path.is_dir(bag.bag_path, "data", "service"):
-            tiff_files_dir = str(Path(bag.bag_path, "data", "service"))
-        else:
-            tiff_files_dir = str(Path(bag.bag_path, "data"))
-        self.jp2_path = self.create_jp2(bag, tiff_files)
-        bag.process_status = Bag.JPG2000
-        bag.save()
-        bags_with_jp2s.append(bag.bag_identifier)
-    msg = "JPG2000s created." if len(bags_with_jp2s) else "No TIFF files ready for JP2 creation."
-    return msg, bags_with_jp2s
-
+        bags_with_jp2s = []
+        for bag in Bag.objects.filter(process_status=Bag.PREPARED):
+            if Path.is_dir(bag.bag_path, "data", "service"):
+                tiff_files_dir = str(Path(bag.bag_path, "data", "service"))
+            else:
+                tiff_files_dir = str(Path(bag.bag_path, "data"))
+            self.jp2_path = self.create_jp2(bag, tiff_files_dir)
+            bag.process_status = Bag.JPG2000
+            bag.save()
+            bags_with_jp2s.append(bag.bag_identifier)
+        msg = "JPG2000s created." if len(bags_with_jp2s) else "No TIFF files ready for JP2 creation."
+        return msg, bags_with_jp2s
 
     def calculate_layers(self):
-    """Calculates the number of layers based on pixel dimensions.
-    For TIFF files, image tag 256 is the width, and 257 is the height.
-    Args:
-        file (str): filename of a TIFF image file.
-    Returns:
-        layers (int): number of layers to convert to
-    """
-
-    with Image.open(file) as img:
-        width = [w for w in img.tag[256]][0]
-        height = [h for h in img.tag[257]][0]
-    return math.ceil((math.log(max(width, height)) / math.log(2)
-                      ) - ((math.log(96) / math.log(2)))) + 1
-
+        """Calculates the number of layers based on pixel dimensions.
+        For TIFF files, image tag 256 is the width, and 257 is the height.
+        Args:
+            file (str): filename of a TIFF image file.
+        Returns:
+            layers (int): number of layers to convert to
+        """
+        # I can't use "file" here. What should I use?
+        with Image.open(file) as img:
+            width = [w for w in img.tag[256]][0]
+            height = [h for h in img.tag[257]][0]
+        return math.ceil((math.log(max(width, height)) / math.log(2)
+                          ) - ((math.log(96) / math.log(2)))) + 1
 
     def create_jp2(self, bag, tiff_files_dir):
-    """Creates JPEG2000 files from TIFF files.
-    The default options for conversion below are:
-    - Compression ration of `1.5`
-    - Precinct size: `[256,256]` for first two layers and then `[128,128]` for all others
-    - Code block size of `[64,64]`
-    - Progression order of `RPCL`
-    """
+        """Creates JPEG2000 files from TIFF files.
+        The default options for conversion below are:
+        - Compression ration of `1.5`
+        - Precinct size: `[256,256]` for first two layers and then `[128,128]` for all others
+        - Code block size of `[64,64]`
+        - Progression order of `RPCL`
+        """
 
-    default_options = ["-r", "1.5",
-                    "-c", "[256,256],[256,256],[128,128]",
-                    "-b", "64,64",
-                    "-p", "RPCL"]
-    tiff_files = matching_files(tiff_files_dir, prepend=True)
-    jp2_dir = Path(bag.bag_path, "data", "JP2")
-    if not jp2_dir.is_dir():
-        jp2_dir.mkdir()
-    # I feel like this is wrong. It doesn't make sense to use a for loop here, does it?
-    for file in tiff_files:
-        jp2_path = "{}.jp2".format(Path(jp2_dir, bag.dimes_identifier))
-        layers = calculate_layers(file)
-        cmd = ["/usr/local/bin/opj_compress",
-            "-i", file,
-            "-o", jp2_path,
-            "-n", str(layers),
-            "-SOP"] + default_options
-        subprocess.run(cmd, check=True)
-        return jp2_path
+        default_options = ["-r", "1.5",
+                           "-c", "[256,256],[256,256],[128,128]",
+                           "-b", "64,64",
+                           "-p", "RPCL"]
+        tiff_files = matching_files(tiff_files_dir, prepend=True)
+        jp2_dir = Path(bag.bag_path, "data", "JP2")
+        if not jp2_dir.is_dir():
+            jp2_dir.mkdir()
+        # I feel like this is wrong. It doesn't make sense to use a for loop here, does it?
+        for file in tiff_files:
+            jp2_path = "{}.jp2".format(Path(jp2_dir, bag.dimes_identifier))
+            layers = calculate_layers(file)
+            cmd = ["/usr/local/bin/opj_compress",
+                   "-i", file,
+                   "-o", jp2_path,
+                   "-n", str(layers),
+                   "-SOP"] + default_options
+            subprocess.run(cmd, check=True)
+            return jp2_path
 
 
 class PDFMaker:
