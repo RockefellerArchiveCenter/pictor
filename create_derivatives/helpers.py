@@ -7,7 +7,6 @@ def check_dir_exists(dir):
     return True
 
 
-
 def matching_files(directory, prefix=None, suffix=None, prepend=False):
     """Get a list of files that start with a specific prefix.
     Args:
