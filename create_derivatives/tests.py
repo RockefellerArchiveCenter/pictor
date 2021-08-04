@@ -146,24 +146,7 @@ class BagPreparerTestCase(TestCase):
 
 
 class AWSUploadTestCase(TestCase):
-
-    def setUp(self):
-        """Creates a temp directory and adds an uncompressed bag fixture to the temp directory and database"""
-        path = Path(settings.TMP_DIR)
-        if not path.exists():
-            path.mkdir(parents=True)
-        bag = "3aai9usY3AZzCSFkB3RSQ9"
-        fixture_directory = "aws_upload_bag"
-        bag_path = Path(settings.TMP_DIR, bag)
-        if not Path(bag_path).exists():
-            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
-            Bag.objects.create(
-                bag_identifier="sdfjldskj",
-                bag_path=bag_path,
-                origin="digitization",
-                as_data="sdjfkldsjf",
-                dimes_identifier=bag,
-                process_status=Bag.MANIFESTS_CREATED)
+    fixtures = ["uploaded.json"]
 
     @patch("create_derivatives.clients.AWSClient.__init__")
     @patch("create_derivatives.clients.AWSClient.upload_files")
@@ -181,6 +164,3 @@ class AWSUploadTestCase(TestCase):
         for bag in Bag.objects.all().filter(bag_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
         self.assertEqual(mock_upload_files.call_count, 3)
-
-    def tearDown(self):
-        shutil.rmtree(settings.TMP_DIR)
