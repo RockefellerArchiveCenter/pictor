@@ -107,13 +107,12 @@ class PDFMaker:
 
         Original PDF is replaced with compressed PDF.
         """
-        source_pdf_path = self.pdf_path
         output_pdf_path = "{}_compressed.pdf".format(
             Path(bag.bag_path, "data", "PDF", bag.dimes_identifier))
         subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS={}'.format('/screen'),
-                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), source_pdf_path], stderr=subprocess.PIPE)
-        Path(source_pdf_path).unlink()
-        Path(output_pdf_path).rename(source_pdf_path)
+                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), self.pdf_path], stderr=subprocess.PIPE)
+        Path(self.pdf_path).unlink()
+        Path(output_pdf_path).rename(self.pdf_path)
 
     def ocr_pdf(self):
         """Add OCR layer using ocrmypdf."""
