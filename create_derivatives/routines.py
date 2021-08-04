@@ -6,7 +6,6 @@ import shortuuid
 from asterism.file_helpers import anon_extract_all
 from pictor import settings
 
-
 from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
