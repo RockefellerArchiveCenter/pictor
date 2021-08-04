@@ -47,7 +47,7 @@ class BagPreparer:
     def unpack_bag(self, bag_identifier):
         """Extracts a serialized bag to the tmp directory."""
         if anon_extract_all(
-                "{}.tar.gz".format(str(Path(settings.SRC_DIR, bag_identifier))), settings.TMP_DIR):
+                "{}.tar.gz".format(Path(settings.SRC_DIR, bag_identifier)), settings.TMP_DIR):
             return str(Path(settings.TMP_DIR, bag_identifier))
         else:
             raise Exception("Unable to extract bag", bag_identifier)
@@ -82,7 +82,7 @@ class PDFMaker:
     def run(self):
         bags_with_pdfs = []
         for bag in Bag.objects.filter(process_status=Bag.JPG2000):
-            jp2_files_dir = Path(bag.bag_path, "data", "JP2")
+            jp2_files_dir = str(Path(bag.bag_path, "data", "JP2"))
             self.pdf_path = self.create_pdf(bag, jp2_files_dir)
             self.compress_pdf(bag)
             self.ocr_pdf()
@@ -95,7 +95,7 @@ class PDFMaker:
     def create_pdf(self, bag, jp2_files_dir):
         """Creates concatenated PDF from JPEG2000 files."""
         jp2_files = matching_files(jp2_files_dir, prepend=True)
-        pdf_dir = Path(Path(bag.bag_path, "data", "PDF"))
+        pdf_dir = Path(bag.bag_path, "data", "PDF")
         if not pdf_dir.is_dir():
             pdf_dir.mkdir()
         pdf_path = "{}.pdf".format(Path(pdf_dir, bag.dimes_identifier))
