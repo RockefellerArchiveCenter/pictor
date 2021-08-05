@@ -63,6 +63,7 @@ pikepdf==2.16.1
     # via img2pdf
 pillow==8.3.1
     # via
+    #   -r requirements.in
     #   img2pdf
     #   pikepdf
 psycopg2-binary==2.9.1
