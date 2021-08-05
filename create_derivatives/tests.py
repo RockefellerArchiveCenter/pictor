@@ -227,7 +227,7 @@ class CleanupRoutineTestCase(TestCase):
         msg, object_list = CleanupRoutine().run()
         self.assertEqual(len(list(Path(settings.TMP_DIR).glob('*'))), 0)
         self.assertEqual(msg, "Bags successfully cleaned up.")
-        self.assertTrue(isinstance(object_list), list)
+        self.assertTrue(isinstance(object_list, list))
         self.assertEqual(len(object_list), 1)
 
     def tearDown(self):
