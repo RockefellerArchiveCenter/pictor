@@ -1,6 +1,6 @@
 import math
 import subprocess
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import bagit
 import shortuuid
@@ -73,8 +73,8 @@ class JP2Maker:
     directory is empty or does not exist.
 
     Returns:
-        JP2000 derivatives in the bags' /data directory.
-        Updated bag process status.
+        A tuple containing human-readable message along with list of bag identifiers.
+        Exceptions are raised for errors along the way.
     """
 
     def run(self):
@@ -108,7 +108,23 @@ class JP2Maker:
         return math.ceil((math.log(max(width, height)) / math.log(2)
                           ) - ((math.log(96) / math.log(2)))) + 1
 
-    def create_jp2(self, bag, tiff_files):
+    def get_page_number(self, file):
+        """Parses a page number from a filename.
+        Presumes that:
+            The page number is preceded by an underscore
+            The page number is  immediately followed by either by `_m`, `_me` or `_se`,
+            or the file extension.
+        """
+        filename, _ = PurePath(PurePath(file).name).suffix
+        if "_se" in filename:
+            trimmed = filename.split("_se")[0]
+        elif "_m" in filename:
+            trimmed = filename.split("_m")[0]
+        else:
+            trimmed = filename
+        return trimmed.split("_")[-1]
+
+    def create_jp2(self, bag, tiff_files,):
         """Creates JPEG2000 files from TIFF files.
         The default options for conversion below are:
         - Compression ration of `1.5`
@@ -126,7 +142,7 @@ class JP2Maker:
             jp2_dir.mkdir()
         # I feel like this is wrong. It doesn't make sense to use a for loop here, does it?
         for file in tiff_files:
-            jp2_path = "{}.jp2".format(Path(jp2_dir, file))
+            jp2_path = "{}.jp2".format(Path(jp2_dir, self.get_page_number(file)))
             layers = self.calculate_layers(file)
             cmd = ["/usr/local/bin/opj_compress",
                    "-i", file,
