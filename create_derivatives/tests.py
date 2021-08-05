@@ -7,9 +7,9 @@ from django.urls import reverse
 from pictor import settings
 from rest_framework.test import APIRequestFactory
 
-from .helpers import check_dir_exists
+from .helpers import check_dir_exists, matching_files
 from .models import Bag
-from .routines import BagPreparer
+from .routines import AWSUpload, BagPreparer, PDFMaker
 
 
 class ViewTestCase(TestCase):
@@ -66,6 +66,31 @@ class HelpersTestCase(TestCase):
             self.assertTrue(
                 p in str(context.exception), "Directory was not found in exception")
 
+    def test_matching_files(self):
+        MATCHING_FIXTURE_FILEPATH = Path("create_derivatives", "fixtures", "matching")
+        MATCHING_SOURCE_DIR = Path("matching").absolute()
+        if MATCHING_SOURCE_DIR.is_dir():
+            shutil.rmtree(MATCHING_SOURCE_DIR)
+        shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
+        matching = matching_files(MATCHING_SOURCE_DIR)
+        assert len(matching) == 4
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
+        assert len(matching) == 2
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="foo")
+        assert len(matching) == 0
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
+        assert len(matching) == 2
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".jp2")
+        assert len(matching) == 1
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".tif")
+        assert len(matching) == 1
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".pdf")
+        assert len(matching) == 0
+        matching = matching_files(MATCHING_SOURCE_DIR, prepend=True)
+        path = str(matching[0])
+        assert path.startswith(str(MATCHING_SOURCE_DIR))
+        shutil.rmtree(MATCHING_SOURCE_DIR)
+
 
 class BagPreparerTestCase(TestCase):
     fixtures = ["created.json"]
@@ -118,3 +143,59 @@ class BagPreparerTestCase(TestCase):
     def tearDown(self):
         for f in Path(settings.SRC_DIR).iterdir():
             f.unlink()
+
+
+class PDFMakerTestCase(TestCase):
+
+    def setUp(self):
+        tmp_path = Path(settings.TMP_DIR)
+        if not tmp_path.exists():
+            tmp_path.mkdir(parents=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        self.set_up_bag("unpacked_bag_with_jp2", self.bag_id)
+
+    def set_up_bag(self, fixture_directory, bag):
+        """Adds an uncompressed bag fixture to the temp directory and database"""
+        bag_path = str(Path(settings.TMP_DIR, bag))
+        if not Path(bag_path).exists():
+            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            Bag.objects.create(
+                bag_identifier="sdfjldskj",
+                bag_path=bag_path,
+                origin="digitization",
+                as_data="sdjfkldsjf",
+                dimes_identifier=bag,
+                process_status=Bag.JPG2000)
+
+    def test_run(self):
+        pdfs = PDFMaker().run()
+        bag_path = Path(settings.TMP_DIR, self.bag_id)
+        bag = Bag.objects.get(bag_path=bag_path)
+        self.assertTrue(Path(bag_path, "data", "PDF", "{}.pdf".format(self.bag_id)).is_file())
+        self.assertEqual(len(list(Path(bag_path, "data", "PDF").glob('*'))), 1)
+        self.assertEqual(bag.process_status, Bag.PDF)
+        self.assertEqual(pdfs[0], "PDFs created.")
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
+
+
+class AWSUploadTestCase(TestCase):
+    fixtures = ["uploaded.json"]
+
+    @patch("create_derivatives.clients.AWSClient.__init__")
+    @patch("create_derivatives.clients.AWSClient.upload_files")
+    def test_run(self, mock_upload_files, mock_init):
+        """Asserts that the run method produces the desired results message.
+
+        Tests that the method updates the bag's process_status at the end.
+        """
+        mock_init.return_value = None
+        routine = AWSUpload()
+        msg, object_list = routine.run(True)
+        self.assertEqual(msg, "Bags successfully uploaded")
+        self.assertTrue(isinstance(object_list, list))
+        self.assertEqual(len(object_list), 1)
+        for bag in Bag.objects.all().filter(bag_identifier="sdfjldskj"):
+            self.assertEqual(bag.process_status, Bag.UPLOADED)
+        self.assertEqual(mock_upload_files.call_count, 3)

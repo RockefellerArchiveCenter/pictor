@@ -8,7 +8,7 @@ from asterism.file_helpers import anon_extract_all
 from pictor import settings
 from PIL import Image
 
-from .clients import ArchivesSpaceClient
+from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
 
@@ -49,7 +49,7 @@ class BagPreparer:
     def unpack_bag(self, bag_identifier):
         """Extracts a serialized bag to the tmp directory."""
         if anon_extract_all(
-                "{}.tar.gz".format(str(Path(settings.SRC_DIR, bag_identifier))), settings.TMP_DIR):
+                "{}.tar.gz".format(Path(settings.SRC_DIR, bag_identifier)), settings.TMP_DIR):
             return str(Path(settings.TMP_DIR, bag_identifier))
         else:
             raise Exception("Unable to extract bag", bag_identifier)
@@ -138,8 +138,61 @@ class JP2Maker:
 
 
 class PDFMaker:
-    # TO DO: make PDF derivates, compress, OCR
-    pass
+    """Creates concatenated PDF file from JP2 derivatives.
+
+    Creates PDF directory in bag's data directory, creates PDF, then compresses and OCRs the PDF
+
+    Returns:
+        A tuple containing human-readable message along with list of bag identifiers.
+        Exceptions are raised for errors along the way.
+
+    """
+
+    def run(self):
+        bags_with_pdfs = []
+        for bag in Bag.objects.filter(process_status=Bag.JPG2000):
+            jp2_files_dir = str(Path(bag.bag_path, "data", "JP2"))
+            self.pdf_path = self.create_pdf(bag, jp2_files_dir)
+            self.compress_pdf(bag)
+            self.ocr_pdf()
+            bag.process_status = Bag.PDF
+            bag.save()
+            bags_with_pdfs.append(bag.bag_identifier)
+        msg = "PDFs created." if len(bags_with_pdfs) else "No JPG2000 files ready for PDF creation."
+        return msg, bags_with_pdfs
+
+    def create_pdf(self, bag, jp2_files_dir):
+        """Creates concatenated PDF from JPEG2000 files."""
+        jp2_files = matching_files(jp2_files_dir, prepend=True)
+        pdf_dir = Path(bag.bag_path, "data", "PDF")
+        if not pdf_dir.is_dir():
+            pdf_dir.mkdir()
+        pdf_path = "{}.pdf".format(Path(pdf_dir, bag.dimes_identifier))
+        subprocess.run(["/usr/local/bin/img2pdf"] + jp2_files + ["-o", pdf_path])
+        return pdf_path
+
+    def compress_pdf(self, bag):
+        """Compress PDF via Ghostscript command line interface.
+
+        Original PDF is replaced with compressed PDF.
+        """
+        output_pdf_path = "{}_compressed.pdf".format(
+            Path(bag.bag_path, "data", "PDF", bag.dimes_identifier))
+        subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS={}'.format('/screen'),
+                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), self.pdf_path], stderr=subprocess.PIPE)
+        Path(self.pdf_path).unlink()
+        Path(output_pdf_path).rename(self.pdf_path)
+
+    def ocr_pdf(self):
+        """Add OCR layer using ocrmypdf."""
+        subprocess.run(["ocrmypdf",
+                        self.pdf_path,
+                        self.pdf_path,
+                        "--output-type",
+                        "pdf",
+                        "--optimize",
+                        "0",
+                        "--quiet"])
 
 
 class ManifestMaker:
@@ -148,8 +201,27 @@ class ManifestMaker:
 
 
 class AWSUpload:
-    # TO DO: upload files and PDFs
-    pass
+
+    def __init__(self):
+        self.aws_client = AWSClient(*settings.AWS)
+
+    def run(self, replace):
+        uploaded_bags = []
+        for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
+            pdf_dir = Path(bag.bag_path, "data", "PDF")
+            jp2_dir = Path(bag.bag_path, "data", "JP2")
+            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+            for src_dir, target_dir in [
+                    (pdf_dir, "pdfs"),
+                    (jp2_dir, "images"),
+                    (manifest_dir, "manifests")]:
+                uploads = matching_files(
+                    str(src_dir), prefix=bag.bag_identifier, prepend=True)
+                self.aws_client.upload_files(uploads, target_dir, replace)
+            bag.process_status = Bag.UPLOADED
+            bag.save()
+            uploaded_bags.append(bag.bag_identifier)
+        return "Bags successfully uploaded", uploaded_bags
 
 
 class CleanupRoutine:
