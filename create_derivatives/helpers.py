@@ -17,7 +17,6 @@ def matching_files(directory, prefix=None, suffix=None, prepend=False):
     Returns:
         files (lst): a list of files that matched the identifier.
     """
-
     files = sorted([f for f in Path(directory).iterdir() if (
         Path(directory, f).is_file() and not str(f.name).startswith((".", "Thumbs")))])
     if prefix:
