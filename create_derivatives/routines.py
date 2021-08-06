@@ -157,6 +157,13 @@ class AWSUpload:
 
 
 class CleanupRoutine:
+    """Removes bag files that have been processed.
+
+    Returns:
+        A tuple containing human-readable message along with list of bag identifiers.
+
+    """
+
     def run(self):
         cleaned_up = []
         for bag in Bag.objects.filter(process_status=Bag.UPLOADED):
