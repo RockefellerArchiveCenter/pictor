@@ -95,6 +95,11 @@ sqlparse==0.4.1
     # via django
 structlog==21.1.0
     # via archivessnake
+typing-extensions==3.10.0.0
+    # via
+    #   asgiref
+    #   gitpython
+    #   structlog
 urllib3==1.26.6
     # via
     #   botocore
