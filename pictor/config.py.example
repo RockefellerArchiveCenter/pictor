@@ -36,3 +36,8 @@ AWS = (
   "987654321",
   "rac-iiif",
 )
+
+# baseurl
+IMAGESERVER = (
+  "http://iiif.rockarch.org"
+)

@@ -5,7 +5,10 @@ from shutil import rmtree
 import bagit
 import shortuuid
 from asterism.file_helpers import anon_extract_all
+from iiif_prezi.factory import ManifestFactory
+from iiif_prezi_upgrader import Upgrader
 from pictor import settings
+from PIL import Image
 
 from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import check_dir_exists, matching_files
@@ -129,9 +132,49 @@ class PDFMaker:
 
 
 class ManifestMaker:
-    # TO DO: make manifests
-    def run(self):
-        pass
+
+    def __init__(self):
+        self.server_url = *settings.IMAGESERVER
+
+    def create_manifest(self, files, image_dir, identifier,
+                    obj_data, replace=False):
+    """Method that runs the other methods to build a manifest file and populate
+    it with information.
+    Args:
+        files (list): Files to iterate over
+        image_dir (str): Path to directory containing derivative image files.
+        identifier (str): A unique identifier.
+        obj_data (dict): Data about the archival object.
+        replace (bool): Replace existing files.
+    """
+    manifest_path = "{}.json".format(
+        os.path.join(self.manifest_dir, identifier))
+    if (os.path.isfile(manifest_path) and not replace):
+        raise FileExistsError(
+            "Error creating manifest: {} already exists".format(manifest_path))
+    page_number = 1
+    manifest = self.fac.manifest(ident=identifier, label=obj_data["title"])
+    manifest.set_metadata({"Date": obj_data["dates"]})
+    manifest.thumbnail = self.set_thumbnail(os.path.splitext(files[0])[0])
+    sequence = manifest.sequence(ident="{}.json".format(identifier))
+    for file in files:
+        page_ref = os.path.splitext(file)[0]
+        width, height = self.get_image_info(image_dir, file)
+        canvas = sequence.canvas(
+            ident=page_ref,
+            label="Page {}".format(
+                str(page_number)))
+        canvas.set_hw(height, width)
+        annotation = canvas.annotation(ident=page_ref)
+        img = annotation.image(
+            ident="/{}/full/max/0/default.jpg".format(page_ref))
+        self.set_image_data(img, height, width, page_ref)
+        canvas.thumbnail = self.set_thumbnail(page_ref)
+        page_number += 1
+    v2_json = manifest.toJSON(top=True)
+    v3_json = self.upgrader.process_resource(v2_json, top=True)
+    with open(manifest_path, 'w', encoding='utf-8') as jf:
+        json.dump(v3_json, jf, ensure_ascii=False, indent=4)
 
 
 class AWSUpload:
