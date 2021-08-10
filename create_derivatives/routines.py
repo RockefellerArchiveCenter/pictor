@@ -66,7 +66,8 @@ class BagPreparer:
 
 class JP2Maker:
     # TO DO: make JPG2000 derivatives
-    pass
+    def run(self):
+        pass
 
 
 class PDFMaker:
@@ -129,7 +130,8 @@ class PDFMaker:
 
 class ManifestMaker:
     # TO DO: make manifests
-    pass
+    def run(self):
+        pass
 
 
 class AWSUpload:
@@ -156,7 +158,7 @@ class AWSUpload:
         return "Bags successfully uploaded", uploaded_bags
 
 
-class CleanupRoutine:
+class Cleanup:
     """Removes bag files that have been processed.
 
     Returns:
