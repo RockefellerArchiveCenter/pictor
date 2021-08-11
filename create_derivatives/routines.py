@@ -135,46 +135,115 @@ class ManifestMaker:
 
     def __init__(self):
         self.server_url = *settings.IMAGESERVER
+        self.resource_url = "{}/iiif/3/".format(self.server_url)
+        self.fac = ManifestFactory()
+        self.fac.set_base_prezi_uri("{}/manifests/".format(self.server_url))
+        self.fac.set_base_image_uri(self.resource_url)
+        self.fac.set_debug("error")
+        self.upgrader = Upgrader()
+
+    def run(self):
+        bags_with_manifests = []
+        for bag in Bag.objects.filter(process_status=Bag.PDF):
+            self.bag_identifier = bag.dimes_identifier
+            jp2_files = matching_files(str(Path(bag.bag_path, "data", "JP2")), prefix=self.bag_identifier)
+            self.manifest_dir = str(Path(bag.bag_path, "data", "manifests"))
+            self.fac.set_base_prezi_dir(str(self.manifest_dir))
+            self.create_manifest(jp2_files, str(Path(bag.bag_path, "data", "JP2"), self.bag_identifier, bag.as_data))
 
     def create_manifest(self, files, image_dir, identifier,
-                    obj_data, replace=False):
-    """Method that runs the other methods to build a manifest file and populate
-    it with information.
-    Args:
-        files (list): Files to iterate over
-        image_dir (str): Path to directory containing derivative image files.
-        identifier (str): A unique identifier.
-        obj_data (dict): Data about the archival object.
-        replace (bool): Replace existing files.
-    """
-    manifest_path = "{}.json".format(
-        os.path.join(self.manifest_dir, identifier))
-    if (os.path.isfile(manifest_path) and not replace):
-        raise FileExistsError(
-            "Error creating manifest: {} already exists".format(manifest_path))
-    page_number = 1
-    manifest = self.fac.manifest(ident=identifier, label=obj_data["title"])
-    manifest.set_metadata({"Date": obj_data["dates"]})
-    manifest.thumbnail = self.set_thumbnail(os.path.splitext(files[0])[0])
-    sequence = manifest.sequence(ident="{}.json".format(identifier))
-    for file in files:
-        page_ref = os.path.splitext(file)[0]
-        width, height = self.get_image_info(image_dir, file)
-        canvas = sequence.canvas(
-            ident=page_ref,
-            label="Page {}".format(
-                str(page_number)))
-        canvas.set_hw(height, width)
-        annotation = canvas.annotation(ident=page_ref)
-        img = annotation.image(
-            ident="/{}/full/max/0/default.jpg".format(page_ref))
-        self.set_image_data(img, height, width, page_ref)
-        canvas.thumbnail = self.set_thumbnail(page_ref)
-        page_number += 1
-    v2_json = manifest.toJSON(top=True)
-    v3_json = self.upgrader.process_resource(v2_json, top=True)
-    with open(manifest_path, 'w', encoding='utf-8') as jf:
-        json.dump(v3_json, jf, ensure_ascii=False, indent=4)
+                        obj_data):
+        """Method that runs the other methods to build a manifest file and populate
+        it with information.
+
+        Args:
+            files (list): Files to iterate over
+            image_dir (str): Path to directory containing derivative image files.
+            identifier (str): A unique identifier.
+            obj_data (dict): Data about the archival object.
+        """
+        manifest_path = "{}.json".format(str(Path(self.manifest_dir, identifier)))
+        page_number = 1
+        manifest = self.fac.manifest(ident=identifier, label=obj_data["title"])
+        cleaned_id = manifest.id[:-5]
+        manifest.id = cleaned_id
+        manifest.set_metadata({"Date": obj_data["dates"]})
+        manifest.thumbnail = self.set_thumbnail(Path(files[0]).stem)
+        sequence = manifest.sequence(ident=identifier)
+        for file in files:
+            page_ref = Path(file).stem
+            width, height = self.get_image_info(image_dir, file)
+            canvas = sequence.canvas(
+                ident="{}/manifests/{}/canvas/{}".format(
+                    self.server_url, manifest.id, str("{0:03}".format(page_number))),
+                label="Page {}".format(
+                    str(page_number)))
+            canvas.set_hw(height, width)
+            annotation = canvas.annotation(ident=page_ref)
+            img = annotation.image(
+                ident="/{}/full/max/0/default.jpg".format(page_ref))
+            self.set_image_data(img, height, width, page_ref)
+            canvas.thumbnail = self.set_thumbnail(page_ref)
+            page_number += 1
+        v2_json = manifest.toJSON(top=True)
+        v3_json = self.upgrader.process_resource(v2_json, top=True)
+        with open(manifest_path, 'w', encoding='utf-8') as jf:
+            json.dump(v3_json, jf, ensure_ascii=False, indent=4)
+
+    def get_image_info(self, image_dir, file):
+        """Gets information about the image file.
+
+        Args:
+            image_dir (str): path to the directory containing the image file
+            file (str): filename of the image file
+        Returns:
+            width (int): Pixel width of the image file
+            height (int): Pixel height of the image file
+        """
+        with Image.open(str(Path(image_dir, file))) as img:
+            width, height = img.size
+        return width, height
+
+    def set_image_data(self, img, height, width, ref):
+        """Sets the image height and width. Creates the image object.
+
+        Args:
+            img (object): An iiif-prezi Image object.
+            height (int): Pixel height of the image.
+            width (int): Pixel width of the image.
+            ref (string): Reference identifier for the file, including page in filename.
+
+        Returns:
+            img (object): A iiif_prezi image object with data.
+        """
+        img.height = height
+        img.width = width
+        img.format = "image/jpeg"
+        img.service = self.set_service(ref)
+        return img
+
+    def set_thumbnail(self, identifier):
+        """Creates a IIIF-compatible thumbnail.
+
+        Args:
+            identifier (str): A string identifier to use as the thumbnail id.
+        Returns:
+            thumbnail (object): An iiif_prezi Image object.
+        """
+        thumbnail = self.fac.image(
+            ident="/{}/square/{},/0/default.jpg".format(identifier, THUMBNAIL_WIDTH))
+        self.set_image_data(
+            thumbnail,
+            THUMBNAIL_HEIGHT,
+            THUMBNAIL_WIDTH,
+            identifier)
+        return thumbnail
+
+    def set_service(self, identifier):
+        return self.fac.service(
+            ident="{}{}".format(self.resource_url, identifier),
+            context="http://iiif.io/api/image/3/context.json",
+            profile="http://iiif.io/api/image/3/level2.json")
 
 
 class AWSUpload:
