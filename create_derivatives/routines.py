@@ -1,6 +1,6 @@
 import math
 import subprocess
-from pathlib import Path, PurePath
+from pathlib import Path
 
 import bagit
 import shortuuid
@@ -69,8 +69,8 @@ class JP2Maker:
     """Creates JP2000 derivatives from TIFFs.
 
     Creates JP2 directory in bag's data directory and JP2 derivatives.
-    Includes logic to target TIFF files in the service directory, or in the data directory if the service
-    directory is empty or does not exist.
+    TIFFs to be converted are targeted in the service directory. If the service directory is empty or
+    does not exist, target TIFFs at the root of the data directory.
 
     Returns:
         A tuple containing human-readable message along with list of bag identifiers.
@@ -86,7 +86,7 @@ class JP2Maker:
             else:
                 tiff_files_dir = str(Path(bag.bag_path, "data"))
             tiff_files = matching_files(tiff_files_dir, prepend=True)
-            self.jp2_path = self.create_jp2(bag, tiff_files)
+            self.jp2_list = self.create_jp2
             bag.process_status = Bag.JPG2000
             bag.save()
             bags_with_jp2s.append(bag.bag_identifier)
@@ -96,6 +96,7 @@ class JP2Maker:
     def calculate_layers(self, file):
         """Calculates the number of layers based on pixel dimensions.
         For TIFF files, image tag 256 is the width, and 257 is the height.
+
         Args:
             file (str): filename of a TIFF image file.
         Returns:
@@ -110,27 +111,37 @@ class JP2Maker:
 
     def get_page_number(self, file):
         """Parses a page number from a filename.
+
         Presumes that:
             The page number is preceded by an underscore
             The page number is  immediately followed by either by `_m`, `_me` or `_se`,
             or the file extension.
-        """
-        filename, _ = PurePath(PurePath(file).name).suffix
-        if "_se" in filename:
-            trimmed = filename.split("_se")[0]
-        elif "_m" in filename:
-            trimmed = filename.split("_m")[0]
-        else:
-            trimmed = filename
-        return trimmed.split("_")[-1]
 
-    def create_jp2(self, bag, tiff_files,):
+        Args:
+            file (str): filename of a TIFF image file.
+        Returns:
+            page number from the filename
+        """
+
+        filename, _ = Path(file).stem
+        if "_se" in filename:
+            filename_trimmed = filename.split("_se")[0]
+        elif "_m" in filename:
+            filename_trimmed = filename.split("_m")[0]
+        else:
+            filename_trimmed = filename
+        return filename_trimmed.split("_")[-1]
+
+    def create_jp2(self, bag, tiff_files):
         """Creates JPEG2000 files from TIFF files.
         The default options for conversion below are:
         - Compression ration of `1.5`
         - Precinct size: `[256,256]` for first two layers and then `[128,128]` for all others
         - Code block size of `[64,64]`
         - Progression order of `RPCL`
+
+        Returns:
+            jp2_list: A tuple of JPG2000 paths including their page numbers
         """
 
         default_options = ["-r", "1.5",
@@ -140,7 +151,7 @@ class JP2Maker:
         jp2_dir = Path(bag.bag_path, "data", "JP2")
         if not jp2_dir.is_dir():
             jp2_dir.mkdir()
-        # I feel like this is wrong. It doesn't make sense to use a for loop here, does it?
+        jp2_list = []
         for file in tiff_files:
             jp2_path = "{}.jp2".format(Path(jp2_dir, self.get_page_number(file)))
             layers = self.calculate_layers(file)
@@ -150,7 +161,8 @@ class JP2Maker:
                    "-n", str(layers),
                    "-SOP"] + default_options
             subprocess.run(cmd, check=True)
-            return jp2_path
+            jp2_list.append(jp2_path)
+        return jp2_list
 
 
 class PDFMaker:
