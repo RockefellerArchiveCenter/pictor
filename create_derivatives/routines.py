@@ -238,11 +238,11 @@ class ManifestMaker:
             thumbnail (object): An iiif_prezi Image object.
         """
         thumbnail = self.fac.image(
-            ident="/{}/square/{},/0/default.jpg".format(identifier, THUMBNAIL_WIDTH))
+            ident="/{}/square/{},/0/default.jpg".format(identifier, self.THUMBNAIL_WIDTH))
         self.set_image_data(
             thumbnail,
-            THUMBNAIL_HEIGHT,
-            THUMBNAIL_WIDTH,
+            self.THUMBNAIL_HEIGHT,
+            self.THUMBNAIL_WIDTH,
             identifier)
         return thumbnail
 
