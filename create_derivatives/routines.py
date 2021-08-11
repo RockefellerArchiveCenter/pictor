@@ -1,3 +1,4 @@
+import json
 import subprocess
 from pathlib import Path
 from shutil import rmtree
@@ -134,6 +135,8 @@ class PDFMaker:
 class ManifestMaker:
 
     def __init__(self):
+        self.THUMBNAIL_HEIGHT = 200
+        self.THUMBNAIL_WIDTH = 200
         self.server_url = settings.IMAGESERVER
         self.resource_url = "{}/iiif/3/".format(self.server_url)
         self.fac = ManifestFactory()
@@ -150,6 +153,10 @@ class ManifestMaker:
             self.manifest_dir = str(Path(bag.bag_path, "data", "manifests"))
             self.fac.set_base_prezi_dir(str(self.manifest_dir))
             self.create_manifest(jp2_files, str(Path(bag.bag_path, "data", "JP2"), self.bag_identifier, bag.as_data))
+            bag.process_status = Bag.MANIFESTS_CREATED
+            bag.save()
+            bags_with_manifests.append(bag.bag_identifier)
+        return "Manifests successfully created", bags_with_manifests
 
     def create_manifest(self, files, image_dir, identifier,
                         obj_data):
