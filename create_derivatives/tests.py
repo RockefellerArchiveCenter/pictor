@@ -4,6 +4,8 @@ from unittest.mock import patch
 
 from django.test import TestCase
 from django.urls import reverse
+from iiif_prezi.factory import ManifestFactory
+from iiif_prezi_upgrader import Upgrader
 from pictor import settings
 from rest_framework.test import APIRequestFactory
 
