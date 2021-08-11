@@ -69,16 +69,28 @@ class JP2Maker:
     """Creates JP2000 derivatives from TIFFs.
 
     Creates JP2 directory in bag's data directory and JP2 derivatives.
-    TIFFs to be converted are targeted in the service directory. If the service directory is empty or
-    does not exist, target TIFFs at the root of the data directory.
 
     Returns:
         A tuple containing human-readable message along with list of bag identifiers.
         Exceptions are raised for errors along the way.
     """
 
-    def run(self):
+    def run(self, bag):
         bags_with_jp2s = []
+        self.jp2_list = self.create_jp2
+        bag.process_status = Bag.JPG2000
+        bag.save()
+        bags_with_jp2s.append(bag.bag_identifier)
+        msg = "JPG2000s created." if len(bags_with_jp2s) else "No TIFF files ready for JP2 creation."
+        return msg, bags_with_jp2s
+
+    def define_target_dir(self, bag):
+        """Get a list of TIFF files from the target directory to convert to JP2000
+
+        TIFFs to be converted are targeted in the service directory. If the service directory is empty or
+        does not exist, target TIFFs at the root of the data directory.
+        """
+
         for bag in Bag.objects.filter(process_status=Bag.PREPARED):
             service_dir = Path(bag.bag_path, "data", "service")
             if service_dir.is_dir() and len(service_dir):
@@ -86,12 +98,7 @@ class JP2Maker:
             else:
                 tiff_files_dir = str(Path(bag.bag_path, "data"))
             tiff_files = matching_files(tiff_files_dir, prepend=True)
-            self.jp2_list = self.create_jp2
-            bag.process_status = Bag.JPG2000
-            bag.save()
-            bags_with_jp2s.append(bag.bag_identifier)
-        msg = "JPG2000s created." if len(bags_with_jp2s) else "No TIFF files ready for JP2 creation."
-        return msg, bags_with_jp2s
+            return tiff_files
 
     def calculate_layers(self, file):
         """Calculates the number of layers based on pixel dimensions.
@@ -132,7 +139,7 @@ class JP2Maker:
             filename_trimmed = filename
         return filename_trimmed.split("_")[-1]
 
-    def create_jp2(self, bag, tiff_files):
+    def create_jp2(self, bag):
         """Creates JPEG2000 files from TIFF files.
         The default options for conversion below are:
         - Compression ration of `1.5`
@@ -152,7 +159,7 @@ class JP2Maker:
         if not jp2_dir.is_dir():
             jp2_dir.mkdir()
         jp2_list = []
-        for file in tiff_files:
+        for file in self.define_target_dir(bag):
             jp2_path = "{}.jp2".format(Path(jp2_dir, self.get_page_number(file)))
             layers = self.calculate_layers(file)
             cmd = ["/usr/local/bin/opj_compress",
