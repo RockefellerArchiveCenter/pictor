@@ -134,7 +134,7 @@ class PDFMaker:
 class ManifestMaker:
 
     def __init__(self):
-        self.server_url = *settings.IMAGESERVER
+        self.server_url = settings.IMAGESERVER
         self.resource_url = "{}/iiif/3/".format(self.server_url)
         self.fac = ManifestFactory()
         self.fac.set_base_prezi_uri("{}/manifests/".format(self.server_url))

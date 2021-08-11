@@ -38,6 +38,4 @@ AWS = (
 )
 
 # baseurl
-IMAGESERVER = (
-  "https://iiif.rockarch.org"
-)
+IMAGESERVER = "https://iiif.rockarch.org"
