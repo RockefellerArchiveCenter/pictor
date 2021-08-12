@@ -9,7 +9,9 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
-from .routines import AWSUpload, BagPreparer, JP2Maker, PDFMaker
+
+from .routines import AWSUpload, BagPreparer, CleanupRoutine, JP2Maker, PDFMaker
+
 
 
 class ViewTestCase(TestCase):
@@ -238,3 +240,36 @@ class AWSUploadTestCase(TestCase):
         for bag in Bag.objects.all().filter(bag_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
         self.assertEqual(mock_upload_files.call_count, 3)
+
+
+class CleanupRoutineTestCase(TestCase):
+    def setUp(self):
+        tmp_path = Path(settings.TMP_DIR)
+        if tmp_path.exists():
+            shutil.rmtree(settings.TMP_DIR)
+        tmp_path.mkdir(parents=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        self.set_up_bag("aws_upload_bag", self.bag_id)
+
+    def set_up_bag(self, fixture_directory, bag):
+        """Adds an uncompressed bag fixture to the temp directory and database"""
+        bag_path = str(Path(settings.TMP_DIR, bag))
+        if not Path(bag_path).exists():
+            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            Bag.objects.create(
+                bag_identifier="sdfjldskj",
+                bag_path=bag_path,
+                origin="digitization",
+                as_data="sdjfkldsjf",
+                dimes_identifier=bag,
+                process_status=Bag.UPLOADED)
+
+    def test_run(self):
+        msg, object_list = CleanupRoutine().run()
+        self.assertEqual(len(list(Path(settings.TMP_DIR).glob('*'))), 0)
+        self.assertEqual(msg, "Bags successfully cleaned up.")
+        self.assertTrue(isinstance(object_list, list))
+        self.assertEqual(len(object_list), 1)
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
