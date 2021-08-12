@@ -1,3 +1,4 @@
+import random
 import shutil
 from pathlib import Path
 from unittest.mock import patch
@@ -197,6 +198,48 @@ class PDFMakerTestCase(TestCase):
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
 
+class ManifestMakerTestCase(TestCase):
+    fixtures = ["manifests.json"]
+
+    def setUp(self):
+        tmp_path = Path(settings.TMP_DIR)
+        if not tmp_path.exists():
+            tmp_path.mkdir(parents=True)
+        self.bag_path = Path(settings.TMP_DIR, "3aai9usY3AZzCSFkB3RSQ8")
+        self.derivative_dir = Path(settings.TMP_DIR, "JP2")
+        self.manifest_dir = Path(settings.TMP_DIR, "MANIFEST")
+        if not self.bag_path.exists():
+            shutil.copytree(Path("create_derivatives", "fixtures", "manifest_generation_bag", "3aai9usY3AZzCSFkB3RSQ8"), self.bag_path)
+        for p in [self.derivative_dir, self.manifest_dir]:
+            if not p.exists():
+                p.mkdir(parents=True)
+        for f in Path("create_derivatives", "fixtures", "jp2").iterdir():
+            shutil.copy(f, self.derivative_dir)
+
+    def test_run(self):
+        routine = ManifestMaker()
+        for bag in Bag.objects.filter(process_status=Bag.PDF):
+            msg, object_list = routine.run()
+            self.assertEqual(msg, "Manifests successfully created.")
+            self.assertTrue(isinstance(object_list, list))
+            self.assertEqual(len(object_list), 1)
+            for bag in Bag.objects.all().filter(bag_identifier="asdfjklmn"):
+                self.assertEqual(bag.process_status, Bag.MANIFESTS_CREATED)
+
+    def test_create_manifest(self):
+        """Ensures a correctly-named manifest is created."""
+        uuid = random_string(9)
+        copy_sample_files(self.derivative_dir, uuid, 2, "jp2")
+        ManifestMaker().create_manifest(
+            matching_files(str(self.derivative_dir), prefix=uuid), self.manifest_dir,
+            self.derivative_dir, uuid,
+            {"title": random_string(), "dates": random_string()})
+        manifests = [str(f) for f in Path(self.manifest_dir).iterdir()]
+        assert len(manifests) == 1
+        assert Path(self.manifest_dir, "{}.json".format(uuid)).is_file()
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
 
 class ManifestMakerTestCase(TestCase):
     fixtures = ["manifests.json"]
