@@ -9,9 +9,8 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
-
-from .routines import AWSUpload, BagPreparer, CleanupRoutine, JP2Maker, PDFMaker
-
+from .routines import (AWSUpload, BagPreparer, CleanupRoutine, JP2Maker,
+                       PDFMaker)
 
 
 class ViewTestCase(TestCase):
