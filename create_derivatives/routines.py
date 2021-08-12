@@ -165,6 +165,7 @@ class ManifestMaker:
 
         Args:
             files (list): Files to iterate over
+            manifest_dir (str): Path to directory to write manifests to.
             image_dir (str): Path to directory containing derivative image files.
             identifier (str): A unique identifier.
             obj_data (dict): Data about the archival object.
