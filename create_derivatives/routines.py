@@ -148,17 +148,17 @@ class ManifestMaker:
     def run(self):
         bags_with_manifests = []
         for bag in Bag.objects.filter(process_status=Bag.PDF):
-            self.bag_identifier = bag.dimes_identifier
-            jp2_files = matching_files(str(Path(bag.bag_path, "data", "JP2")), prefix=self.bag_identifier)
-            self.manifest_dir = str(Path(bag.bag_path, "data", "manifests"))
-            self.fac.set_base_prezi_dir(str(self.manifest_dir))
-            self.create_manifest(jp2_files, str(Path(bag.bag_path, "data", "JP2"), self.bag_identifier, bag.as_data))
+            jp2_files = sorted([str(f) for f in matching_files(str(Path(bag.bag_path, "data", "JP2")))])
+            manifest_dir = str(Path(bag.bag_path, "data", "MANIFEST"))
+            self.fac.set_base_prezi_dir(str(manifest_dir))
+            self.create_manifest(jp2_files, manifest_dir, str(Path(bag.bag_path, "data", "JP2")), bag.bag_identifier, bag.as_data)
             bag.process_status = Bag.MANIFESTS_CREATED
             bag.save()
             bags_with_manifests.append(bag.bag_identifier)
-        return "Manifests successfully created", bags_with_manifests
+        msg = "Manifests successfully created." if len(bags_with_manifests) else "No manifests created."
+        return msg, bags_with_manifests
 
-    def create_manifest(self, files, image_dir, identifier,
+    def create_manifest(self, files, manifest_dir, image_dir, identifier,
                         obj_data):
         """Method that runs the other methods to build a manifest file and populate
         it with information.
@@ -169,7 +169,7 @@ class ManifestMaker:
             identifier (str): A unique identifier.
             obj_data (dict): Data about the archival object.
         """
-        manifest_path = "{}.json".format(str(Path(self.manifest_dir, identifier)))
+        manifest_path = "{}.json".format(str(Path(manifest_dir, identifier)))
         page_number = 1
         manifest = self.fac.manifest(ident=identifier, label=obj_data["title"])
         cleaned_id = manifest.id[:-5]
@@ -181,8 +181,8 @@ class ManifestMaker:
             page_ref = Path(file).stem
             width, height = self.get_image_info(image_dir, file)
             canvas = sequence.canvas(
-                ident="{}/manifests/{}/canvas/{}".format(
-                    self.server_url, manifest.id, str("{0:03}".format(page_number))),
+                ident="{}/canvas/{}".format(
+                    manifest.id, str("{0:03}".format(page_number))),
                 label="Page {}".format(
                     str(page_number)))
             canvas.set_hw(height, width)
