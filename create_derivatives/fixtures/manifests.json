@@ -4,7 +4,7 @@
 		"pk": 8,
 		"fields": {
 			"bag_identifier": "sdfjldskj",
-			"bag_path": "/code/create_derivatives/fixtures/aws_upload_bag/3aai9usY3AZzCSFkB3RSQ8",
+			"bag_path": "/code/create_derivatives/fixtures/manifest_generation_bag/3aai9usY3AZzCSFkB3RSQ8",
 			"type": null,
 			"origin": "digitization",
 			"process_status": 3,
