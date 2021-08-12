@@ -22,7 +22,7 @@ def copy_sample_files(directory, identifier, page_count, suffix):
                 Path(directory, f),
                 Path(target))
         Path(directory, f).unlink()
-        
+
 
 def random_string(length=10):
     """Generates random ascii lowercase letters."""

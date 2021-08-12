@@ -241,7 +241,7 @@ class ManifestMakerTestCase(TestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
-        
+
 
 class AWSUploadTestCase(TestCase):
     fixtures = ["uploaded.json"]
