@@ -1,4 +1,3 @@
-import random
 import shutil
 from pathlib import Path
 from unittest.mock import patch
@@ -10,7 +9,8 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
-from .routines import AWSUpload, BagPreparer, CleanupRoutine, ManifestMaker, PDFMaker
+from .routines import (AWSUpload, BagPreparer, CleanupRoutine, ManifestMaker,
+                       PDFMaker)
 from .test_helpers import copy_sample_files, random_string
 
 
@@ -198,6 +198,7 @@ class PDFMakerTestCase(TestCase):
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
 
+
 class ManifestMakerTestCase(TestCase):
     fixtures = ["manifests.json"]
 
@@ -240,6 +241,7 @@ class ManifestMakerTestCase(TestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
+        
 
 class AWSUploadTestCase(TestCase):
     fixtures = ["uploaded.json"]
