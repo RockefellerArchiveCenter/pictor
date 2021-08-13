@@ -8,7 +8,7 @@ from django.urls import reverse
 from pictor import settings
 from rest_framework.test import APIRequestFactory
 
-from .helpers import check_dir_exists, matching_files
+from .helpers import matching_files
 from .models import Bag
 from .routines import AWSUpload, BagPreparer, Cleanup, ManifestMaker, PDFMaker
 from .test_helpers import copy_sample_files, random_string
@@ -68,47 +68,6 @@ class ViewTestCase(TestCase):
                 error_response.json(),
                 {'detail': exception_text, 'objects': [exception_id], 'count': 1},
                 "Unexpected error response")
-
-
-class HelpersTestCase(TestCase):
-
-    def test_check_dir_exists(self):
-        """Asserts check_dir_exists handles found and missing directories."""
-        test_paths = ["/foo", "/bar", "/baz"]
-        for p in test_paths:
-            path = Path(p)
-            path.mkdir(exist_ok=True)
-            self.assertTrue(check_dir_exists(p), "Function did not return True")
-            path.rmdir()
-            with self.assertRaises(Exception) as context:
-                check_dir_exists(p)
-            self.assertTrue(
-                p in str(context.exception), "Directory was not found in exception")
-
-    def test_matching_files(self):
-        MATCHING_FIXTURE_FILEPATH = Path("create_derivatives", "fixtures", "matching")
-        MATCHING_SOURCE_DIR = Path("matching").absolute()
-        if MATCHING_SOURCE_DIR.is_dir():
-            shutil.rmtree(MATCHING_SOURCE_DIR)
-        shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
-        matching = matching_files(MATCHING_SOURCE_DIR)
-        assert len(matching) == 4
-        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
-        assert len(matching) == 2
-        matching = matching_files(MATCHING_SOURCE_DIR, prefix="foo")
-        assert len(matching) == 0
-        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
-        assert len(matching) == 2
-        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".jp2")
-        assert len(matching) == 1
-        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".tif")
-        assert len(matching) == 1
-        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".pdf")
-        assert len(matching) == 0
-        matching = matching_files(MATCHING_SOURCE_DIR, prepend=True)
-        path = str(matching[0])
-        assert path.startswith(str(MATCHING_SOURCE_DIR))
-        shutil.rmtree(MATCHING_SOURCE_DIR)
 
 
 class BagPreparerTestCase(TestCase):
