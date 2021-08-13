@@ -170,7 +170,7 @@ class ManifestMaker:
         """
         manifest_path = "{}.json".format(str(Path(manifest_dir, identifier)))
         page_number = 1
-        manifest = self.fac.manifest(ident="{}/manifests/{}".format(self.server_url, identifier), label=obj_data["title"])
+        manifest = self.fac.manifest(ident="{}{}".format(self.fac.prezi_base, identifier), label=obj_data["title"])
         manifest.set_metadata({"Date": obj_data["dates"]})
         manifest.thumbnail = self.set_thumbnail(Path(files[0]).stem)
         sequence = manifest.sequence(ident=identifier)
