@@ -219,13 +219,12 @@ class ManifestMakerTestCase(TestCase):
 
     def test_run(self):
         routine = ManifestMaker()
-        for bag in Bag.objects.filter(process_status=Bag.PDF):
-            msg, object_list = routine.run()
-            self.assertEqual(msg, "Manifests successfully created.")
-            self.assertTrue(isinstance(object_list, list))
-            self.assertEqual(len(object_list), 1)
-            for bag in Bag.objects.all().filter(bag_identifier="asdfjklmn"):
-                self.assertEqual(bag.process_status, Bag.MANIFESTS_CREATED)
+        msg, object_list = routine.run()
+        self.assertEqual(msg, "Manifests successfully created.")
+        self.assertTrue(isinstance(object_list, list))
+        self.assertEqual(len(object_list), 1)
+        for bag in Bag.objects.all().filter(dimes_identifier="asdfjklmn"):
+            self.assertEqual(bag.process_status, Bag.MANIFESTS_CREATED)
 
     def test_create_manifest(self):
         """Ensures a correctly-named manifest is created."""
@@ -259,7 +258,7 @@ class AWSUploadTestCase(TestCase):
         self.assertEqual(msg, "Bags successfully uploaded")
         self.assertTrue(isinstance(object_list, list))
         self.assertEqual(len(object_list), 1)
-        for bag in Bag.objects.all().filter(bag_identifier="sdfjldskj"):
+        for bag in Bag.objects.all().filter(dimes_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
         self.assertEqual(mock_upload_files.call_count, 3)
 

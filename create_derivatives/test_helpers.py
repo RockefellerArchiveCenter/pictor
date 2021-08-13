@@ -21,7 +21,7 @@ def copy_sample_files(directory, identifier, page_count, suffix):
             shutil.copyfile(
                 Path(directory, f),
                 Path(target))
-        Path(directory, f).unlink()
+        Path(target, f).unlink()
 
 
 def random_string(length=10):

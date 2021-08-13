@@ -3,12 +3,13 @@
 		"model": "create_derivatives.bag",
 		"pk": 8,
 		"fields": {
-			"bag_identifier": "sdfjldskj",
+			"bag_identifier": "asdfjklmn",
 			"bag_path": "/code/create_derivatives/fixtures/manifest_generation_bag/3aai9usY3AZzCSFkB3RSQ8",
 			"type": null,
 			"origin": "digitization",
 			"process_status": 3,
 			"as_data": {"uri": "foobar", "title": "baz", "dates": "January 1, 2020"},
+      "dimes_identifier": "asdfjklmn",
 			"created": "2021-07-26T20:02:22.535Z",
 			"last_modified": "2021-07-26T20:02:22.535Z"
 		}

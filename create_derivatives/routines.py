@@ -135,14 +135,12 @@ class PDFMaker:
 class ManifestMaker:
 
     def __init__(self):
-        self.THUMBNAIL_HEIGHT = 200
-        self.THUMBNAIL_WIDTH = 200
-        self.server_url = settings.IMAGESERVER
+        self.server_url = settings.IMAGESERVER_URL
         self.resource_url = "{}/iiif/3/".format(self.server_url)
         self.fac = ManifestFactory()
         self.fac.set_base_prezi_uri("{}/manifests/".format(self.server_url))
         self.fac.set_base_image_uri(self.resource_url)
-        self.fac.set_debug("error")
+        self.fac.set_debug(settings.PREZI_DEBUG)
         self.upgrader = Upgrader()
 
     def run(self):
@@ -150,11 +148,11 @@ class ManifestMaker:
         for bag in Bag.objects.filter(process_status=Bag.PDF):
             jp2_files = sorted([str(f) for f in matching_files(str(Path(bag.bag_path, "data", "JP2")))])
             manifest_dir = str(Path(bag.bag_path, "data", "MANIFEST"))
-            self.fac.set_base_prezi_dir(str(manifest_dir))
-            self.create_manifest(jp2_files, manifest_dir, str(Path(bag.bag_path, "data", "JP2")), bag.bag_identifier, bag.as_data)
+            self.fac.set_base_prezi_dir(manifest_dir)
+            self.create_manifest(jp2_files, manifest_dir, str(Path(bag.bag_path, "data", "JP2")), bag.dimes_identifier, bag.as_data)
             bag.process_status = Bag.MANIFESTS_CREATED
             bag.save()
-            bags_with_manifests.append(bag.bag_identifier)
+            bags_with_manifests.append(bag.dimes_identifier)
         msg = "Manifests successfully created." if len(bags_with_manifests) else "No manifests created."
         return msg, bags_with_manifests
 
@@ -239,11 +237,11 @@ class ManifestMaker:
             thumbnail (object): An iiif_prezi Image object.
         """
         thumbnail = self.fac.image(
-            ident="/{}/square/{},/0/default.jpg".format(identifier, self.THUMBNAIL_WIDTH))
+            ident="/{}/square/{},/0/default.jpg".format(identifier, 200))
         self.set_image_data(
             thumbnail,
-            self.THUMBNAIL_HEIGHT,
-            self.THUMBNAIL_WIDTH,
+            200,
+            200,
             identifier)
         return thumbnail
 
@@ -270,11 +268,11 @@ class AWSUpload:
                     (jp2_dir, "images"),
                     (manifest_dir, "manifests")]:
                 uploads = matching_files(
-                    str(src_dir), prefix=bag.bag_identifier, prepend=True)
+                    str(src_dir), prefix=bag.dimes_identifier, prepend=True)
                 self.aws_client.upload_files(uploads, target_dir, replace)
             bag.process_status = Bag.UPLOADED
             bag.save()
-            uploaded_bags.append(bag.bag_identifier)
+            uploaded_bags.append(bag.dimes_identifier)
         return "Bags successfully uploaded", uploaded_bags
 
 
