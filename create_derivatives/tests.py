@@ -155,7 +155,7 @@ class JP2MakerTestCase(TestCase):
         self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
         self.set_up_bag("unpacked_bag_with_tiff", self.bag_id)
 
-    def set_up_bag(sefl, fixture_directory, bag):
+    def set_up_bag(self, fixture_directory, bag):
         """Adds an uncompressed bag fixture to the temp directory and database"""
         bag_path = str(Path(settings.TMP_DIR, bag))
         if not Path(bag_path).exists():
@@ -174,12 +174,11 @@ class JP2MakerTestCase(TestCase):
         Tests that the method updates the bag's process_status and produces the
         desired results message.
         """
-        jp2s = JP2Maker().run()
+        msg, jp2s = JP2Maker().run()
         bag_path = Path(settings.TMP_DIR, self.bag_id)
         bag = Bag.objects.get(bag_path=bag_path)
-        self.assertTrue(Path(bag_path, "data", "JP2", "{}.jp2".format(self.bag_id)).is_file())
         self.assertEqual(bag.process_status, Bag.JPG2000)
-        self.assertEqual(jp2s[0], "JP2s created.")
+        self.assertEqual(msg, "JPG2000s created.")
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)

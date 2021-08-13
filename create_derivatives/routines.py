@@ -122,8 +122,7 @@ class JP2Maker:
         Returns:
             page number from the filename
         """
-
-        filename, _ = Path(file).stem
+        filename = Path(file).stem
         if "_se" in filename:
             filename_trimmed = filename.split("_se")[0]
         elif "_m" in filename:
@@ -163,7 +162,6 @@ class JP2Maker:
                    "-SOP"] + default_options
             subprocess.run(cmd, check=True)
             jp2_list.append(jp2_path)
-            print(jp2_list)
         return jp2_list
 
 
