@@ -153,7 +153,8 @@ class JP2Maker:
         jp2_list = []
         tiff_files = matching_files(tiff_files_dir, prepend=True)
         for file in tiff_files:
-            jp2_path = "{}.jp2".format(Path(jp2_dir, self.get_page_number(file)))
+            page_number = self.get_page_number(file)
+            jp2_path = "{}.jp2".format(Path(jp2_dir, bag.dimes_identifier + '_' + page_number))
             layers = self.calculate_layers(file)
             cmd = ["/usr/local/bin/opj_compress",
                    "-i", file,
