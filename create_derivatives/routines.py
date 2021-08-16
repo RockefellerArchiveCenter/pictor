@@ -175,7 +175,7 @@ class ManifestMaker:
         manifest.thumbnail = self.set_thumbnail(Path(files[0]).stem)
         sequence = manifest.sequence(ident=identifier)
         for file in files:
-            page_ref = Path(file).stem
+            filename = Path(file).stem
             width, height = self.get_image_info(image_dir, file)
             canvas = sequence.canvas(
                 ident="{}/canvas/{}".format(
@@ -183,11 +183,11 @@ class ManifestMaker:
                 label="Page {}".format(
                     str(page_number)))
             canvas.set_hw(height, width)
-            annotation = canvas.annotation(ident=page_ref)
+            annotation = canvas.annotation(ident=filename)
             img = annotation.image(
-                ident="/{}/full/max/0/default.jpg".format(page_ref))
-            self.set_image_data(img, height, width, page_ref)
-            canvas.thumbnail = self.set_thumbnail(page_ref)
+                ident="/{}/full/max/0/default.jpg".format(filename))
+            self.set_image_data(img, height, width, filename)
+            canvas.thumbnail = self.set_thumbnail(filename)
             page_number += 1
         v2_json = manifest.toJSON(top=True)
         v3_json = self.upgrader.process_resource(v2_json, top=True)
@@ -205,8 +205,7 @@ class ManifestMaker:
             height (int): Pixel height of the image file
         """
         with Image.open(str(Path(image_dir, file))) as img:
-            width, height = img.size
-        return width, height
+            return img.size
 
     def set_image_data(self, img, height, width, ref):
         """Sets the image height and width. Creates the image object.
