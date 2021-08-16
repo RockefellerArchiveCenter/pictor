@@ -21,14 +21,14 @@
     "thumbnail": [
         {
             "id": {
-                "@id": "http://iiif.rockarch.org/iiif/3/asdfjklmn/square/200,/0/default.jpg",
+                "@id": "https://iiif.rockarch.org/iiif/3/asdfjklmn/square/200,/0/default.jpg",
                 "@type": "dctypes:Image",
                 "format": "image/jpeg",
                 "height": 200,
                 "width": 200,
                 "service": {
                     "@context": "http://iiif.io/api/image/3/context.json",
-                    "@id": "http://iiif.rockarch.org/iiif/3/asdfjklmn",
+                    "@id": "https://iiif.rockarch.org/iiif/3/asdfjklmn",
                     "profile": "http://iiif.io/api/image/3/level2.json"
                 }
             },
@@ -36,21 +36,28 @@
         }
     ],
     "type": "Manifest",
+<<<<<<< HEAD:create_derivatives/fixtures/manifest_generation_bag/3aai9usY3AZzCSFkB3RSQ8/data/MANIFEST/asdfjklmn.json
     "id": "http://iiif.rockarch.org/manifests/asdfjklmn",
     "items": [
         {
             "@id": "http://iiif.rockarch.org/manifests/asdfjklmn/canvas/001",
+=======
+    "id": "https://iiif.rockarch.org/manifests/sdfjldskj",
+    "items": [
+        {
+            "@id": "https://iiif.rockarch.org/manifests/sdfjldskj/canvas/001",
+>>>>>>> add db fixtures:create_derivatives/fixtures/manifest_generation_bag/3aai9usY3AZzCSFkB3RSQ8/data/MANIFEST/sdfjldskj.json
             "@type": "sc:Canvas",
             "label": "Page 1",
             "thumbnail": {
-                "@id": "http://iiif.rockarch.org/iiif/3/asdfjklmn/square/200,/0/default.jpg",
+                "@id": "https://iiif.rockarch.org/iiif/3/asdfjklmn/square/200,/0/default.jpg",
                 "@type": "dctypes:Image",
                 "format": "image/jpeg",
                 "height": 200,
                 "width": 200,
                 "service": {
                     "@context": "http://iiif.io/api/image/3/context.json",
-                    "@id": "http://iiif.rockarch.org/iiif/3/asdfjklmn",
+                    "@id": "https://iiif.rockarch.org/iiif/3/asdfjklmn",
                     "profile": "http://iiif.io/api/image/3/level2.json"
                 }
             },
@@ -58,22 +65,26 @@
             "width": 3503,
             "images": [
                 {
-                    "@id": "http://iiif.rockarch.org/manifests/annotation/asdfjklmn.json",
+                    "@id": "https://iiif.rockarch.org/manifests/annotation/asdfjklmn.json",
                     "@type": "oa:Annotation",
                     "motivation": "sc:painting",
                     "resource": {
-                        "@id": "http://iiif.rockarch.org/iiif/3/asdfjklmn/full/max/0/default.jpg",
+                        "@id": "https://iiif.rockarch.org/iiif/3/asdfjklmn/full/max/0/default.jpg",
                         "@type": "dctypes:Image",
                         "format": "image/jpeg",
                         "height": 4478,
                         "width": 3503,
                         "service": {
                             "@context": "http://iiif.io/api/image/3/context.json",
-                            "@id": "http://iiif.rockarch.org/iiif/3/asdfjklmn",
+                            "@id": "https://iiif.rockarch.org/iiif/3/asdfjklmn",
                             "profile": "http://iiif.io/api/image/3/level2.json"
                         }
                     },
+<<<<<<< HEAD:create_derivatives/fixtures/manifest_generation_bag/3aai9usY3AZzCSFkB3RSQ8/data/MANIFEST/asdfjklmn.json
                     "on": "http://iiif.rockarch.org/manifests/asdfjklmn/canvas/001"
+=======
+                    "on": "https://iiif.rockarch.org/manifests/sdfjldskj/canvas/001"
+>>>>>>> add db fixtures:create_derivatives/fixtures/manifest_generation_bag/3aai9usY3AZzCSFkB3RSQ8/data/MANIFEST/sdfjldskj.json
                 }
             ]
         }

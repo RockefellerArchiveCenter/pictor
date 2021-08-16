@@ -4,11 +4,11 @@
 		"pk": 1,
 		"fields": {
 			"bag_identifier": "3aai9usY3AZzCSFkB3RSQ9",
-			"bag_path": "/code/create_derivatives/fixtures/aws_upload_bag/3aai9usY3AZzCSFkB3RSQ9",
-			"type": null,
+			"bag_path": "/pictor/tmp/3aai9usY3AZzCSFkB3RSQ9",
 			"origin": "digitization",
-			"process_status": 4,
-			"data": null,
+			"process_status": 2,
+			"as_data": "aljdsu9032n",
+			"dimes_identifier": "3aai9usY3AZzCSFkB3RSQ9",
 			"created": "2021-07-26T20:02:22.535Z",
 			"last_modified": "2021-07-26T20:02:22.535Z"
 		}
