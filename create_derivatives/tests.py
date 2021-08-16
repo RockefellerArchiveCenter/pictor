@@ -207,27 +207,24 @@ class ManifestMakerTestCase(TestCase):
         if not tmp_path.exists():
             tmp_path.mkdir(parents=True)
         self.bag_path = Path(settings.TMP_DIR, "3aai9usY3AZzCSFkB3RSQ8")
-        self.derivative_dir = Path(settings.TMP_DIR, "JP2")
-        self.manifest_dir = Path(settings.TMP_DIR, "MANIFEST")
+        self.derivative_dir = Path(self.bag_path, "data", "JP2")
+        self.manifest_dir = Path(self.bag_path, "data", "MANIFEST")
         if not self.bag_path.exists():
             shutil.copytree(Path("create_derivatives", "fixtures", "manifest_generation_bag", "3aai9usY3AZzCSFkB3RSQ8"), self.bag_path)
         for p in [self.derivative_dir, self.manifest_dir]:
             if not p.exists():
                 p.mkdir(parents=True)
-        for f in Path("create_derivatives", "fixtures", "jp2").iterdir():
-            shutil.copy(f, self.derivative_dir)
 
     def test_run(self):
         routine = ManifestMaker()
-        msg, object_list = routine.run()
-        self.assertEqual(msg, "Manifests successfully created.")
-        self.assertTrue(isinstance(object_list, list))
-        self.assertEqual(len(object_list), 1)
         for bag in Bag.objects.all().filter(dimes_identifier="asdfjklmn"):
-            self.assertEqual(bag.process_status, Bag.MANIFESTS_CREATED)
-            for manifest in Path(bag.bag_path, "data", "MANIFEST").iterdir():
-                if manifest.stem == bag.dimes_identifier:
-                    manifest.unlink()
+            bag.bag_path = self.bag_path
+            bag.save()
+            msg, object_list = routine.run()
+            self.assertEqual(msg, "Manifests successfully created.")
+            self.assertTrue(isinstance(object_list, list))
+            self.assertEqual(len(object_list), 1)
+            self.assertEqual(bag.process_status, bag.MANIFESTS_CREATED)
 
     def test_create_manifest(self):
         """Ensures a correctly-named manifest is created."""
