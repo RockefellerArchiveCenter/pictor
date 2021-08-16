@@ -146,10 +146,11 @@ class ManifestMaker:
     def run(self):
         bags_with_manifests = []
         for bag in Bag.objects.filter(process_status=Bag.PDF):
-            jp2_files = sorted([str(f) for f in matching_files(str(Path(bag.bag_path, "data", "JP2")))])
-            manifest_dir = str(Path(bag.bag_path, "data", "MANIFEST"))
-            self.fac.set_base_prezi_dir(manifest_dir)
-            self.create_manifest(jp2_files, manifest_dir, str(Path(bag.bag_path, "data", "JP2")), bag.dimes_identifier, bag.as_data)
+            jp2_path = Path(bag.bag_path, "data", "JP2")
+            jp2_files = sorted([f for f in matching_files(jp2_path)])
+            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+            self.fac.set_base_prezi_dir(str(manifest_dir))
+            self.create_manifest(jp2_files, manifest_dir, jp2_path, bag.dimes_identifier, bag.as_data)
             bag.process_status = Bag.MANIFESTS_CREATED
             bag.save()
             bags_with_manifests.append(bag.dimes_identifier)
@@ -168,14 +169,14 @@ class ManifestMaker:
             identifier (str): A unique identifier.
             obj_data (dict): Data about the archival object.
         """
-        manifest_path = str(Path(manifest_dir, "{}.json".format(identifier)))
+        manifest_path = Path(manifest_dir, "{}.json".format(identifier))
         page_number = 1
         manifest = self.fac.manifest(ident="{}{}".format(self.fac.prezi_base, identifier), label=obj_data["title"])
         manifest.set_metadata({"Date": obj_data["dates"]})
-        manifest.thumbnail = self.set_thumbnail(Path(files[0]).stem)
+        manifest.thumbnail = self.set_thumbnail(files[0].stem)
         sequence = manifest.sequence(ident=identifier)
         for file in files:
-            filename = Path(file).stem
+            filename = file.stem
             width, height = self.get_image_info(image_dir, file)
             canvas = sequence.canvas(
                 ident="{}/canvas/{}".format(
@@ -204,7 +205,7 @@ class ManifestMaker:
             width (int): Pixel width of the image file
             height (int): Pixel height of the image file
         """
-        with Image.open(str(Path(image_dir, file))) as img:
+        with Image.open(Path(image_dir, file)) as img:
             return img.size
 
     def set_image_data(self, img, height, width, ref):
