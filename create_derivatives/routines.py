@@ -83,9 +83,9 @@ class JP2Maker:
         for bag in Bag.objects.filter(process_status=Bag.PREPARED):
             service_dir = Path(bag.bag_path, "data", "service")
             if service_dir.is_dir() and len(service_dir):
-                tiff_files_dir = str(Path(bag.bag_path, "data", "service"))
+                tiff_files_dir = Path(bag.bag_path, "data", "service")
             else:
-                tiff_files_dir = str(Path(bag.bag_path, "data"))
+                tiff_files_dir = Path(bag.bag_path, "data")
             self.jp2_list = self.create_jp2(bag, tiff_files_dir)
             bag.process_status = Bag.JPG2000
             bag.save()
@@ -114,7 +114,7 @@ class JP2Maker:
 
         Presumes that:
             The page number is preceded by an underscore
-            The page number is  immediately followed by either by `_m`, `_me` or `_se`,
+            The page number is immediately followed by either by `_m`, `_me` or `_se`,
             or the file extension.
 
         Args:
@@ -133,11 +133,12 @@ class JP2Maker:
 
     def create_jp2(self, bag, tiff_files_dir):
         """Creates JPEG2000 files from TIFF files.
-        The default options for conversion below are:
-        - Compression ration of `1.5`
-        - Precinct size: `[256,256]` for first two layers and then `[128,128]` for all others
-        - Code block size of `[64,64]`
-        - Progression order of `RPCL`
+
+        Args:
+            -r(str): Compression ratio. Default is 1.5.
+            -c(str): Precinct size. Default is `[256,256]` for first two layers and `[128,128]` for others.
+            -b(str): Code block. Default size of `[64,64]`.
+            -p(str): Progression order. Default of 'RPCL`.
 
         Returns:
             jp2_list: A tuple of JPG2000 paths including their page numbers
@@ -151,10 +152,10 @@ class JP2Maker:
         if not jp2_dir.is_dir():
             jp2_dir.mkdir()
         jp2_list = []
-        tiff_files = matching_files(tiff_files_dir, prepend=True)
+        tiff_files = matching_files(str(tiff_files_dir), prepend=True)
         for file in tiff_files:
             page_number = self.get_page_number(file)
-            jp2_path = Path(jp2_dir, "{}.jp2".format(bag.dimes_identifier + '_' + page_number))
+            jp2_path = Path(jp2_dir, "{}_{}.jp2".format(bag.dimes_identifier, page_number))
             layers = self.calculate_layers(file)
             cmd = ["/usr/local/bin/opj_compress",
                    "-i", file,
