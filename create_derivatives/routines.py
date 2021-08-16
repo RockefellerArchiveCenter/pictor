@@ -168,7 +168,7 @@ class ManifestMaker:
             identifier (str): A unique identifier.
             obj_data (dict): Data about the archival object.
         """
-        manifest_path = "{}.json".format(str(Path(manifest_dir, identifier)))
+        manifest_path = str(Path(manifest_dir, "{}.json".format(identifier)))
         page_number = 1
         manifest = self.fac.manifest(ident="{}{}".format(self.fac.prezi_base, identifier), label=obj_data["title"])
         manifest.set_metadata({"Date": obj_data["dates"]})
