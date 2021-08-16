@@ -135,10 +135,10 @@ class PDFMaker:
 class ManifestMaker:
 
     def __init__(self):
-        self.server_url = settings.IMAGESERVER_URL
-        self.resource_url = "{}/iiif/3/".format(self.server_url)
+        server_url = settings.IMAGESERVER_URL
+        self.resource_url = "{}/iiif/3/".format(server_url)
         self.fac = ManifestFactory()
-        self.fac.set_base_prezi_uri("{}/manifests/".format(self.server_url))
+        self.fac.set_base_prezi_uri("{}/manifests/".format(server_url))
         self.fac.set_base_image_uri(self.resource_url)
         self.fac.set_debug(settings.PREZI_DEBUG)
         self.upgrader = Upgrader()
@@ -233,12 +233,14 @@ class ManifestMaker:
         Returns:
             thumbnail (object): An iiif_prezi Image object.
         """
+        thumbnail_height = 200
+        thumbnail_width = 200
         thumbnail = self.fac.image(
-            ident="/{}/square/{},/0/default.jpg".format(identifier, 200))
+            ident="/{}/square/{},/0/default.jpg".format(identifier, thumbnail_width))
         self.set_image_data(
             thumbnail,
-            200,
-            200,
+            thumbnail_height,
+            thumbnail_width,
             identifier)
         return thumbnail
 
