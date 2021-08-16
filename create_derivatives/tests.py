@@ -225,7 +225,10 @@ class ManifestMakerTestCase(TestCase):
         self.assertEqual(len(object_list), 1)
         for bag in Bag.objects.all().filter(dimes_identifier="asdfjklmn"):
             self.assertEqual(bag.process_status, Bag.MANIFESTS_CREATED)
-            shutil.rmtree(Path(bag.bag_path, "data", "MANIFEST"))
+            manifests = [file for file in Path(bag.bag_path, "data", "MANIFEST").iterdir()]
+            for manifest in manifests:
+                if manifest.stem == bag.dimes_identifier:
+                    manifest.unlink()
 
     def test_create_manifest(self):
         """Ensures a correctly-named manifest is created."""
