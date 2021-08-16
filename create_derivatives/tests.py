@@ -10,17 +10,9 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import matching_files
 from .models import Bag
-from .routines import AWSUpload, BagPreparer, Cleanup, ManifestMaker, PDFMaker
-from .test_helpers import copy_sample_files, random_string
-
-
-def make_dir(directory_path, remove_first=False, parents=True):
-    """Makes a directory. If remove_first is set to true, removes directory if it exists; if set to false, does not make directory if it exists"""
-    path = Path(directory_path)
-    if remove_first:
-        shutil.rmtree(directory_path)
-    if not path.exists():
-        path.mkdir(parents=parents)
+from .routines import (AWSUpload, BagPreparer, CleanupRoutine, ManifestMaker,
+                       PDFMaker)
+from .test_helpers import copy_sample_files, make_dir, random_string
 
 
 class BagPreparerTestCase(TestCase):
@@ -212,13 +204,7 @@ class AWSUploadTestCase(TestCase):
         self.assertEqual(mock_upload_files.call_count, 3)
 
 
-<<<<<<< HEAD
 class CleanupTestCase(TestCase):
-=======
-class CleanupRoutineTestCase(TestCase):
-    fixtures = ["cleanup.json"]
-
->>>>>>> use db fixtures
     def setUp(self):
         make_dir(settings.TMP_DIR, remove_first=True)
         self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
