@@ -225,8 +225,7 @@ class ManifestMakerTestCase(TestCase):
         self.assertEqual(len(object_list), 1)
         for bag in Bag.objects.all().filter(dimes_identifier="asdfjklmn"):
             self.assertEqual(bag.process_status, Bag.MANIFESTS_CREATED)
-            manifests = [file for file in Path(bag.bag_path, "data", "MANIFEST").iterdir()]
-            for manifest in manifests:
+            for manifest in Path(bag.bag_path, "data", "MANIFEST").iterdir():
                 if manifest.stem == bag.dimes_identifier:
                     manifest.unlink()
 
