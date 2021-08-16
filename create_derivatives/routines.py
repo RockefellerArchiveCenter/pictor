@@ -178,9 +178,12 @@ class ManifestMaker:
         for file in files:
             filename = file.stem
             width, height = self.get_image_info(image_dir, file)
+            """Set the canvas ID, which starts the same as the manifest ID,
+            and then include page_number as the canvas ID.
+            """
             canvas = sequence.canvas(
                 ident="{}/canvas/{}".format(
-                    manifest.id, str("{0:03}".format(page_number))),
+                    manifest.id, str(page_number).zfill(3)),
                 label="Page {}".format(
                     str(page_number)))
             canvas.set_hw(height, width)
