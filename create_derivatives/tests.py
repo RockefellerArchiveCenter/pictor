@@ -214,13 +214,15 @@ class ManifestMakerTestCase(TestCase):
         for p in [self.derivative_dir, self.manifest_dir]:
             if not p.exists():
                 p.mkdir(parents=True)
-
-    def test_run(self):
-        routine = ManifestMaker()
         for bag in Bag.objects.all().filter(dimes_identifier="asdfjklmn"):
             bag.bag_path = self.bag_path
             bag.save()
+
+    def test_run(self):
+        for bag in Bag.objects.all().filter(process_status=3):
+            routine = ManifestMaker()
             msg, object_list = routine.run()
+            bag.refresh_from_db()
             self.assertEqual(msg, "Manifests successfully created.")
             self.assertTrue(isinstance(object_list, list))
             self.assertEqual(len(object_list), 1)
