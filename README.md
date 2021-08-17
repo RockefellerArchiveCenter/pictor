@@ -43,9 +43,22 @@ The first time the container is started, the example config file (`/pictor/confi
 
 Using this repo requires having [Docker](https://store.docker.com/search?type=edition&offering=community) installed.
 
-## Usage
+## Services
 pictor receives content from an external service. It expects TIFF files that are in bags, and which
-contain their ArchivesSpace RefID in the bag-info.txt file.
+contain their ArchivesSpace RefID in the bag-info.txt file. For an example of what pictor expects to receive, see the `fixtures/` directory.
+
+pictor has 6 services:
+1. Prepare Bag: unpacks bags and adds all necessary data to the object.
+2. Make JPG2000: creates JPG2000 derivatives from TIFF files.
+3. Make PDF: creates concatenated PDF file from JPG2000 derivatives.
+4. Make Manifest: creates a IIIF presentation manifest from JPG2000 files.
+5. AWS Upload: uploads bags with derivatives and Manifest to Amazon Web Services (AWS).
+6. Cleanup: removes bag files that have been processed.
+
+### Routes
+
+| Method | URL | Parameters | Response  | Behavior  |
+|--------|-----|---|---|---|
 
 ## License
 
