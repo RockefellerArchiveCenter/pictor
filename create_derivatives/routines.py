@@ -82,7 +82,7 @@ class JP2Maker:
         bags_with_jp2s = []
         for bag in Bag.objects.filter(process_status=Bag.PREPARED):
             service_dir = Path(bag.bag_path, "data", "service")
-            if service_dir.is_dir() and len(service_dir):
+            if service_dir.is_dir() and any(service_dir.iterdir()):
                 tiff_files_dir = Path(bag.bag_path, "data", "service")
             else:
                 tiff_files_dir = Path(bag.bag_path, "data")
