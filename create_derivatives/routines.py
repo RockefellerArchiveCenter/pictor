@@ -133,6 +133,14 @@ class PDFMaker:
 
 
 class ManifestMaker:
+    """Creates a IIIF presentation manifest version 3 from JP2 files.
+
+    Creates manifest directory in bag's data directory and then creates manifest.
+
+    Returns:
+        A tuple containing human-readable message along with list of bag identifiers.
+        Exceptions are raised for errors along the way.
+    """
 
     def __init__(self):
         server_url = settings.IMAGESERVER_URL
@@ -149,6 +157,8 @@ class ManifestMaker:
             jp2_path = Path(bag.bag_path, "data", "JP2")
             jp2_files = sorted([f for f in matching_files(jp2_path)])
             manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+            if not manifest_dir.is_dir():
+                manifest_dir.mkdir()
             self.fac.set_base_prezi_dir(str(manifest_dir))
             self.create_manifest(jp2_files, manifest_dir, jp2_path, bag.dimes_identifier, bag.as_data)
             bag.process_status = Bag.MANIFESTS_CREATED

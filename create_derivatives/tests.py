@@ -203,6 +203,7 @@ class ManifestMakerTestCase(TestCase):
     fixtures = ["manifests.json"]
 
     def setUp(self):
+        """Sets paths for fixture directories and copies files over if needed."""
         tmp_path = Path(settings.TMP_DIR)
         if not tmp_path.exists():
             tmp_path.mkdir(parents=True)
