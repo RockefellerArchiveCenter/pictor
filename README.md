@@ -59,8 +59,16 @@ pictor has 6 services:
 
 | Method | URL | Parameters | Response  | Behavior  |
 |--------|-----|---|---|---|
-|GET|/bags| |200|Return a list of bags|
-
+| POST|/bags | | 200 | Creates a new bag object |
+| GET | /bags | | 200 | Returns a list of bags |
+| GET | /bags/{bag_id} | | 200 | Returns data about an individual bag |
+| POST | /prepare | | 200 | Runs the BagPreparer routine |
+| POST | /make-jp2 | | 200 | Runs the JP2Maker routine |
+| POST | /make-pdf | | 200 | Runs the PDFMaker routine |
+| POST | /make-manifest | | 200 | Runs the ManifestMaker routine |
+| POST | /upload| |200|Runs the AWSUpload routine |
+| POST | /cleanup | | 200 | Runs the Cleanup routine |
+| POST | /schema/ | | 200 | Returns the OpenAPI schema |
 
 ## License
 
