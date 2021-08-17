@@ -86,7 +86,7 @@ class JP2Maker:
                 tiff_files_dir = Path(bag.bag_path, "data", "service")
             else:
                 tiff_files_dir = Path(bag.bag_path, "data")
-            self.jp2_list = self.create_jp2(bag, tiff_files_dir)
+            self.create_jp2(bag, tiff_files_dir)
             bag.process_status = Bag.JPG2000
             bag.save()
             bags_with_jp2s.append(bag.bag_identifier)
