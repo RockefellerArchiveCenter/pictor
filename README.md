@@ -29,7 +29,7 @@ Or, if you want to remove all data
 
 ### Running Container on Docker for Apple silicon
 
-Note that for some packages to install correctly in the Docker image, an Intel image needs to be run under emulation. Use the `docker-compose.m1.yml` instead of the default Docker compose file, e.g.,:
+Note that for some packages to install correctly in the Docker image, an Intel image needs to be run under emulation. Use the `docker-compose.m1.yml` instead of the default Docker compose file:
 
 ```
 docker-compose -f docker-compose.m1.yml up
@@ -44,7 +44,7 @@ The first time the container is started, the example config file (`/pictor/confi
 Using this repo requires having [Docker](https://store.docker.com/search?type=edition&offering=community) installed.
 
 ## Services
-pictor receives content from an external service. It expects TIFF files that are in bags, and which
+pictor receives content from an external service. It expects TIFF files that are in bags that
 contain their ArchivesSpace RefID in the bag-info.txt file. For an example of what pictor expects to receive, see the `fixtures/` directory.
 
 pictor has 6 services:
@@ -59,6 +59,8 @@ pictor has 6 services:
 
 | Method | URL | Parameters | Response  | Behavior  |
 |--------|-----|---|---|---|
+|GET|/bags| |200|Return a list of bags|
+
 
 ## License
 
