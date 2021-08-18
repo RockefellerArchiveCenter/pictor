@@ -45,7 +45,7 @@ Using this repo requires having [Docker](https://store.docker.com/search?type=ed
 
 ## Services
 pictor receives content from an external service. It expects TIFF files that are in bags that
-contain their ArchivesSpace RefID in the bag-info.txt file. For an example of what pictor expects to receive, see the `fixtures/` directory.
+contain their ArchivesSpace URI in the bag-info.txt file. For an example of what pictor expects to receive, see the `fixtures/` directory.
 
 pictor has 6 services:
 1. Prepare Bag: unpacks bags and adds all necessary data to the object.
@@ -59,7 +59,7 @@ pictor has 6 services:
 
 | Method | URL | Parameters | Response  | Behavior  |
 |--------|-----|---|---|---|
-| POST|/bags | | 200 | Creates a new bag object |
+| POST | /bags | | 200 | Creates a new bag object |
 | GET | /bags | | 200 | Returns a list of bags |
 | GET | /bags/{bag_id} | | 200 | Returns data about an individual bag |
 | POST | /prepare | | 200 | Runs the BagPreparer routine |
