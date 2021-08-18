@@ -2,7 +2,8 @@ FROM python:3.6-buster
 
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
-RUN apt-get update -y && apt-get -y install ghostscript \ ocrmypdf
+RUN apt-get update -y && apt-get install -y ghostscript \
+  ocrmypdf
 WORKDIR /code
 ADD requirements.txt /code/
 RUN pip install --upgrade pip && pip install -r requirements.txt
