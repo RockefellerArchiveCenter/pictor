@@ -1,4 +1,3 @@
-import random
 import shutil
 from pathlib import Path
 from unittest.mock import patch
@@ -10,9 +9,65 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import matching_files
 from .models import Bag
-from .routines import (AWSUpload, BagPreparer, CleanupRoutine, ManifestMaker,
-                       PDFMaker)
+from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
+                       ManifestMaker, PDFMaker)
 from .test_helpers import copy_sample_files, make_dir, random_string
+
+
+class ViewTestCase(TestCase):
+    """Tests Views."""
+    fixtures = ["created.json"]
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+
+    def assert_status_code(
+            self, method, url, expected_status, data=None, **kwargs):
+        """Asserts that a URL returns an expected HTTP status code."""
+        response = getattr(self.client, method)(url, data, **kwargs)
+        self.assertEqual(
+            expected_status, response.status_code,
+            "Expected status code {} but got {}".format(expected_status, response.status_code))
+        return response
+
+    def test_bagviewset(self):
+        """Asserts BagViewSet views return expected responses."""
+        self.assert_status_code("get", reverse("bag-list"), 200)
+        for bag in Bag.objects.all():
+            self.assert_status_code("get", reverse("bag-detail", kwargs={"pk": bag.pk}), 200)
+        data = {
+            "bag_data": {"uri": "foo"},
+            "origin": "digitization",
+            "identifier": "foo"}
+        self.assert_status_code("post", reverse("bag-list"), 201, data=data, content_type="application/json")
+
+    @patch("create_derivatives.routines.BagPreparer.__init__")
+    @patch("create_derivatives.routines.BagPreparer.run")
+    @patch("create_derivatives.routines.JP2Maker.run")
+    @patch("create_derivatives.routines.PDFMaker.run")
+    @patch("create_derivatives.routines.ManifestMaker.run")
+    @patch("create_derivatives.routines.AWSUpload.run")
+    @patch("create_derivatives.routines.Cleanup.run")
+    def test_routine_views(self, mock_cleanup, mock_upload, mock_manifest, mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
+        """Asserts routine views return expected status codes and data."""
+        mock_prepare_init.return_value = None
+        exception_text = "foobar"
+        exception_id = "1"
+        view_matrix = [
+            ("bag-preparer", mock_prepare),
+            ("jp2-maker", mock_jp2),
+            ("pdf-maker", mock_pdf),
+            ("manifest-maker", mock_manifest),
+            ("aws-upload", mock_upload),
+            ("cleanup", mock_cleanup)]
+        for view, routine in view_matrix:
+            self.assert_status_code("post", reverse(view), 200)
+            routine.side_effect = Exception(exception_text, exception_id)
+            error_response = self.assert_status_code("post", reverse(view), 500)
+            self.assertEqual(
+                error_response.json(),
+                {'detail': exception_text, 'objects': [exception_id], 'count': 1},
+                "Unexpected error response")
 
 
 class BagPreparerTestCase(TestCase):
@@ -43,7 +98,7 @@ class BagPreparerTestCase(TestCase):
     def test_run(self, mock_get_object, mock_init):
         """Asserts that the run method produces the desired results.
 
-        Tests that the correct number of bags was processsed, and that the
+        Tests that the correct number of bags was processed, and that the
         attributes of each have been correctly set.
         """
         mock_init.return_value = None
@@ -64,6 +119,44 @@ class BagPreparerTestCase(TestCase):
     def tearDown(self):
         for f in Path(settings.SRC_DIR).iterdir():
             f.unlink()
+
+
+class JP2MakerTestCase(TestCase):
+
+    def setUp(self):
+        tmp_path = Path(settings.TMP_DIR)
+        if not tmp_path.exists():
+            tmp_path.mkdir(parents=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        self.set_up_bag("unpacked_bag_with_tiff", self.bag_id)
+
+    def set_up_bag(self, fixture_directory, bag):
+        """Adds an uncompressed bag fixture to the temp directory and database"""
+        bag_path = str(Path(settings.TMP_DIR, bag))
+        if not Path(bag_path).exists():
+            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            Bag.objects.create(
+                bag_identifier="sdfjldskj",
+                bag_path=bag_path,
+                origin="digitization",
+                as_data="sdjfkldsjf",
+                dimes_identifier=bag,
+                process_status=Bag.PREPARED)
+
+    def test_run(self):
+        """Asserts that the run method produced a JP2000 file in the JP2 directory.
+
+        Tests that the method updates the bag's process_status and produces the
+        desired results message.
+        """
+        msg, jp2s = JP2Maker().run()
+        bag_path = Path(settings.TMP_DIR, self.bag_id)
+        bag = Bag.objects.get(bag_path=bag_path)
+        self.assertEqual(bag.process_status, Bag.JPG2000)
+        self.assertEqual(msg, "JPG2000s created.")
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
 
 
 class PDFMakerTestCase(TestCase):
@@ -93,6 +186,7 @@ class PDFMakerTestCase(TestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
+
 
 class ManifestMakerTestCase(TestCase):
     fixtures = ["manifests.json"]
@@ -128,53 +222,6 @@ class ManifestMakerTestCase(TestCase):
             matching_files(str(self.derivative_dir), prefix=uuid), self.manifest_dir,
             self.derivative_dir, uuid,
             {"title": random_string(), "dates": random_string()})
-        manifests = [str(f) for f in Path(self.manifest_dir).iterdir()]
-        assert len(manifests) == 1
-        assert Path(self.manifest_dir, "{}.json".format(uuid)).is_file()
-
-    def tearDown(self):
-        shutil.rmtree(settings.TMP_DIR)
-
-class ManifestMakerTestCase(TestCase):
-    fixtures = ["manifests.json"]
-
-    def setUp(self):
-        """Sets paths for fixture directories and copies files over if needed."""
-        tmp_path = Path(settings.TMP_DIR)
-        if not tmp_path.exists():
-            tmp_path.mkdir(parents=True)
-        self.bag_path = Path(settings.TMP_DIR, "3aai9usY3AZzCSFkB3RSQ8")
-        self.derivative_dir = Path(self.bag_path, "data", "JP2")
-        self.manifest_dir = Path(self.bag_path, "data", "MANIFEST")
-        if not self.bag_path.exists():
-            shutil.copytree(Path("create_derivatives", "fixtures", "manifest_generation_bag", "3aai9usY3AZzCSFkB3RSQ8"), self.bag_path)
-        for p in [self.derivative_dir, self.manifest_dir]:
-            if not p.exists():
-                p.mkdir(parents=True)
-        for bag in Bag.objects.all().filter(dimes_identifier="asdfjklmn"):
-            bag.bag_path = self.bag_path
-            bag.save()
-
-    def test_run(self):
-        for bag in Bag.objects.all().filter(process_status=3):
-            routine = ManifestMaker()
-            msg, object_list = routine.run()
-            bag.refresh_from_db()
-            self.assertEqual(msg, "Manifests successfully created.")
-            self.assertTrue(isinstance(object_list, list))
-            self.assertEqual(len(object_list), 1)
-            self.assertEqual(bag.process_status, bag.MANIFESTS_CREATED)
-
-    def test_create_manifest(self):
-        """Ensures a correctly-named manifest is created."""
-        uuid = random_string(9)
-        copy_sample_files(self.derivative_dir, uuid, 2, "jp2")
-        routine = ManifestMaker()
-        routine.manifest_dir = self.manifest_dir
-        routine.jp2_files = matching_files(str(self.derivative_dir), prefix=uuid)
-        routine.jp2_path = self.derivative_dir
-        routine.create_manifest(uuid,
-                                {"title": random_string(), "dates": random_string()})
         manifests = [str(f) for f in Path(self.manifest_dir).iterdir()]
         assert len(manifests) == 1
         assert Path(self.manifest_dir, "{}.json".format(uuid)).is_file()
@@ -225,42 +272,3 @@ class CleanupTestCase(TestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
-
-
-class ViewTestCase(TestCase):
-    """Tests Views."""
-    fixtures = ["created.json"]
-
-    def setUp(self):
-        self.factory = APIRequestFactory()
-
-    def assert_status_code(
-            self, method, url, expected_status, data=None, **kwargs):
-        """Asserts that a URL returns an expected HTTP status code."""
-        response = getattr(self.client, method)(url, data, **kwargs)
-        self.assertEqual(
-            expected_status, response.status_code,
-            "Expected status code {} but got {}".format(expected_status, response.status_code))
-
-    def test_bagviewset(self):
-        """Asserts BagViewSet views return expected responses."""
-        self.assert_status_code("get", reverse("bag-list"), 200)
-        for bag in Bag.objects.all():
-            self.assert_status_code(
-                "get",
-                reverse(
-                    "bag-detail",
-                    kwargs={
-                        "pk": bag.pk}),
-                200)
-        data = {
-            "bag_data": {
-                "uri": "foo"},
-            "origin": "digitization",
-            "identifier": "foo"}
-        self.assert_status_code(
-            "post",
-            reverse("bag-list"),
-            201,
-            data=data,
-            content_type="application/json")
