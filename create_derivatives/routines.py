@@ -150,44 +150,44 @@ class ManifestMaker:
         self.fac.set_base_image_uri(self.resource_url)
         self.fac.set_debug(settings.PREZI_DEBUG)
         self.upgrader = Upgrader()
+        self.manifest_dir = None
+        self.jp2_path = None
+        self.jp2_files = None
 
     def run(self):
         bags_with_manifests = []
         for bag in Bag.objects.filter(process_status=Bag.PDF):
-            jp2_path = Path(bag.bag_path, "data", "JP2")
-            jp2_files = sorted([f for f in matching_files(jp2_path)])
-            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
-            if not manifest_dir.is_dir():
-                manifest_dir.mkdir()
-            self.fac.set_base_prezi_dir(str(manifest_dir))
-            self.create_manifest(jp2_files, manifest_dir, jp2_path, bag.dimes_identifier, bag.as_data)
+            self.bag = bag
+            self.jp2_path = Path(bag.bag_path, "data", "JP2")
+            self.jp2_files = sorted([f for f in matching_files(self.jp2_path)])
+            self.manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+            if not self.manifest_dir.is_dir():
+                self.manifest_dir.mkdir()
+            self.fac.set_base_prezi_dir(str(self.manifest_dir))
+            self.create_manifest(bag.dimes_identifier, bag.as_data)
             bag.process_status = Bag.MANIFESTS_CREATED
             bag.save()
             bags_with_manifests.append(bag.dimes_identifier)
         msg = "Manifests successfully created." if len(bags_with_manifests) else "No manifests created."
         return msg, bags_with_manifests
 
-    def create_manifest(self, files, manifest_dir, image_dir, identifier,
-                        obj_data):
+    def create_manifest(self, identifier, obj_data):
         """Method that runs the other methods to build a manifest file and populate
         it with information.
 
         Args:
-            files (list): Files to iterate over
-            manifest_dir (str): Path to directory to write manifests to.
-            image_dir (str): Path to directory containing derivative image files.
             identifier (str): A unique identifier.
             obj_data (dict): Data about the archival object.
         """
-        manifest_path = Path(manifest_dir, "{}.json".format(identifier))
+        manifest_path = Path(self.manifest_dir, "{}.json".format(identifier))
         page_number = 1
         manifest = self.fac.manifest(ident="{}{}".format(self.fac.prezi_base, identifier), label=obj_data["title"])
         manifest.set_metadata({"Date": obj_data["dates"]})
-        manifest.thumbnail = self.set_thumbnail(files[0].stem)
+        manifest.thumbnail = self.set_thumbnail(self.jp2_files[0].stem)
         sequence = manifest.sequence(ident=identifier)
-        for file in files:
+        for file in self.jp2_files:
             filename = file.stem
-            width, height = self.get_image_info(image_dir, file)
+            width, height = self.get_image_info(file)
             """Set the canvas ID, which starts the same as the manifest ID,
             and then include page_number as the canvas ID.
             """
@@ -208,17 +208,15 @@ class ManifestMaker:
         with open(manifest_path, 'w', encoding='utf-8') as jf:
             json.dump(v3_json, jf, ensure_ascii=False, indent=4)
 
-    def get_image_info(self, image_dir, file):
+    def get_image_info(self, file):
         """Gets information about the image file.
 
         Args:
-            image_dir (str): path to the directory containing the image file
             file (str): filename of the image file
         Returns:
-            width (int): Pixel width of the image file
-            height (int): Pixel height of the image file
+            img.size (tuple): A tuple containing the width and height of an image.
         """
-        with Image.open(Path(image_dir, file)) as img:
+        with Image.open(Path(self.jp2_path, file)) as img:
             return img.size
 
     def set_image_data(self, img, height, width, ref):
@@ -229,7 +227,6 @@ class ManifestMaker:
             height (int): Pixel height of the image.
             width (int): Pixel width of the image.
             ref (string): Reference identifier for the file, including page in filename.
-
         Returns:
             img (object): A iiif_prezi image object with data.
         """

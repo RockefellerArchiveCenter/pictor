@@ -232,9 +232,11 @@ class ManifestMakerTestCase(TestCase):
         """Ensures a correctly-named manifest is created."""
         uuid = random_string(9)
         copy_sample_files(self.derivative_dir, uuid, 2, "jp2")
-        ManifestMaker().create_manifest(
-            matching_files(str(self.derivative_dir), prefix=uuid), self.manifest_dir,
-            self.derivative_dir, uuid,
+        routine = ManifestMaker()
+        routine.manifest_dir = self.manifest_dir
+        routine.jp2_files = matching_files(str(self.derivative_dir), prefix=uuid)
+        routine.jp2_path = self.derivative_dir
+        routine.create_manifest(uuid,
             {"title": random_string(), "dates": random_string()})
         manifests = [str(f) for f in Path(self.manifest_dir).iterdir()]
         assert len(manifests) == 1
