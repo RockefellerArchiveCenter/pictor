@@ -237,7 +237,7 @@ class ManifestMakerTestCase(TestCase):
         routine.jp2_files = matching_files(str(self.derivative_dir), prefix=uuid)
         routine.jp2_path = self.derivative_dir
         routine.create_manifest(uuid,
-            {"title": random_string(), "dates": random_string()})
+                                {"title": random_string(), "dates": random_string()})
         manifests = [str(f) for f in Path(self.manifest_dir).iterdir()]
         assert len(manifests) == 1
         assert Path(self.manifest_dir, "{}.json".format(uuid)).is_file()
