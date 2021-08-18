@@ -9,7 +9,7 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
-from .routines import (AWSUpload, BagPreparer, CleanupRoutine, ManifestMaker,
+from .routines import (AWSUpload, BagPreparer, Cleanup, ManifestMaker,
                        PDFMaker)
 from .test_helpers import copy_sample_files, random_string
 
