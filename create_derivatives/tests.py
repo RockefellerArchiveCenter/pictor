@@ -9,8 +9,7 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
-from .routines import (AWSUpload, BagPreparer, CleanupRoutine, JP2Maker,
-                       PDFMaker)
+from .routines import AWSUpload, BagPreparer, Cleanup, JP2Maker, PDFMaker
 
 
 class ViewTestCase(TestCase):
@@ -27,29 +26,46 @@ class ViewTestCase(TestCase):
         self.assertEqual(
             expected_status, response.status_code,
             "Expected status code {} but got {}".format(expected_status, response.status_code))
+        return response
 
     def test_bagviewset(self):
         """Asserts BagViewSet views return expected responses."""
         self.assert_status_code("get", reverse("bag-list"), 200)
         for bag in Bag.objects.all():
-            self.assert_status_code(
-                "get",
-                reverse(
-                    "bag-detail",
-                    kwargs={
-                        "pk": bag.pk}),
-                200)
+            self.assert_status_code("get", reverse("bag-detail", kwargs={"pk": bag.pk}), 200)
         data = {
-            "bag_data": {
-                "uri": "foo"},
+            "bag_data": {"uri": "foo"},
             "origin": "digitization",
             "identifier": "foo"}
-        self.assert_status_code(
-            "post",
-            reverse("bag-list"),
-            201,
-            data=data,
-            content_type="application/json")
+        self.assert_status_code("post", reverse("bag-list"), 201, data=data, content_type="application/json")
+
+    @patch("create_derivatives.routines.BagPreparer.__init__")
+    @patch("create_derivatives.routines.BagPreparer.run")
+    @patch("create_derivatives.routines.JP2Maker.run")
+    @patch("create_derivatives.routines.PDFMaker.run")
+    @patch("create_derivatives.routines.ManifestMaker.run")
+    @patch("create_derivatives.routines.AWSUpload.run")
+    @patch("create_derivatives.routines.Cleanup.run")
+    def test_routine_views(self, mock_cleanup, mock_upload, mock_manifest, mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
+        """Asserts routine views return expected status codes and data."""
+        mock_prepare_init.return_value = None
+        exception_text = "foobar"
+        exception_id = "1"
+        view_matrix = [
+            ("bag-preparer", mock_prepare),
+            ("jp2-maker", mock_jp2),
+            ("pdf-maker", mock_pdf),
+            ("manifest-maker", mock_manifest),
+            ("aws-upload", mock_upload),
+            ("cleanup", mock_cleanup)]
+        for view, routine in view_matrix:
+            self.assert_status_code("post", reverse(view), 200)
+            routine.side_effect = Exception(exception_text, exception_id)
+            error_response = self.assert_status_code("post", reverse(view), 500)
+            self.assertEqual(
+                error_response.json(),
+                {'detail': exception_text, 'objects': [exception_id], 'count': 1},
+                "Unexpected error response")
 
 
 class HelpersTestCase(TestCase):
@@ -211,7 +227,7 @@ class PDFMakerTestCase(TestCase):
         bag_path = Path(settings.TMP_DIR, self.bag_id)
         bag = Bag.objects.get(bag_path=bag_path)
         self.assertTrue(Path(bag_path, "data", "PDF", "{}.pdf".format(self.bag_id)).is_file())
-        self.assertEqual(len(list(Path(bag_path, "data", "PDF").glob('*'))), 1)
+        self.assertEqual(len(list(Path(bag_path, "data", "PDF").glob("*"))), 1)
         self.assertEqual(bag.process_status, Bag.PDF)
         self.assertEqual(pdfs[0], "PDFs created.")
 
@@ -240,7 +256,7 @@ class AWSUploadTestCase(TestCase):
         self.assertEqual(mock_upload_files.call_count, 3)
 
 
-class CleanupRoutineTestCase(TestCase):
+class CleanupTestCase(TestCase):
     def setUp(self):
         tmp_path = Path(settings.TMP_DIR)
         if tmp_path.exists():
@@ -263,8 +279,8 @@ class CleanupRoutineTestCase(TestCase):
                 process_status=Bag.UPLOADED)
 
     def test_run(self):
-        msg, object_list = CleanupRoutine().run()
-        self.assertEqual(len(list(Path(settings.TMP_DIR).glob('*'))), 0)
+        msg, object_list = Cleanup().run()
+        self.assertEqual(len(list(Path(settings.TMP_DIR).glob("*"))), 0)
         self.assertEqual(msg, "Bags successfully cleaned up.")
         self.assertTrue(isinstance(object_list, list))
         self.assertEqual(len(object_list), 1)
