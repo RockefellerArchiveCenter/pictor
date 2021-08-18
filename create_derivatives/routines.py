@@ -150,14 +150,10 @@ class ManifestMaker:
         self.fac.set_base_image_uri(self.resource_url)
         self.fac.set_debug(settings.PREZI_DEBUG)
         self.upgrader = Upgrader()
-        self.manifest_dir = None
-        self.jp2_path = None
-        self.jp2_files = None
 
     def run(self):
         bags_with_manifests = []
         for bag in Bag.objects.filter(process_status=Bag.PDF):
-            self.bag = bag
             self.jp2_path = Path(bag.bag_path, "data", "JP2")
             self.jp2_files = sorted([f for f in matching_files(self.jp2_path)])
             self.manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
