@@ -81,12 +81,15 @@ class JP2Maker:
     def run(self):
         bags_with_jp2s = []
         for bag in Bag.objects.filter(process_status=Bag.PREPARED):
+            jp2_dir = Path(bag.bag_path, "data", "JP2")
+            if not jp2_dir.is_dir():
+                jp2_dir.mkdir()
             service_dir = Path(bag.bag_path, "data", "service")
             if service_dir.is_dir() and any(service_dir.iterdir()):
                 tiff_files_dir = Path(bag.bag_path, "data", "service")
             else:
                 tiff_files_dir = Path(bag.bag_path, "data")
-            self.create_jp2(bag, tiff_files_dir)
+            self.create_jp2(bag, tiff_files_dir, jp2_dir)
             bag.process_status = Bag.JPG2000
             bag.save()
             bags_with_jp2s.append(bag.bag_identifier)
@@ -131,7 +134,7 @@ class JP2Maker:
             filename_trimmed = filename
         return filename_trimmed.split("_")[-1]
 
-    def create_jp2(self, bag, tiff_files_dir):
+    def create_jp2(self, bag, tiff_files_dir, jp2_dir):
         """Creates JPEG2000 files from TIFF files.
 
         Args:
@@ -148,9 +151,6 @@ class JP2Maker:
                            "-c", "[256,256],[256,256],[128,128]",
                            "-b", "64,64",
                            "-p", "RPCL"]
-        jp2_dir = Path(bag.bag_path, "data", "JP2")
-        if not jp2_dir.is_dir():
-            jp2_dir.mkdir()
         jp2_list = []
         tiff_files = matching_files(str(tiff_files_dir), prepend=True)
         for file in tiff_files:
