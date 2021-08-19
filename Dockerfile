@@ -5,6 +5,7 @@ RUN mkdir /code
 RUN apt-get update -y && apt-get install -y ghostscript \
   cmake \
   make \
+  libtiff-dev \
   ocrmypdf
 
 # Download and compile openjpeg2.3
