@@ -9,7 +9,9 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
-from .routines import AWSUpload, BagPreparer, Cleanup, JP2Maker, PDFMaker
+from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
+                       ManifestMaker, PDFMaker)
+from .test_helpers import copy_sample_files, random_string
 
 
 class ViewTestCase(TestCase):
@@ -235,6 +237,54 @@ class PDFMakerTestCase(TestCase):
         shutil.rmtree(settings.TMP_DIR)
 
 
+class ManifestMakerTestCase(TestCase):
+    fixtures = ["manifests.json"]
+
+    def setUp(self):
+        """Sets paths for fixture directories and copies files over if needed."""
+        tmp_path = Path(settings.TMP_DIR)
+        if not tmp_path.exists():
+            tmp_path.mkdir(parents=True)
+        self.bag_path = Path(settings.TMP_DIR, "3aai9usY3AZzCSFkB3RSQ8")
+        self.derivative_dir = Path(self.bag_path, "data", "JP2")
+        self.manifest_dir = Path(self.bag_path, "data", "MANIFEST")
+        if not self.bag_path.exists():
+            shutil.copytree(Path("create_derivatives", "fixtures", "manifest_generation_bag", "3aai9usY3AZzCSFkB3RSQ8"), self.bag_path)
+        for p in [self.derivative_dir, self.manifest_dir]:
+            if not p.exists():
+                p.mkdir(parents=True)
+        for bag in Bag.objects.all().filter(dimes_identifier="asdfjklmn"):
+            bag.bag_path = self.bag_path
+            bag.save()
+
+    def test_run(self):
+        for bag in Bag.objects.all().filter(process_status=3):
+            routine = ManifestMaker()
+            msg, object_list = routine.run()
+            bag.refresh_from_db()
+            self.assertEqual(msg, "Manifests successfully created.")
+            self.assertTrue(isinstance(object_list, list))
+            self.assertEqual(len(object_list), 1)
+            self.assertEqual(bag.process_status, bag.MANIFESTS_CREATED)
+
+    def test_create_manifest(self):
+        """Ensures a correctly-named manifest is created."""
+        uuid = random_string(9)
+        copy_sample_files(self.derivative_dir, uuid, 2, "jp2")
+        routine = ManifestMaker()
+        routine.manifest_dir = self.manifest_dir
+        routine.jp2_files = matching_files(str(self.derivative_dir), prefix=uuid)
+        routine.jp2_path = self.derivative_dir
+        routine.create_manifest(uuid,
+                                {"title": random_string(), "dates": random_string()})
+        manifests = [str(f) for f in Path(self.manifest_dir).iterdir()]
+        assert len(manifests) == 1
+        assert Path(self.manifest_dir, "{}.json".format(uuid)).is_file()
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
+
+
 class AWSUploadTestCase(TestCase):
     fixtures = ["uploaded.json"]
 
@@ -251,7 +301,7 @@ class AWSUploadTestCase(TestCase):
         self.assertEqual(msg, "Bags successfully uploaded")
         self.assertTrue(isinstance(object_list, list))
         self.assertEqual(len(object_list), 1)
-        for bag in Bag.objects.all().filter(bag_identifier="sdfjldskj"):
+        for bag in Bag.objects.all().filter(dimes_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
         self.assertEqual(mock_upload_files.call_count, 3)
 
