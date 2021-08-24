@@ -364,7 +364,7 @@ class AWSUpload:
     def __init__(self):
         self.aws_client = AWSClient(*settings.AWS)
 
-    def run(self, replace):
+    def run(self):
         uploaded_bags = []
         for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
             pdf_dir = Path(bag.bag_path, "data", "PDF")
@@ -376,7 +376,7 @@ class AWSUpload:
                     (manifest_dir, "manifests")]:
                 uploads = matching_files(
                     str(src_dir), prefix=bag.dimes_identifier, prepend=True)
-                self.aws_client.upload_files(uploads, target_dir, replace)
+                self.aws_client.upload_files(uploads, target_dir)
             bag.process_status = Bag.UPLOADED
             bag.save()
             uploaded_bags.append(bag.dimes_identifier)

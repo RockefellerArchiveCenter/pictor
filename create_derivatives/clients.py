@@ -50,7 +50,7 @@ class AWSClient:
             aws_secret_access_key=secret_key)
         self.bucket = bucket
 
-    def upload_files(self, files, destination_dir, replace=False):
+    def upload_files(self, files, destination_dir):
         """Iterates over directories and conditionally uploads files to S3.
 
         Args:
@@ -61,19 +61,12 @@ class AWSClient:
         for file in files:
             key = os.path.splitext(os.path.basename(file))[0]
             bucket_path = os.path.join(destination_dir, key)
-            if (self.object_in_bucket(bucket_path) and not replace):
-                raise FileExistsError(
-                    "Error uploading files to AWS: {} already exists in {}".format(
-                        bucket_path, self.bucket))
-            else:
-                content_type = "image/jp2"
-                if file.endswith(".json"):
-                    content_type = "application/json"
-                elif file.endswith(".pdf"):
-                    content_type = "application/pdf"
-                self.s3.meta.client.upload_file(
-                    file, self.bucket, bucket_path,
-                    ExtraArgs={'ContentType': content_type})
+            content_type = "image/jp2"
+            if file.endswith(".json"):
+                content_type = "application/json"
+            elif file.endswith(".pdf"):
+                content_type = "application/pdf"
+            self.s3.meta.client.upload_file(file, self.bucket, bucket_path, ExtraArgs={'ContentType': content_type})
 
     def object_in_bucket(self, object_path):
         """Checks if a file already exists in an S3 bucket.
