@@ -84,12 +84,16 @@ class JP2Maker:
     def run(self):
         bags_with_jp2s = []
         for bag in Bag.objects.filter(process_status=Bag.PREPARED):
+            jp2_dir = Path(bag.bag_path, "data", "JP2")
+            if not jp2_dir.is_dir():
+                jp2_dir.mkdir()
             service_dir = Path(bag.bag_path, "data", "service")
             if service_dir.is_dir() and any(service_dir.iterdir()):
                 tiff_files_dir = Path(bag.bag_path, "data", "service")
             else:
                 tiff_files_dir = Path(bag.bag_path, "data")
-            self.create_jp2(bag, tiff_files_dir)
+            tiff_files = matching_files(str(tiff_files_dir), prepend=True)
+            self.create_jp2s(bag, tiff_files, jp2_dir)
             bag.process_status = Bag.JPG2000
             bag.save()
             bags_with_jp2s.append(bag.bag_identifier)
@@ -123,7 +127,7 @@ class JP2Maker:
         Args:
             file (str): filename of a TIFF image file.
         Returns:
-            page number from the filename
+            page number from the filename.
         """
         filename = Path(file).stem
         if "_se" in filename:
@@ -134,14 +138,19 @@ class JP2Maker:
             filename_trimmed = filename
         return filename_trimmed.split("_")[-1]
 
-    def create_jp2(self, bag, tiff_files_dir):
+    def create_jp2s(self, bag, tiff_files, jp2_dir):
         """Creates JPEG2000 files from TIFF files.
 
+        The default options for conversion below are:
+        - Compression ration of `1.5`
+        - Precinct size: `[256,256]` for first two layers and then `[128,128]` for all others
+        - Code block size of `[64,64]`
+        - Progression order of `RPCL`
+
         Args:
-            -r(str): Compression ratio. Default is 1.5.
-            -c(str): Precinct size. Default is `[256,256]` for first two layers and `[128,128]` for others.
-            -b(str): Code block. Default size of `[64,64]`.
-            -p(str): Progression order. Default of 'RPCL`.
+            bag (object): Unpacked bag object.
+            tiff_files (lst): A list of TIFF files.
+            jp2_dir (object): The JPEG200 derivatives target directory.
 
         Returns:
             jp2_list: A tuple of JPG2000 paths including their page numbers
@@ -151,14 +160,10 @@ class JP2Maker:
                            "-c", "[256,256],[256,256],[128,128]",
                            "-b", "64,64",
                            "-p", "RPCL"]
-        jp2_dir = Path(bag.bag_path, "data", "JP2")
-        if not jp2_dir.is_dir():
-            jp2_dir.mkdir()
         jp2_list = []
-        tiff_files = matching_files(str(tiff_files_dir), prepend=True)
         for file in tiff_files:
             page_number = self.get_page_number(file)
-            jp2_path = Path(jp2_dir, "{}_{}.jp2".format(bag.dimes_identifier, page_number))
+            jp2_path = jp2_dir.joinpath("{}_{}.jp2".format(bag.dimes_identifier, page_number))
             layers = self.calculate_layers(file)
             cmd = ["/usr/local/bin/opj_compress",
                    "-i", file,
@@ -246,14 +251,10 @@ class ManifestMaker:
         self.fac.set_base_image_uri(self.resource_url)
         self.fac.set_debug(settings.PREZI_DEBUG)
         self.upgrader = Upgrader()
-        self.manifest_dir = None
-        self.jp2_path = None
-        self.jp2_files = None
 
     def run(self):
         bags_with_manifests = []
         for bag in Bag.objects.filter(process_status=Bag.PDF):
-            self.bag = bag
             self.jp2_path = Path(bag.bag_path, "data", "JP2")
             self.jp2_files = sorted([f for f in matching_files(self.jp2_path)])
             self.manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
