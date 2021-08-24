@@ -233,7 +233,7 @@ class AWSUploadTestCase(TestCase):
         """
         mock_init.return_value = None
         routine = AWSUpload()
-        msg, object_list = routine.run(True)
+        msg, object_list = routine.run()
         self.assertEqual(msg, "Bags successfully uploaded")
         self.assertTrue(isinstance(object_list, list))
         self.assertEqual(len(object_list), 1)
