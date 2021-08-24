@@ -7,10 +7,39 @@ from django.urls import reverse
 from pictor import settings
 from rest_framework.test import APIRequestFactory
 
+from .helpers import matching_files
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
                        ManifestMaker, PDFMaker)
 from .test_helpers import make_dir, set_up_bag
+
+
+class HelpersTestCase(TestCase):
+
+    def test_matching_files(self):
+        MATCHING_FIXTURE_FILEPATH = Path("create_derivatives", "fixtures", "matching")
+        MATCHING_SOURCE_DIR = Path("matching").absolute()
+        if MATCHING_SOURCE_DIR.is_dir():
+            shutil.rmtree(MATCHING_SOURCE_DIR)
+        shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
+        matching = matching_files(MATCHING_SOURCE_DIR)
+        assert len(matching) == 4
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
+        assert len(matching) == 2
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="foo")
+        assert len(matching) == 0
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
+        assert len(matching) == 2
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".jp2")
+        assert len(matching) == 1
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".tif")
+        assert len(matching) == 1
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".pdf")
+        assert len(matching) == 0
+        matching = matching_files(MATCHING_SOURCE_DIR, prepend=True)
+        path = str(matching[0])
+        assert path.startswith(str(MATCHING_SOURCE_DIR))
+        shutil.rmtree(MATCHING_SOURCE_DIR)
 
 
 class ViewTestCase(TestCase):
