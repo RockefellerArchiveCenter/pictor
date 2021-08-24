@@ -9,7 +9,8 @@ from rest_framework.test import APIRequestFactory
 
 from .helpers import check_dir_exists, matching_files
 from .models import Bag
-from .routines import AWSUpload, BagPreparer, Cleanup, ManifestMaker, PDFMaker
+from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
+                       ManifestMaker, PDFMaker)
 from .test_helpers import copy_sample_files, random_string
 
 
@@ -140,7 +141,7 @@ class BagPreparerTestCase(TestCase):
     def test_run(self, mock_get_object, mock_init):
         """Asserts that the run method produces the desired results.
 
-        Tests that the correct number of bags was processsed, and that the
+        Tests that the correct number of bags was processed, and that the
         attributes of each have been correctly set.
         """
         mock_init.return_value = None
@@ -161,6 +162,44 @@ class BagPreparerTestCase(TestCase):
     def tearDown(self):
         for f in Path(settings.SRC_DIR).iterdir():
             f.unlink()
+
+
+class JP2MakerTestCase(TestCase):
+
+    def setUp(self):
+        tmp_path = Path(settings.TMP_DIR)
+        if not tmp_path.exists():
+            tmp_path.mkdir(parents=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        self.set_up_bag("unpacked_bag_with_tiff", self.bag_id)
+
+    def set_up_bag(self, fixture_directory, bag):
+        """Adds an uncompressed bag fixture to the temp directory and database"""
+        bag_path = str(Path(settings.TMP_DIR, bag))
+        if not Path(bag_path).exists():
+            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
+            Bag.objects.create(
+                bag_identifier="sdfjldskj",
+                bag_path=bag_path,
+                origin="digitization",
+                as_data="sdjfkldsjf",
+                dimes_identifier=bag,
+                process_status=Bag.PREPARED)
+
+    def test_run(self):
+        """Asserts that the run method produced a JP2000 file in the JP2 directory.
+
+        Tests that the method updates the bag's process_status and produces the
+        desired results message.
+        """
+        msg, jp2s = JP2Maker().run()
+        bag_path = Path(settings.TMP_DIR, self.bag_id)
+        bag = Bag.objects.get(bag_path=bag_path)
+        self.assertEqual(bag.process_status, Bag.JPG2000)
+        self.assertEqual(msg, "JPG2000s created.")
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
 
 
 class PDFMakerTestCase(TestCase):

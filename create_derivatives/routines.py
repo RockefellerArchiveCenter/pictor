@@ -1,4 +1,5 @@
 import json
+import math
 import subprocess
 from pathlib import Path
 from shutil import rmtree
@@ -19,7 +20,7 @@ from .models import Bag
 class BagPreparer:
     """Prepares bags for derivative creation.
 
-    Unpacks bags into settings.TMP_DIR and adds all necessary data the object.
+    Unpacks bags into settings.TMP_DIR and adds all necessary data to the object.
 
     Returns:
         A tuple containing human-readable message along with list of bag identifiers.
@@ -69,9 +70,109 @@ class BagPreparer:
 
 
 class JP2Maker:
-    # TO DO: make JPG2000 derivatives
+    """Creates JP2000 derivatives from TIFFs.
+
+    Creates JP2 directory in bag's data directory and JP2 derivatives.
+    TIFFs to be converted are targeted in the service directory. If the service directory is empty or
+    does not exist, target TIFFs at the root of the data directory.
+
+    Returns:
+        A tuple containing human-readable message along with list of bag identifiers.
+        Exceptions are raised for errors along the way.
+    """
+
     def run(self):
-        pass
+        bags_with_jp2s = []
+        for bag in Bag.objects.filter(process_status=Bag.PREPARED):
+            jp2_dir = Path(bag.bag_path, "data", "JP2")
+            if not jp2_dir.is_dir():
+                jp2_dir.mkdir()
+            service_dir = Path(bag.bag_path, "data", "service")
+            if service_dir.is_dir() and any(service_dir.iterdir()):
+                tiff_files_dir = Path(bag.bag_path, "data", "service")
+            else:
+                tiff_files_dir = Path(bag.bag_path, "data")
+            tiff_files = matching_files(str(tiff_files_dir), prepend=True)
+            self.create_jp2s(bag, tiff_files, jp2_dir)
+            bag.process_status = Bag.JPG2000
+            bag.save()
+            bags_with_jp2s.append(bag.bag_identifier)
+        msg = "JPG2000s created." if len(bags_with_jp2s) else "No TIFF files ready for JP2 creation."
+        return msg, bags_with_jp2s
+
+    def calculate_layers(self, file):
+        """Calculates the number of layers based on pixel dimensions.
+        For TIFF files, image tag 256 is the width, and 257 is the height.
+
+        Args:
+            file (str): filename of a TIFF image file.
+        Returns:
+            layers (int): number of layers to convert to
+        """
+
+        with Image.open(file) as img:
+            width = [w for w in img.tag[256]][0]
+            height = [h for h in img.tag[257]][0]
+        return math.ceil((math.log(max(width, height)) / math.log(2)
+                          ) - ((math.log(96) / math.log(2)))) + 1
+
+    def get_page_number(self, file):
+        """Parses a page number from a filename.
+
+        Presumes that:
+            The page number is preceded by an underscore
+            The page number is immediately followed by either by `_m`, `_me` or `_se`,
+            or the file extension.
+
+        Args:
+            file (str): filename of a TIFF image file.
+        Returns:
+            page number from the filename.
+        """
+        filename = Path(file).stem
+        if "_se" in filename:
+            filename_trimmed = filename.split("_se")[0]
+        elif "_m" in filename:
+            filename_trimmed = filename.split("_m")[0]
+        else:
+            filename_trimmed = filename
+        return filename_trimmed.split("_")[-1]
+
+    def create_jp2s(self, bag, tiff_files, jp2_dir):
+        """Creates JPEG2000 files from TIFF files.
+
+        The default options for conversion below are:
+        - Compression ration of `1.5`
+        - Precinct size: `[256,256]` for first two layers and then `[128,128]` for all others
+        - Code block size of `[64,64]`
+        - Progression order of `RPCL`
+
+        Args:
+            bag (object): Unpacked bag object.
+            tiff_files (lst): A list of TIFF files.
+            jp2_dir (object): The JPEG200 derivatives target directory.
+
+        Returns:
+            jp2_list: A tuple of JPG2000 paths including their page numbers
+        """
+
+        default_options = ["-r", "1.5",
+                           "-c", "[256,256],[256,256],[128,128]",
+                           "-b", "64,64",
+                           "-p", "RPCL"]
+        jp2_list = []
+        for file in tiff_files:
+            page_number = self.get_page_number(file)
+            jp2_path = jp2_dir.joinpath("{}_{}.jp2".format(bag.dimes_identifier, page_number))
+            layers = self.calculate_layers(file)
+            cmd = ["/usr/local/bin/opj_compress",
+                   "-i", file,
+                   "-o", jp2_path,
+                   "-n", str(layers),
+                   "-SOP"] + default_options
+            subprocess.run(cmd, check=True)
+            jp2_list.append(jp2_path)
+        return jp2_list
 
 
 class PDFMaker:
