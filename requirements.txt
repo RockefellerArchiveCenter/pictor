@@ -18,7 +18,7 @@ boltons==21.0.0
     # via archivessnake
 boto3==1.18.14
     # via -r requirements.in
-botocore==1.21.14
+botocore==1.21.24
     # via
     #   boto3
     #   s3transfer
@@ -26,7 +26,7 @@ cachetools==4.2.2
     # via pyld
 certifi==2021.5.30
     # via requests
-charset-normalizer==2.0.3
+charset-normalizer==2.0.4
     # via requests
 clinner==1.12.3
     # via health-check
@@ -41,7 +41,7 @@ djangorestframework==3.12.4
     # via
     #   -r requirements.in
     #   asterism
-frozendict==2.0.4
+frozendict==2.0.6
     # via pyld
 gitdb==4.0.7
     # via gitpython

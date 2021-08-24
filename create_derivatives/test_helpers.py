@@ -1,30 +1,18 @@
-import random
 import shutil
-import string
 from pathlib import Path
 
 
-def copy_sample_files(directory, identifier, page_count, suffix):
-    """Duplicates a sample file.
-
-    Args:
-        directory (str): Initial path of directory containing images to copy.
-        identifier (string): Identifier used in filenames.
-        page_count (int): The number of files to generate for each identifier.
-        suffix (str): The filename suffix (extension) to be used
-    """
-    for f in Path(directory).iterdir():
-        for page in range(page_count):
-            target = Path(
-                directory, "{}_{}.{}".format(
-                    identifier, page, suffix))
-            shutil.copyfile(
-                Path(directory, f),
-                Path(target))
-        Path(target, f).unlink()
+def make_dir(directory_path, remove_first=False, parents=True):
+    """Makes a directory. If remove_first is set to true, removes directory if it exists; if set to false, does not make directory if it exists"""
+    path = Path(directory_path)
+    if path.exists() and remove_first:
+        shutil.rmtree(directory_path)
+    if not path.exists():
+        path.mkdir(parents=parents)
 
 
-def random_string(length=10):
-    """Generates random ascii lowercase letters."""
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(length))
+def set_up_bag(tmp_dir, fixture_directory, bag):
+    """Adds an uncompressed bag fixture to the temp directory and database"""
+    bag_path = Path(tmp_dir, bag)
+    if not bag_path.exists():
+        shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)

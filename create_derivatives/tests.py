@@ -7,11 +7,39 @@ from django.urls import reverse
 from pictor import settings
 from rest_framework.test import APIRequestFactory
 
-from .helpers import check_dir_exists, matching_files
+from .helpers import matching_files
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
                        ManifestMaker, PDFMaker)
-from .test_helpers import copy_sample_files, random_string
+from .test_helpers import make_dir, set_up_bag
+
+
+class HelpersTestCase(TestCase):
+
+    def test_matching_files(self):
+        MATCHING_FIXTURE_FILEPATH = Path("create_derivatives", "fixtures", "matching")
+        MATCHING_SOURCE_DIR = Path("matching").absolute()
+        if MATCHING_SOURCE_DIR.is_dir():
+            shutil.rmtree(MATCHING_SOURCE_DIR)
+        shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
+        matching = matching_files(MATCHING_SOURCE_DIR)
+        assert len(matching) == 4
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
+        assert len(matching) == 2
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="foo")
+        assert len(matching) == 0
+        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
+        assert len(matching) == 2
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".jp2")
+        assert len(matching) == 1
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".tif")
+        assert len(matching) == 1
+        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".pdf")
+        assert len(matching) == 0
+        matching = matching_files(MATCHING_SOURCE_DIR, prepend=True)
+        path = str(matching[0])
+        assert path.startswith(str(MATCHING_SOURCE_DIR))
+        shutil.rmtree(MATCHING_SOURCE_DIR)
 
 
 class ViewTestCase(TestCase):
@@ -70,55 +98,12 @@ class ViewTestCase(TestCase):
                 "Unexpected error response")
 
 
-class HelpersTestCase(TestCase):
-
-    def test_check_dir_exists(self):
-        """Asserts check_dir_exists handles found and missing directories."""
-        test_paths = ["/foo", "/bar", "/baz"]
-        for p in test_paths:
-            path = Path(p)
-            path.mkdir(exist_ok=True)
-            self.assertTrue(check_dir_exists(p), "Function did not return True")
-            path.rmdir()
-            with self.assertRaises(Exception) as context:
-                check_dir_exists(p)
-            self.assertTrue(
-                p in str(context.exception), "Directory was not found in exception")
-
-    def test_matching_files(self):
-        MATCHING_FIXTURE_FILEPATH = Path("create_derivatives", "fixtures", "matching")
-        MATCHING_SOURCE_DIR = Path("matching").absolute()
-        if MATCHING_SOURCE_DIR.is_dir():
-            shutil.rmtree(MATCHING_SOURCE_DIR)
-        shutil.copytree(MATCHING_FIXTURE_FILEPATH, MATCHING_SOURCE_DIR)
-        matching = matching_files(MATCHING_SOURCE_DIR)
-        assert len(matching) == 4
-        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
-        assert len(matching) == 2
-        matching = matching_files(MATCHING_SOURCE_DIR, prefix="foo")
-        assert len(matching) == 0
-        matching = matching_files(MATCHING_SOURCE_DIR, prefix="sample")
-        assert len(matching) == 2
-        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".jp2")
-        assert len(matching) == 1
-        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".tif")
-        assert len(matching) == 1
-        matching = matching_files(MATCHING_SOURCE_DIR, suffix=".pdf")
-        assert len(matching) == 0
-        matching = matching_files(MATCHING_SOURCE_DIR, prepend=True)
-        path = str(matching[0])
-        assert path.startswith(str(MATCHING_SOURCE_DIR))
-        shutil.rmtree(MATCHING_SOURCE_DIR)
-
-
 class BagPreparerTestCase(TestCase):
     fixtures = ["created.json"]
 
     def setUp(self):
         for p in [settings.SRC_DIR, settings.TMP_DIR]:
-            path = Path(p)
-            if not path.exists():
-                path.mkdir(parents=True)
+            make_dir(p)
         for f in Path("create_derivatives", "fixtures", "bags").iterdir():
             shutil.copy(str(f), settings.SRC_DIR)
 
@@ -165,26 +150,12 @@ class BagPreparerTestCase(TestCase):
 
 
 class JP2MakerTestCase(TestCase):
+    fixtures = ["jpg2000.json"]
 
     def setUp(self):
-        tmp_path = Path(settings.TMP_DIR)
-        if not tmp_path.exists():
-            tmp_path.mkdir(parents=True)
+        make_dir(settings.TMP_DIR)
         self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
-        self.set_up_bag("unpacked_bag_with_tiff", self.bag_id)
-
-    def set_up_bag(self, fixture_directory, bag):
-        """Adds an uncompressed bag fixture to the temp directory and database"""
-        bag_path = str(Path(settings.TMP_DIR, bag))
-        if not Path(bag_path).exists():
-            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
-            Bag.objects.create(
-                bag_identifier="sdfjldskj",
-                bag_path=bag_path,
-                origin="digitization",
-                as_data="sdjfkldsjf",
-                dimes_identifier=bag,
-                process_status=Bag.PREPARED)
+        set_up_bag(settings.TMP_DIR, "unpacked_bag_with_tiff", self.bag_id)
 
     def test_run(self):
         """Asserts that the run method produced a JP2000 file in the JP2 directory.
@@ -203,26 +174,12 @@ class JP2MakerTestCase(TestCase):
 
 
 class PDFMakerTestCase(TestCase):
+    fixtures = ["pdf.json"]
 
     def setUp(self):
-        tmp_path = Path(settings.TMP_DIR)
-        if not tmp_path.exists():
-            tmp_path.mkdir(parents=True)
+        make_dir(settings.TMP_DIR, remove_first=True)
         self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
-        self.set_up_bag("unpacked_bag_with_jp2", self.bag_id)
-
-    def set_up_bag(self, fixture_directory, bag):
-        """Adds an uncompressed bag fixture to the temp directory and database"""
-        bag_path = str(Path(settings.TMP_DIR, bag))
-        if not Path(bag_path).exists():
-            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
-            Bag.objects.create(
-                bag_identifier="sdfjldskj",
-                bag_path=bag_path,
-                origin="digitization",
-                as_data="sdjfkldsjf",
-                dimes_identifier=bag,
-                process_status=Bag.JPG2000)
+        set_up_bag(settings.TMP_DIR, "unpacked_bag_with_jp2", self.bag_id)
 
     def test_run(self):
         pdfs = PDFMaker().run()
@@ -242,44 +199,23 @@ class ManifestMakerTestCase(TestCase):
 
     def setUp(self):
         """Sets paths for fixture directories and copies files over if needed."""
-        tmp_path = Path(settings.TMP_DIR)
-        if not tmp_path.exists():
-            tmp_path.mkdir(parents=True)
-        self.bag_path = Path(settings.TMP_DIR, "3aai9usY3AZzCSFkB3RSQ8")
-        self.derivative_dir = Path(self.bag_path, "data", "JP2")
-        self.manifest_dir = Path(self.bag_path, "data", "MANIFEST")
-        if not self.bag_path.exists():
-            shutil.copytree(Path("create_derivatives", "fixtures", "manifest_generation_bag", "3aai9usY3AZzCSFkB3RSQ8"), self.bag_path)
-        for p in [self.derivative_dir, self.manifest_dir]:
-            if not p.exists():
-                p.mkdir(parents=True)
-        for bag in Bag.objects.all().filter(dimes_identifier="asdfjklmn"):
-            bag.bag_path = self.bag_path
-            bag.save()
+        make_dir(settings.TMP_DIR)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ8"
+        set_up_bag(settings.TMP_DIR, "manifest_generation_bag", self.bag_id)
 
     def test_run(self):
         for bag in Bag.objects.all().filter(process_status=3):
+            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
             routine = ManifestMaker()
             msg, object_list = routine.run()
             bag.refresh_from_db()
+            manifests = [str(f) for f in Path(manifest_dir).iterdir()]
+            self.assertEqual(len(manifests), 1)
+            self.assertTrue(Path(manifest_dir, "{}.json".format("asdfjklmn")).is_file())
             self.assertEqual(msg, "Manifests successfully created.")
             self.assertTrue(isinstance(object_list, list))
             self.assertEqual(len(object_list), 1)
             self.assertEqual(bag.process_status, bag.MANIFESTS_CREATED)
-
-    def test_create_manifest(self):
-        """Ensures a correctly-named manifest is created."""
-        uuid = random_string(9)
-        copy_sample_files(self.derivative_dir, uuid, 2, "jp2")
-        routine = ManifestMaker()
-        routine.manifest_dir = self.manifest_dir
-        routine.jp2_files = matching_files(str(self.derivative_dir), prefix=uuid)
-        routine.jp2_path = self.derivative_dir
-        routine.create_manifest(uuid,
-                                {"title": random_string(), "dates": random_string()})
-        manifests = [str(f) for f in Path(self.manifest_dir).iterdir()]
-        assert len(manifests) == 1
-        assert Path(self.manifest_dir, "{}.json".format(uuid)).is_file()
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
@@ -307,26 +243,12 @@ class AWSUploadTestCase(TestCase):
 
 
 class CleanupTestCase(TestCase):
-    def setUp(self):
-        tmp_path = Path(settings.TMP_DIR)
-        if tmp_path.exists():
-            shutil.rmtree(settings.TMP_DIR)
-        tmp_path.mkdir(parents=True)
-        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
-        self.set_up_bag("aws_upload_bag", self.bag_id)
+    fixtures = ["cleanup.json"]
 
-    def set_up_bag(self, fixture_directory, bag):
-        """Adds an uncompressed bag fixture to the temp directory and database"""
-        bag_path = str(Path(settings.TMP_DIR, bag))
-        if not Path(bag_path).exists():
-            shutil.copytree(Path("create_derivatives", "fixtures", fixture_directory, bag), bag_path)
-            Bag.objects.create(
-                bag_identifier="sdfjldskj",
-                bag_path=bag_path,
-                origin="digitization",
-                as_data="sdjfkldsjf",
-                dimes_identifier=bag,
-                process_status=Bag.UPLOADED)
+    def setUp(self):
+        make_dir(settings.TMP_DIR, remove_first=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        set_up_bag(settings.TMP_DIR, "aws_upload_bag", self.bag_id)
 
     def test_run(self):
         msg, object_list = Cleanup().run()
