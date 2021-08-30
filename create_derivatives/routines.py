@@ -13,7 +13,7 @@ from pictor import settings
 from PIL import Image
 
 from .clients import ArchivesSpaceClient, AWSClient
-from .helpers import check_dir_exists, matching_files
+from .helpers import check_dir_exists, get_page_number, matching_files
 from .models import Bag
 
 
@@ -116,28 +116,6 @@ class JP2Maker:
         return math.ceil((math.log(max(width, height)) / math.log(2)
                           ) - ((math.log(96) / math.log(2)))) + 1
 
-    def get_page_number(self, file):
-        """Parses a page number from a filename.
-
-        Presumes that:
-            The page number is preceded by an underscore
-            The page number is immediately followed by either by `_m`, `_me` or `_se`,
-            or the file extension.
-
-        Args:
-            file (str): filename of a TIFF image file.
-        Returns:
-            page number from the filename.
-        """
-        filename = Path(file).stem
-        if "_se" in filename:
-            filename_trimmed = filename.split("_se")[0]
-        elif "_m" in filename:
-            filename_trimmed = filename.split("_m")[0]
-        else:
-            filename_trimmed = filename
-        return filename_trimmed.split("_")[-1]
-
     def create_jp2s(self, bag, tiff_files, jp2_dir):
         """Creates JPEG2000 files from TIFF files.
 
@@ -161,12 +139,12 @@ class JP2Maker:
                            "-b", "64,64",
                            "-p", "RPCL"]
         jp2_list = []
-        for file in tiff_files:
-            page_number = self.get_page_number(file)
+        for tiff_file in tiff_files:
+            page_number = get_page_number(tiff_file).zfill(4)
             jp2_path = jp2_dir.joinpath("{}_{}.jp2".format(bag.dimes_identifier, page_number))
-            layers = self.calculate_layers(file)
+            layers = self.calculate_layers(tiff_file)
             cmd = ["/usr/local/bin/opj_compress",
-                   "-i", file,
+                   "-i", tiff_file,
                    "-o", jp2_path,
                    "-n", str(layers),
                    "-SOP"] + default_options
@@ -277,7 +255,7 @@ class ManifestMaker:
             obj_data (dict): Data about the archival object.
         """
         manifest_path = Path(self.manifest_dir, "{}.json".format(identifier))
-        page_number = 1
+        page_number = int(get_page_number(self.jp2_files[0]))
         manifest = self.fac.manifest(ident="{}{}".format(self.fac.prezi_base, identifier), label=obj_data["title"])
         manifest.set_metadata({"Date": obj_data["dates"]})
         manifest.thumbnail = self.set_thumbnail(self.jp2_files[0].stem)
@@ -290,7 +268,7 @@ class ManifestMaker:
             """
             canvas = sequence.canvas(
                 ident="{}/canvas/{}".format(
-                    manifest.id, str(page_number).zfill(3)),
+                    manifest.id, str(page_number).zfill(4)),
                 label="Page {}".format(
                     str(page_number)))
             canvas.set_hw(height, width)
