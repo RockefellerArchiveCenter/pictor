@@ -255,12 +255,12 @@ class ManifestMaker:
             obj_data (dict): Data about the archival object.
         """
         manifest_path = Path(self.manifest_dir, "{}.json".format(identifier))
-        page_number = int(get_page_number(self.jp2_files[0]))
         manifest = self.fac.manifest(ident="{}{}".format(self.fac.prezi_base, identifier), label=obj_data["title"])
         manifest.set_metadata({"Date": obj_data["dates"]})
         manifest.thumbnail = self.set_thumbnail(self.jp2_files[0].stem)
         sequence = manifest.sequence(ident=identifier)
         for file in self.jp2_files:
+            page_number = int(get_page_number(file))
             filename = file.stem
             width, height = self.get_image_info(file)
             """Set the canvas ID, which starts the same as the manifest ID,
@@ -277,7 +277,6 @@ class ManifestMaker:
                 ident="/{}/full/max/0/default.jpg".format(filename))
             self.set_image_data(img, height, width, filename)
             canvas.thumbnail = self.set_thumbnail(filename)
-            page_number += 1
         v2_json = manifest.toJSON(top=True)
         v3_json = self.upgrader.process_resource(v2_json, top=True)
         with open(manifest_path, 'w', encoding='utf-8') as jf:
