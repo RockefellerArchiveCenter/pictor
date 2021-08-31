@@ -43,3 +43,4 @@ IMAGESERVER_URL = "https://iiif.rockarch.org"
 # Prezi set_debug
 PREZI_DEBUG_LEVEL = "error"
 
+IIIF_API_VERSION = 2

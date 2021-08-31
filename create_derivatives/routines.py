@@ -234,7 +234,7 @@ class PDFMaker:
 
 
 class ManifestMaker:
-    """Creates a IIIF presentation manifest version 3 from JP2 files.
+    """Creates a IIIF presentation manifest (from a configured version) from JP2 files.
 
     Creates manifest directory in bag's data directory and then creates manifest.
 
@@ -245,7 +245,10 @@ class ManifestMaker:
 
     def __init__(self):
         server_url = settings.IMAGESERVER_URL
-        self.resource_url = "{}/iiif/3/".format(server_url)
+        self.api_version = settings.IIIF_API_VERSION
+        if self.api_version not in [2, 3]:
+            raise Exception("Version {} not supported.".format(self.api_version))
+        self.resource_url = "{}/iiif/{}/".format(server_url, self.api_version)
         self.fac = ManifestFactory()
         self.fac.set_base_prezi_uri("{}/manifests/".format(server_url))
         self.fac.set_base_image_uri(self.resource_url)
@@ -301,9 +304,13 @@ class ManifestMaker:
             canvas.thumbnail = self.set_thumbnail(filename)
             page_number += 1
         v2_json = manifest.toJSON(top=True)
-        v3_json = self.upgrader.process_resource(v2_json, top=True)
+        if self.api_version == 2:
+            manifest_json = v2_json
+        else:
+            v3_json = self.upgrader.process_resource(v2_json, top=True)
+            manifest_json = v3_json
         with open(manifest_path, 'w', encoding='utf-8') as jf:
-            json.dump(v3_json, jf, ensure_ascii=False, indent=4)
+            json.dump(manifest_json, jf, ensure_ascii=False, indent=4)
 
     def get_image_info(self, file):
         """Gets information about the image file.
@@ -355,8 +362,8 @@ class ManifestMaker:
     def set_service(self, identifier):
         return self.fac.service(
             ident="{}{}".format(self.resource_url, identifier),
-            context="http://iiif.io/api/image/3/context.json",
-            profile="http://iiif.io/api/image/3/level2.json")
+            context="http://iiif.io/api/image/{}/context.json".format(self.api_version),
+            profile="http://iiif.io/api/image/{}/level2.json".format(self.api_version))
 
 
 class AWSUpload:
