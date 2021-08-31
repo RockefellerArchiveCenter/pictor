@@ -17,8 +17,10 @@ def matching_files(directory, prefix=None, suffix=None, prepend=False):
     Returns:
         files (lst): a list of files that matched the identifier, sorted alphabetically.
     """
+    HIDDEN_FILES = (".", "Thumbs")  # files which start with these strings will be skipped
+
     files = sorted([f for f in directory.iterdir() if (
-        directory.joinpath(f).is_file() and not str(f.name).startswith((".", "Thumbs")))])
+        directory.joinpath(f).is_file() and not str(f.name).startswith(HIDDEN_FILES))])
     if prefix:
         files = sorted([f for f in files if str(f.name).startswith(prefix)])
     if suffix:
