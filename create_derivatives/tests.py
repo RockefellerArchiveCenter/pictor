@@ -135,7 +135,7 @@ class BagPreparerTestCase(TestCase):
         created_len = len(Bag.objects.filter(process_status=Bag.CREATED))
         prepared = BagPreparer().run()
         self.assertTrue(isinstance(prepared, tuple))
-        self.assertEqual(prepared[0], "Bags successfully prepared")
+        self.assertEqual(prepared[0], "Bags successfully prepared.")
         self.assertEqual(len(prepared[1]), created_len, "Wrong number of bags processed")
         self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), created_len)
         for bag in Bag.objects.all():
@@ -234,7 +234,7 @@ class AWSUploadTestCase(TestCase):
         mock_init.return_value = None
         routine = AWSUpload()
         msg, object_list = routine.run()
-        self.assertEqual(msg, "Bags successfully uploaded")
+        self.assertEqual(msg, "Files successfully uploaded.")
         self.assertTrue(isinstance(object_list, list))
         self.assertEqual(len(object_list), 1)
         for bag in Bag.objects.all().filter(dimes_identifier="sdfjldskj"):
@@ -253,7 +253,7 @@ class CleanupTestCase(TestCase):
     def test_run(self):
         msg, object_list = Cleanup().run()
         self.assertEqual(len(list(Path(settings.TMP_DIR).glob("*"))), 0)
-        self.assertEqual(msg, "Bags successfully cleaned up.")
+        self.assertEqual(msg, "Temporary files successfully removed.")
         self.assertTrue(isinstance(object_list, list))
         self.assertEqual(len(object_list), 1)
 
