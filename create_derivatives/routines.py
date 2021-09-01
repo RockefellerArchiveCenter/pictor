@@ -17,7 +17,40 @@ from .helpers import check_dir_exists, matching_files
 from .models import Bag
 
 
-class BagPreparer:
+class BaseRoutine(object):
+    """Base class which all routines inherit.
+
+    Returns:
+        msg (str): human-readable representation of the routine outcome
+        object_list (lst): list of identifiers for Bags processed by the routine
+
+    Subclasses should implement a `process_bag` method which executes logic on
+    one bag. They should also set the following attributes:
+        start_process_status (int): a Bag process status which determines the starting
+            queryset.
+        end_process_status (int): a Bag process status which will be applied to
+            Bags after they have been successfully processed.
+        success_message (str): a message indicating that the routine completed
+            successfully.
+        idle_message (str): a message indicating that there were no objects for
+            the routine to act on.
+    """
+
+    def run(self):
+        object_list = []
+        for bag in Bag.objects.filter(process_status=self.start_process_status):
+            self.process_bag(bag)
+            bag.process_status = self.end_process_status
+            bag.save()
+            object_list.append(bag.bag_identifier)
+        msg = self.success_message if len(object_list) else self.idle_message
+        return msg, object_list
+
+    def process_bag(self, bag):
+        raise NotImplementedError("You must implement a `process_bag` method")
+
+
+class BagPreparer(BaseRoutine):
     """Prepares bags for derivative creation.
 
     Unpacks bags into settings.TMP_DIR and adds all necessary data to the object.
@@ -27,28 +60,26 @@ class BagPreparer:
         Exceptions are raised for errors along the way.
 
     """
+    start_process_status = Bag.CREATED
+    end_process_status = Bag.PREPARED
+    success_message = "Bags successfully prepared."
+    idle_message = "No bags to prepare."
 
     def __init__(self):
         self.as_client = ArchivesSpaceClient(*settings.ARCHIVESSPACE)
         check_dir_exists(settings.SRC_DIR)
         check_dir_exists(settings.TMP_DIR)
 
-    def run(self):
-        processed_bags = []
-        for bag in Bag.objects.filter(process_status=Bag.CREATED):
-            # TODO: presumes bag.bag_identifier and bag.origin are already set
-            # TODO: we should also be sure that Ursa Major is delivering to two directories, or we will run into conflicts with Fornax
-            if bag.origin != "digitization":
-                raise Exception("Bags from origin {} cannot be processed".format(bag.origin), bag.bag_identifier)
-            unpacked_path = self.unpack_bag(bag.bag_identifier)
-            as_uri = self.get_as_uri(unpacked_path)
-            bag.bag_path = unpacked_path
-            bag.as_data = self.as_client.get_object(as_uri)
-            bag.dimes_identifier = shortuuid.uuid(as_uri)
-            bag.process_status = Bag.PREPARED
-            bag.save()
-            processed_bags.append(bag.bag_identifier)
-        return "Bags successfully prepared", processed_bags
+    def process_bag(self, bag):
+        # TODO: presumes bag.bag_identifier and bag.origin are already set
+        # TODO: we should also be sure that Ursa Major is delivering to two directories, or we will run into conflicts with Fornax
+        if bag.origin != "digitization":
+            raise Exception("Bags from origin {} cannot be processed".format(bag.origin), bag.bag_identifier)
+        unpacked_path = self.unpack_bag(bag.bag_identifier)
+        as_uri = self.get_as_uri(unpacked_path)
+        bag.bag_path = unpacked_path
+        bag.as_data = self.as_client.get_object(as_uri)
+        bag.dimes_identifier = shortuuid.uuid(as_uri)
 
     def unpack_bag(self, bag_identifier):
         """Extracts a serialized bag to the tmp directory."""
@@ -69,7 +100,7 @@ class BagPreparer:
                 bag_filepath) from e
 
 
-class JP2Maker:
+class JP2Maker(BaseRoutine):
     """Creates JP2000 derivatives from TIFFs.
 
     Creates JP2 directory in bag's data directory and JP2 derivatives.
@@ -80,25 +111,22 @@ class JP2Maker:
         A tuple containing human-readable message along with list of bag identifiers.
         Exceptions are raised for errors along the way.
     """
+    start_process_status = Bag.PREPARED
+    end_process_status = Bag.JPG2000
+    success_message = "JPG2000s created."
+    idle_message = "No TIFF files ready for JP2 creation."
 
-    def run(self):
-        bags_with_jp2s = []
-        for bag in Bag.objects.filter(process_status=Bag.PREPARED):
-            jp2_dir = Path(bag.bag_path, "data", "JP2")
-            if not jp2_dir.is_dir():
-                jp2_dir.mkdir()
-            service_dir = Path(bag.bag_path, "data", "service")
-            if service_dir.is_dir() and any(service_dir.iterdir()):
-                tiff_files_dir = Path(bag.bag_path, "data", "service")
-            else:
-                tiff_files_dir = Path(bag.bag_path, "data")
-            tiff_files = matching_files(tiff_files_dir, prepend=True)
-            self.create_jp2s(bag, tiff_files, jp2_dir)
-            bag.process_status = Bag.JPG2000
-            bag.save()
-            bags_with_jp2s.append(bag.bag_identifier)
-        msg = "JPG2000s created." if len(bags_with_jp2s) else "No TIFF files ready for JP2 creation."
-        return msg, bags_with_jp2s
+    def process_bag(self, bag):
+        jp2_dir = Path(bag.bag_path, "data", "JP2")
+        if not jp2_dir.is_dir():
+            jp2_dir.mkdir()
+        service_dir = Path(bag.bag_path, "data", "service")
+        if service_dir.is_dir() and any(service_dir.iterdir()):
+            tiff_files_dir = Path(bag.bag_path, "data", "service")
+        else:
+            tiff_files_dir = Path(bag.bag_path, "data")
+        tiff_files = matching_files(tiff_files_dir, prepend=True)
+        self.create_jp2s(bag, tiff_files, jp2_dir)
 
     def calculate_layers(self, file):
         """Calculates the number of layers based on pixel dimensions.
@@ -175,7 +203,7 @@ class JP2Maker:
         return jp2_list
 
 
-class PDFMaker:
+class PDFMaker(BaseRoutine):
     """Creates concatenated PDF file from JP2 derivatives.
 
     Creates PDF directory in bag's data directory, creates PDF, then compresses and OCRs the PDF
@@ -185,19 +213,16 @@ class PDFMaker:
         Exceptions are raised for errors along the way.
 
     """
+    start_process_status = Bag.JPG2000
+    end_process_status = Bag.PDF
+    success_message = "PDFs created."
+    idle_message = "No JPG2000 files ready for PDF creation."
 
-    def run(self):
-        bags_with_pdfs = []
-        for bag in Bag.objects.filter(process_status=Bag.JPG2000):
-            jp2_files_dir = Path(bag.bag_path, "data", "JP2")
-            self.pdf_path = self.create_pdf(bag, jp2_files_dir)
-            self.compress_pdf(bag)
-            self.ocr_pdf()
-            bag.process_status = Bag.PDF
-            bag.save()
-            bags_with_pdfs.append(bag.bag_identifier)
-        msg = "PDFs created." if len(bags_with_pdfs) else "No JPG2000 files ready for PDF creation."
-        return msg, bags_with_pdfs
+    def process_bag(self, bag):
+        jp2_files_dir = Path(bag.bag_path, "data", "JP2")
+        self.pdf_path = self.create_pdf(bag, jp2_files_dir)
+        self.compress_pdf(bag)
+        self.ocr_pdf()
 
     def create_pdf(self, bag, jp2_files_dir):
         """Creates concatenated PDF from JPEG2000 files."""
@@ -233,7 +258,7 @@ class PDFMaker:
                         "--quiet"])
 
 
-class ManifestMaker:
+class ManifestMaker(BaseRoutine):
     """Creates a IIIF presentation manifest version 3 from JP2 files.
 
     Creates manifest directory in bag's data directory and then creates manifest.
@@ -242,6 +267,10 @@ class ManifestMaker:
         A tuple containing human-readable message along with list of bag identifiers.
         Exceptions are raised for errors along the way.
     """
+    start_process_status = Bag.PDF
+    end_process_status = Bag.MANIFESTS_CREATED
+    success_message = "Manifests successfully created."
+    idle_message = "No manifests created."
 
     def __init__(self):
         server_url = settings.IMAGESERVER_URL
@@ -252,21 +281,14 @@ class ManifestMaker:
         self.fac.set_debug(settings.PREZI_DEBUG)
         self.upgrader = Upgrader()
 
-    def run(self):
-        bags_with_manifests = []
-        for bag in Bag.objects.filter(process_status=Bag.PDF):
-            self.jp2_path = Path(bag.bag_path, "data", "JP2")
-            self.jp2_files = matching_files(self.jp2_path)
-            self.manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
-            if not self.manifest_dir.is_dir():
-                self.manifest_dir.mkdir()
-            self.fac.set_base_prezi_dir(str(self.manifest_dir))
-            self.create_manifest(bag.dimes_identifier, bag.as_data)
-            bag.process_status = Bag.MANIFESTS_CREATED
-            bag.save()
-            bags_with_manifests.append(bag.dimes_identifier)
-        msg = "Manifests successfully created." if len(bags_with_manifests) else "No manifests created."
-        return msg, bags_with_manifests
+    def process_bag(self, bag):
+        self.jp2_path = Path(bag.bag_path, "data", "JP2")
+        self.jp2_files = sorted([f for f in matching_files(self.jp2_path)])
+        self.manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+        if not self.manifest_dir.is_dir():
+            self.manifest_dir.mkdir()
+        self.fac.set_base_prezi_dir(str(self.manifest_dir))
+        self.create_manifest(bag.dimes_identifier, bag.as_data)
 
     def create_manifest(self, identifier, obj_data):
         """Method that runs the other methods to build a manifest file and populate
@@ -359,43 +381,38 @@ class ManifestMaker:
             profile="http://iiif.io/api/image/3/level2.json")
 
 
-class AWSUpload:
+class AWSUpload(BaseRoutine):
+    """Uploads files to AWS."""
+    start_process_status = Bag.MANIFESTS_CREATED
+    end_process_status = Bag.UPLOADED
+    success_message = "Files successfully uploaded."
+    idle_message = "No files to upload."
 
     def __init__(self):
         self.aws_client = AWSClient(*settings.AWS)
 
-    def run(self):
-        uploaded_bags = []
-        for bag in Bag.objects.filter(process_status=Bag.MANIFESTS_CREATED):
-            pdf_dir = Path(bag.bag_path, "data", "PDF")
-            jp2_dir = Path(bag.bag_path, "data", "JP2")
-            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
-            for src_dir, target_dir in [
-                    (pdf_dir, "pdfs"),
-                    (jp2_dir, "images"),
-                    (manifest_dir, "manifests")]:
-                uploads = matching_files(src_dir, prefix=bag.dimes_identifier, prepend=True)
-                self.aws_client.upload_files(uploads, target_dir)
-            bag.process_status = Bag.UPLOADED
-            bag.save()
-            uploaded_bags.append(bag.dimes_identifier)
-        return "Bags successfully uploaded", uploaded_bags
+    def process_bag(self, bag):
+        pdf_dir = Path(bag.bag_path, "data", "PDF")
+        jp2_dir = Path(bag.bag_path, "data", "JP2")
+        manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+        for src_dir, target_dir in [
+                (pdf_dir, "pdfs"),
+                (jp2_dir, "images"),
+                (manifest_dir, "manifests")]:
+            uploads = matching_files(src_dir, prefix=bag.dimes_identifier, prepend=True)
+            self.aws_client.upload_files(uploads, target_dir)
 
 
-class Cleanup:
+class Cleanup(BaseRoutine):
     """Removes bag files that have been processed.
 
     Returns:
         A tuple containing human-readable message along with list of bag identifiers.
-
     """
+    start_process_status = Bag.UPLOADED
+    end_process_status = Bag.CLEANED_UP
+    success_message = "Temporary files successfully removed."
+    idle_message = "No temporary files waiting for cleanup."
 
-    def run(self):
-        cleaned_up = []
-        for bag in Bag.objects.filter(process_status=Bag.UPLOADED):
-            rmtree(bag.bag_path)
-            bag.process_status = Bag.CLEANED_UP
-            bag.save()
-            cleaned_up.append(bag.bag_identifier)
-        msg = "Bags successfully cleaned up." if len(cleaned_up) else "No bags ready for cleanup."
-        return msg, cleaned_up
+    def process_bag(self, bag):
+        rmtree(bag.bag_path)
