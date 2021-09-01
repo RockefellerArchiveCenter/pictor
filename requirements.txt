@@ -32,7 +32,7 @@ clinner==1.12.3
     # via health-check
 colorlog==3.2.0
     # via clinner
-django==3.2.5
+django==3.2.7
     # via
     #   -r requirements.in
     #   asterism
@@ -110,11 +110,6 @@ sqlparse==0.4.1
     # via django
 structlog==21.1.0
     # via archivessnake
-typing-extensions==3.10.0.0
-    # via
-    #   asgiref
-    #   gitpython
-    #   structlog
 urllib3==1.26.6
     # via
     #   botocore
