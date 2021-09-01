@@ -125,7 +125,7 @@ class JP2Maker(BaseRoutine):
             tiff_files_dir = Path(bag.bag_path, "data", "service")
         else:
             tiff_files_dir = Path(bag.bag_path, "data")
-        tiff_files = matching_files(str(tiff_files_dir), prepend=True)
+        tiff_files = matching_files(tiff_files_dir, prepend=True)
         self.create_jp2s(bag, tiff_files, jp2_dir)
 
     def calculate_layers(self, file):
@@ -219,7 +219,7 @@ class PDFMaker(BaseRoutine):
     idle_message = "No JPG2000 files ready for PDF creation."
 
     def process_bag(self, bag):
-        jp2_files_dir = str(Path(bag.bag_path, "data", "JP2"))
+        jp2_files_dir = Path(bag.bag_path, "data", "JP2")
         self.pdf_path = self.create_pdf(bag, jp2_files_dir)
         self.compress_pdf(bag)
         self.ocr_pdf()
@@ -399,8 +399,7 @@ class AWSUpload(BaseRoutine):
                 (pdf_dir, "pdfs"),
                 (jp2_dir, "images"),
                 (manifest_dir, "manifests")]:
-            uploads = matching_files(
-                str(src_dir), prefix=bag.dimes_identifier, prepend=True)
+            uploads = matching_files(src_dir, prefix=bag.dimes_identifier, prepend=True)
             self.aws_client.upload_files(uploads, target_dir)
 
 
