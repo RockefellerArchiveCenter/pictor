@@ -274,10 +274,13 @@ class ManifestMaker(BaseRoutine):
 
     def __init__(self):
         server_url = settings.IMAGESERVER_URL
-        self.api_version = settings.IIIF_API_VERSION
-        if self.api_version not in [2, 3]:
-            raise Exception("Version {} not supported.".format(self.api_version))
-        self.resource_url = "{}/iiif/{}/".format(server_url, self.api_version)
+        self.image_api_version = settings.IIIF_API['image_api']
+        self.presentation_api_version = settings.IIIF_API['presentation_api']
+        if self.image_api_version not in [2, 3]:
+            raise Exception("Version {} of image API not supported.".format(self.image_api_version))
+        elif self.presentation_api_version not in [2, 3]:
+            raise Exception("Version {} of presenation API not supported.".format(self.presentation_api_version))
+        self.resource_url = "{}/iiif/{}/".format(server_url, self.image_api_version)
         self.fac = ManifestFactory()
         self.fac.set_base_prezi_uri("{}/manifests/".format(server_url))
         self.fac.set_base_image_uri(self.resource_url)
@@ -326,7 +329,7 @@ class ManifestMaker(BaseRoutine):
             canvas.thumbnail = self.set_thumbnail(filename)
             page_number += 1
         v2_json = manifest.toJSON(top=True)
-        if self.api_version == 2:
+        if self.presentation_api_version == 2:
             manifest_json = v2_json
         else:
             v3_json = self.upgrader.process_resource(v2_json, top=True)
@@ -384,8 +387,8 @@ class ManifestMaker(BaseRoutine):
     def set_service(self, identifier):
         return self.fac.service(
             ident="{}{}".format(self.resource_url, identifier),
-            context="http://iiif.io/api/image/{}/context.json".format(self.api_version),
-            profile="http://iiif.io/api/image/{}/level2.json".format(self.api_version))
+            context="http://iiif.io/api/image/{}/context.json".format(self.image_api_version),
+            profile="http://iiif.io/api/image/{}/level2.json".format(self.image_api_version))
 
 
 class AWSUpload(BaseRoutine):
