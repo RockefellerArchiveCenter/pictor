@@ -259,7 +259,7 @@ class PDFMaker(BaseRoutine):
 
 
 class ManifestMaker(BaseRoutine):
-    """Creates a IIIF presentation manifest version 3 from JP2 files.
+    """Creates a IIIF presentation manifest from JP2 files.
 
     Creates manifest directory in bag's data directory and then creates manifest.
 
@@ -332,8 +332,7 @@ class ManifestMaker(BaseRoutine):
         if self.presentation_api_version == 2:
             manifest_json = v2_json
         else:
-            v3_json = self.upgrader.process_resource(v2_json, top=True)
-            manifest_json = v3_json
+            manifest_json = self.upgrader.process_resource(v2_json, top=True)
         with open(manifest_path, 'w', encoding='utf-8') as jf:
             json.dump(manifest_json, jf, ensure_ascii=False, indent=4)
 
