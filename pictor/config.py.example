@@ -44,5 +44,5 @@ IMAGESERVER_URL = "https://iiif.rockarch.org"
 PREZI_DEBUG_LEVEL = "error"
 
 IIIF_API = {
-    'image_api': 3, 'presentation_api': 2
+    'image_api': 2, 'presentation_api': 3
 }
