@@ -277,9 +277,9 @@ class ManifestMaker(BaseRoutine):
         self.image_api_version = settings.IIIF_API['image_api']
         self.presentation_api_version = settings.IIIF_API['presentation_api']
         if self.image_api_version not in [2, 3]:
-            raise Exception("Version {} of image API not supported.".format(self.image_api_version))
+            raise Exception("Version {} of IIIF Image API not supported.".format(self.image_api_version))
         elif self.presentation_api_version not in [2, 3]:
-            raise Exception("Version {} of presenation API not supported.".format(self.presentation_api_version))
+            raise Exception("Version {} of IIIF Presentation API not supported.".format(self.presentation_api_version))
         self.resource_url = "{}/iiif/{}/".format(server_url, self.image_api_version)
         self.fac = ManifestFactory()
         self.fac.set_base_prezi_uri("{}/manifests/".format(server_url))
