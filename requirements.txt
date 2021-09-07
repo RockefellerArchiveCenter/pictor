@@ -16,9 +16,9 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.18.14
+boto3==1.18.36
     # via -r requirements.in
-botocore==1.21.24
+botocore==1.21.36
     # via
     #   boto3
     #   s3transfer
@@ -32,7 +32,7 @@ clinner==1.12.3
     # via health-check
 colorlog==3.2.0
     # via clinner
-django==3.2.5
+django==3.2.7
     # via
     #   -r requirements.in
     #   asterism
