@@ -168,7 +168,7 @@ class JP2Maker(BaseRoutine):
                            "-p", "RPCL"]
         jp2_list = []
         for tiff_file in tiff_files:
-            page_number = get_page_number(tiff_file).zfill(4)
+            page_number = get_page_number(tiff_file)
             jp2_path = jp2_dir.joinpath("{}_{}.jp2".format(bag.dimes_identifier, page_number))
             layers = self.calculate_layers(tiff_file)
             cmd = ["/usr/local/bin/opj_compress",
@@ -282,17 +282,13 @@ class ManifestMaker(BaseRoutine):
         manifest.thumbnail = self.set_thumbnail(self.jp2_files[0].stem)
         sequence = manifest.sequence(ident=identifier)
         for file in self.jp2_files:
-            page_number = int(get_page_number(file))
+            page_number = get_page_number(file)
             filename = file.stem
             width, height = self.get_image_info(file)
             """Set the canvas ID, which starts the same as the manifest ID,
             and then include page_number as the canvas ID.
             """
-            canvas = sequence.canvas(
-                ident="{}/canvas/{}".format(
-                    manifest.id, str(page_number).zfill(4)),
-                label="Page {}".format(
-                    str(page_number)))
+            canvas = sequence.canvas(ident="{}/canvas/{}".format(manifest.id, page_number), label="Page {}".format(page_number.lstrip("0")))
             canvas.set_hw(height, width)
             annotation = canvas.annotation(ident=filename)
             img = annotation.image(

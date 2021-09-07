@@ -48,4 +48,4 @@ def get_page_number(filename):
         filename_trimmed = base_filename.split("_m")[0]
     else:
         filename_trimmed = base_filename
-    return filename_trimmed.split("_")[-1].lstrip("0")
+    return filename_trimmed.split("_")[-1].lstrip("0").zfill(4)
