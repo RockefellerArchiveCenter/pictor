@@ -39,7 +39,7 @@ def get_page_number(filename):
     Args:
         file (str): filename of a TIFF image file.
     Returns:
-        page number from the filename with leading zeroes removed
+        4-digit page number from the filename with leading zeroes
     """
     base_filename = Path(filename).stem
     if "_se" in base_filename:
