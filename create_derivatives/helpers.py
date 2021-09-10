@@ -26,3 +26,26 @@ def matching_files(directory, prefix=None, suffix=None, prepend=False):
     if suffix:
         files = sorted([f for f in files if str(f.name).endswith(suffix)])
     return [directory.joinpath(f) for f in files] if prepend else files
+
+
+def get_page_number(filename):
+    """Parses a page number from a filename.
+
+    Presumes that:
+        The page number is preceded by an underscore
+        The page number is immediately followed by either by `_m`, `_me` or `_se`,
+        or the file extension.
+
+    Args:
+        file (str): filename of a TIFF image file.
+    Returns:
+        4-digit page number from the filename with leading zeroes
+    """
+    base_filename = Path(filename).stem
+    if "_se" in base_filename:
+        filename_trimmed = base_filename.split("_se")[0]
+    elif "_m" in base_filename:
+        filename_trimmed = base_filename.split("_m")[0]
+    else:
+        filename_trimmed = base_filename
+    return filename_trimmed.split("_")[-1].lstrip("0").zfill(4)
