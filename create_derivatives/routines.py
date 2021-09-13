@@ -120,13 +120,23 @@ class JP2Maker(BaseRoutine):
         jp2_dir = Path(bag.bag_path, "data", "JP2")
         if not jp2_dir.is_dir():
             jp2_dir.mkdir()
-        service_dir = Path(bag.bag_path, "data", "service")
-        if service_dir.is_dir() and any(service_dir.iterdir()):
-            tiff_files_dir = Path(bag.bag_path, "data", "service")
-        else:
-            tiff_files_dir = Path(bag.bag_path, "data")
-        tiff_files = matching_files(tiff_files_dir, prepend=True)
+            tiff_files = self.get_tiff_file_paths(bag.bag_path)
         self.create_jp2s(bag, tiff_files, jp2_dir)
+
+    def get_tiff_file_paths(self, bag_path):
+        """Determines the location of TIFF files in the bag.
+
+        Args:
+            bag_path (str): root bag path.
+        Returns:
+            tiff_files (list of pathlib.Paths): absolute filepaths for TIFF files.
+        """
+        service_dir = Path(bag_path, "data", "service")
+        if service_dir.is_dir() and any(service_dir.iterdir()):
+            tiff_files_dir = Path(bag_path, "data", "service")
+        else:
+            tiff_files_dir = Path(bag_path, "data")
+        return matching_files(tiff_files_dir, prepend=True)
 
     def calculate_layers(self, file):
         """Calculates the number of layers based on pixel dimensions.
