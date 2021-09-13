@@ -2,11 +2,14 @@ import shutil
 from pathlib import Path
 from unittest.mock import patch
 
+import vcr
+from botocore.stub import Stubber
 from django.test import TestCase
 from django.urls import reverse
 from pictor import settings
 from rest_framework.test import APIRequestFactory
 
+from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import matching_files
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
@@ -259,3 +262,40 @@ class CleanupTestCase(TestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
+
+
+class ClientsTestCase(TestCase):
+
+    archivesspace_vcr = vcr.VCR(
+        serializer='json',
+        cassette_library_dir='create_derivatives/fixtures/cassettes',
+        record_mode='once',
+        match_on=['path', 'method'],
+        filter_query_parameters=['username', 'password'],
+        filter_headers=['Authorization', 'X-ArchivesSpace-Session'],
+    )
+
+    def test_aspace(self):
+        with self.archivesspace_vcr.use_cassette("get_ao.json"):
+            object = ArchivesSpaceClient(*settings.ARCHIVESSPACE).get_object("repositories/101/archival_objects/2336")
+            self.assertTrue(isinstance(object, dict))
+            for key in ["title", "dates", "uri"]:
+                self.assertTrue(key in object)
+
+    @patch("boto3.s3.transfer.S3Transfer.upload_file")
+    def test_upload_files(self, mock_upload):
+        success_message = "success"
+        mock_upload.return_value = success_message
+        aws = AWSClient(*settings.AWS)
+        with Stubber(aws.s3.meta.client):
+            for filename, key, target_dir, mimetype in [
+                    ("123456.json", "123456", "manifests", "application/json"),
+                    ("123456.jp2", "123456", "images", "image/jp2"),
+                    ("123456.pdf", "123456", "pdfs", "application/pdf"), ]:
+                self.assertEqual(aws.upload_files([Path(filename)], target_dir), success_message)
+                mock_upload.assert_called_with(
+                    bucket=settings.AWS[3],
+                    callback=None,
+                    extra_args={"ContentType": mimetype},
+                    filename=filename,
+                    key="{}/{}".format(target_dir, key))
