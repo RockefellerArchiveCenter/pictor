@@ -50,7 +50,9 @@ gitpython==3.1.18
 health-check==3.4.1
     # via -r requirements.in
 idna==3.2
-    # via requests
+    # via
+    #   requests
+    #   yarl
 iiif-prezi==0.3.0
     # via -r requirements.in
 git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
@@ -68,6 +70,8 @@ lxml==4.6.3
     #   pyld
 more-itertools==8.8.0
     # via archivessnake
+multidict==5.1.0
+    # via yarl
 odin==1.7.1
     # via asterism
 pikepdf==2.16.1
@@ -92,6 +96,7 @@ pyyaml==5.4.1
     # via
     #   archivessnake
     #   health-check
+    #   vcrpy
 rapidfuzz==1.4.1
     # via archivessnake
 requests==2.26.0
@@ -104,6 +109,7 @@ six==1.16.0
     # via
     #   odin
     #   python-dateutil
+    #   vcrpy
 smmap==4.0.0
     # via gitdb
 sqlparse==0.4.1
@@ -115,7 +121,14 @@ typing-extensions==3.10.0.0
     #   asgiref
     #   gitpython
     #   structlog
+    #   yarl
 urllib3==1.26.6
     # via
     #   botocore
     #   requests
+vcrpy==4.1.1
+    # via -r requirements.in
+wrapt==1.12.1
+    # via vcrpy
+yarl==1.6.3
+    # via vcrpy
