@@ -158,7 +158,6 @@ class JP2MakerTestCase(TestCase):
     def setUp(self):
         make_dir(settings.TMP_DIR)
         self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
-        set_up_bag(settings.TMP_DIR, "unpacked_bag_with_tiff", self.bag_id)
 
     def test_run(self):
         """Asserts that the run method produced a JP2000 file in the JP2 directory.
@@ -166,11 +165,29 @@ class JP2MakerTestCase(TestCase):
         Tests that the method updates the bag's process_status and produces the
         desired results message.
         """
+        set_up_bag(settings.TMP_DIR, "unpacked_bag_with_tiff", self.bag_id)
         msg, jp2s = JP2Maker().run()
-        bag_path = Path(settings.TMP_DIR, self.bag_id)
-        bag = Bag.objects.get(bag_path=bag_path)
+        bag = Bag.objects.last()
         self.assertEqual(bag.process_status, Bag.JPG2000)
         self.assertEqual(msg, "JPG2000s created.")
+
+    def test_tiff_file_paths(self):
+        """Asserts that TIFF filepaths are properly produced.
+
+        Files in a service directory should be returned if present, otherwise
+        TIFFs in the data directory should be returned.
+        """
+        for fixture_path, expected in [
+                ("unpacked_bag_with_tiff", False),
+                ("unpacked_bag_with_tiff_empty_service", False),
+                ("unpacked_bag_with_tiff_service", True)]:
+            set_up_bag(settings.TMP_DIR, fixture_path, self.bag_id)
+            bag = Bag.objects.last()
+            tiffs = JP2Maker().get_tiff_file_paths(bag.bag_path)
+            for path in tiffs:
+                self.assertTrue("data" in str(path))
+                self.assertEqual("service" in str(path), expected)
+            shutil.rmtree(bag.bag_path)
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
