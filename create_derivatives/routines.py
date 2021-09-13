@@ -260,7 +260,7 @@ class ManifestMaker(BaseRoutine):
             raise Exception("Version {} of IIIF Presentation API not supported.".format(self.presentation_api_version))
         self.resource_url = "{}/iiif/{}/".format(server_url, self.image_api_version)
         self.fac = ManifestFactory()
-        self.fac.set_base_prezi_uri("{}/manifests/".format(server_url))
+        self.fac.set_base_prezi_uri("{}/manifests/".format(settings.MANIFESTS_URL))
         self.fac.set_base_image_uri(self.resource_url)
         self.fac.set_debug(settings.PREZI_DEBUG)
         self.upgrader = Upgrader()

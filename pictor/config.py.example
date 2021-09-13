@@ -38,7 +38,8 @@ AWS = (
 )
 
 # baseurl
-IMAGESERVER_URL = "https://iiif.rockarch.org"
+IMAGESERVER_URL = "https://images.rockarch.org"
+MANIFESTS_URL = "https://iiif.rockarch.org"
 
 # Prezi set_debug
 PREZI_DEBUG_LEVEL = "error"
