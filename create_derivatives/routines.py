@@ -297,20 +297,23 @@ class ManifestMaker(BaseRoutine):
         manifest.set_metadata({"Date": obj_data["dates"]})
         manifest.thumbnail = self.set_thumbnail(self.jp2_files[0].stem)
         sequence = manifest.sequence(ident=identifier)
-        for file in self.jp2_files:
-            page_number = get_page_number(file)
-            filename = file.stem
-            width, height = self.get_image_info(file)
+        annotation_count = 1
+        for jp2_file in self.jp2_files:
+            page_number = get_page_number(jp2_file)
+            jp2_filename = jp2_file.stem
+            width, height = self.get_image_info(jp2_file)
             """Set the canvas ID, which starts the same as the manifest ID,
             and then include page_number as the canvas ID.
             """
-            canvas = sequence.canvas(ident="{}/canvas/{}".format(manifest.id, page_number), label="Page {}".format(page_number.lstrip("0")))
+            canvas_id = "{}/canvas/{}".format(manifest.id, page_number.lstrip("0"))
+            canvas = sequence.canvas(ident=canvas_id, label="Page {}".format(page_number.lstrip("0")))
             canvas.set_hw(height, width)
-            annotation = canvas.annotation(ident=filename)
+            annotation = canvas.annotation("{}/annotation/{}".format(canvas_id, annotation_count))
             img = annotation.image(
-                ident="/{}/full/max/0/default.jpg".format(filename))
-            self.set_image_data(img, height, width, filename)
-            canvas.thumbnail = self.set_thumbnail(filename)
+                ident="/{}/full/max/0/default.jpg".format(jp2_filename))
+            self.set_image_data(img, height, width, jp2_filename)
+            canvas.thumbnail = self.set_thumbnail(jp2_filename)
+            annotation_count += 1
         v2_json = manifest.toJSON(top=True)
         if self.presentation_api_version == 2:
             manifest_json = v2_json
