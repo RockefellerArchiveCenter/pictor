@@ -298,14 +298,14 @@ class ManifestMaker(BaseRoutine):
         manifest.thumbnail = self.set_thumbnail(self.jp2_files[0].stem)
         sequence = manifest.sequence(ident=identifier)
         for jp2_file in self.jp2_files:
-            page_number = get_page_number(jp2_file)
+            page_number = get_page_number(jp2_file).lstrip("0")
             jp2_filename = jp2_file.stem
             width, height = self.get_image_info(jp2_file)
             """Set the canvas ID, which starts the same as the manifest ID,
             and then include page_number as the canvas ID.
             """
-            canvas_id = "{}/canvas/{}".format(manifest.id, page_number.lstrip("0"))
-            canvas = sequence.canvas(ident=canvas_id, label="Page {}".format(page_number.lstrip("0")))
+            canvas_id = "{}/canvas/{}".format(manifest.id, page_number)
+            canvas = sequence.canvas(ident=canvas_id, label="Page {}".format(page_number))
             canvas.set_hw(height, width)
             annotation = canvas.annotation("{}/annotation/1".format(canvas_id))
             img = annotation.image(
