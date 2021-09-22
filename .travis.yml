@@ -27,7 +27,7 @@ deploy:
     secret_access_key: $AWS_SECRET_KEY
     local_dir: $DEPLOY_ZIP_DIR
     skip_cleanup: true
-    on: &development
+    on: 
       repo: RockefellerArchiveCenter/${APPLICATION_NAME}
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(base|development)$
