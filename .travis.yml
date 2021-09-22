@@ -5,19 +5,19 @@ services:
 env:
   global:
     - APPLICATION_NAME: pictor
-    - SERVICE_NAME: pictor-web
+    - CONTAINER: pictor-web
 before_install:
   - cp ${APPLICATION_NAME}/config.py.example ${APPLICATION_NAME}/config.py
   - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
   - docker-compose up -d
 install:
-  - ./wait-for-it.sh ${SERVICE_NAME}:8000 -- docker-compose exec ${SERVICE_NAME} pip install coverage pre-commit
-  - docker-compose exec $SERVICE_NAME pre-commit install
+  - ./wait-for-it.sh ${CONTAINER}:${DJANGO_PORT} -- docker-compose exec ${CONTAINER} pip install coverage pre-commit
+  - docker-compose exec $CONTAINER pre-commit install
 script:
-  - docker-compose exec $SERVICE_NAME pre-commit run --all-files --show-diff-on-failure
-  - docker-compose exec $SERVICE_NAME coverage run manage.py test
+  - docker-compose exec $CONTAINER pre-commit run --all-files --show-diff-on-failure
+  - docker-compose exec $CONTAINER coverage run manage.py test
 after_script:
-  - docker-compose exec $SERVICE_NAME coverage report --omit=create_derivatives/migrations/* -m
+  - docker-compose exec $CONTAINER coverage report --omit=create_derivatives/migrations/* -m
 before_deploy:
   - sudo deploy_scripts/substitute_env.sh
   - sudo deploy_scripts/make_zip.sh $DEPLOY_ZIP_DIR $DEPLOY_ZIP_NAME
