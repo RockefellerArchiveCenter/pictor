@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-for TEMPLATE in pictor/config.py.deploy \
+for TEMPLATE in ${APPLICATION_NAME}/config.py.deploy \
   appspec.yml.deploy \
   deploy_scripts/*.deploy
 do
