@@ -1,31 +1,29 @@
-SECRET_KEY = 'ny033+z#r)$cpjl9gnbi*v=p8rjl2(%3-f&*v(mhi4#^eur9u8'
-DEBUG = True
-SQL_ENGINE = 'django.db.backends.postgresql'
-SQL_DATABASE = 'postgres'
-SQL_USER = 'postgres'
-SQL_PASSWORD = 'postgres'
-SQL_HOST = 'pictor-db'
-SQL_PORT = 5432
-ALLOWED_HOSTS = ['pictor-web', 'localhost']
-BASE_DIR = '/pictor'
-SRC_DIR = '{}/src'.format(BASE_DIR)
-TMP_DIR = '{}/tmp'.format(BASE_DIR)
-DEST_DIR = '{}/dest'.format(BASE_DIR)
-ARCHIVESSPACE_URL = "http://localhost:8089/"
-ARCHIVESSPACE_USER = "admin"
-ARCHIVESSPACE_PW = "admin"
-ARCHIVESSPACE_REPOSTIORY = 2
-AWS_IIIF_REGION_NAME = "us-east-1"
-AWS_IIIF_ACCESS_KEY = "123456789"
-AWS_IIIF_SECRET_KEY = "987654321"
-AWS_IIIF_BUCKET = "rac-iiif"
+SECRET_KEY = 'ny033+z#r)$cpjl9gnbi*v=p8rjl2(%3-f&*v(mhi4#^eur9u8' # used by Django to create hashes (string)
+DEBUG = True # run Django in debug mode, which outputs stack traces to the UI, set to False for production (boolean)
+SQL_ENGINE = 'django.db.backends.postgresql' # the database engine used by Pictor (string, one of django.db.backends)
+SQL_DATABASE = 'postgres' # name of the application database (string)
+SQL_USER = 'postgres' # name of the application database user (string)
+SQL_PASSWORD = 'postgres' # password for the application database (string)
+SQL_HOST = 'pictor-db' # host for the application database (string)
+SQL_PORT = 5432 # port on which the application database can be reached (integer)
+ALLOWED_HOSTS = ['pictor-web', 'localhost'] # hosts Pictor will respond to (list of strings)
+BASE_DIR = '/pictor' 
+SRC_DIR = '{}/src'.format(BASE_DIR) # Source directory (string)
+TMP_DIR = '{}/tmp'.format(BASE_DIR) # Temporary directory (string)
+DEST_DIR = '{}/dest'.format(BASE_DIR) # Destination directory (string)
+ARCHIVESSPACE_URL = "http://localhost:8089/" # base URL for an ArchivesSpace API instance (string)
+ARCHIVESSPACE_USER = "admin" # username for an ArchivesSpace user (read-only credentials required) (string)
+ARCHIVESSPACE_PW = "admin"  # password for the ArchivesSpace user (string)
+ARCHIVESSPACE_REPOSTIORY = 2 # identifier for an ArchivesSpace repository (integer)
+AWS_IIIF_REGION_NAME = "us-east-1" # Region name for AWS bucket that images will be stored in (string)
+AWS_IIIF_ACCESS_KEY = "123456789" # Access key for AWS bucket that images will be stored in (string)
+AWS_IIIF_SECRET_KEY = "987654321" # Secret key for AWS bucket that images will be stored in (string)
+AWS_IIIF_BUCKET = "rac-iiif" # Bucket name for AWS bucket that images will be stored in (string)
 
-# baseurl
-IMAGESERVER_URL = "https://images.rockarch.org"
-MANIFESTS_URL = "https://iiif.rockarch.org"
+IMAGESERVER_URL = "https://images.rockarch.org" # base URL for IIIF images (string)
+MANIFESTS_URL = "https://iiif.rockarch.org" # base URL for IIIF manifests (string)
 
-# Prezi set_debug
-PREZI_DEBUG_LEVEL = "error"
+PREZI_DEBUG_LEVEL = "error" # Prezi set_debug (string)
 
-IIIF_IMAGE_API = 2
-IIIF_PRESENTATION_API = 3
+IIIF_IMAGE_API = 2 # Version of IIIF Image API (integer)
+IIIF_PRESENTATION_API = 3 # Version of IIIF Presentation API (integer
