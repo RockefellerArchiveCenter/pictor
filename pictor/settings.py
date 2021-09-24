@@ -76,8 +76,16 @@ WSGI_APPLICATION = 'pictor.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = CF.DATABASES
-
+DATABASES = {
+    "default": {
+        "ENGINE": CF.SQL_ENGINE,
+        "NAME": CF.SQL_DATABASE,
+        "USER": CF.SQL_USER,
+        "PASSWORD": CF.SQL_PASSWORD,
+        "HOST": CF.SQL_HOST,
+        "PORT": CF.SQL_PORT,
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -128,9 +136,13 @@ SRC_DIR = CF.SRC_DIR
 TMP_DIR = CF.TMP_DIR
 DEST_DIR = CF.DEST_DIR
 
-ARCHIVESSPACE = CF.ARCHIVESSPACE
-AWS = CF.AWS
+# baseurl, username, password, repo_id
+ARCHIVESSPACE = (CF.ARCHIVESSPACE_URL, CF.ARCHIVESSPACE_USER, CF.ARCHIVESSPACE_PW, CF.ARCHIVESSPACE_REPOSTIORY)
+
+# region_name, access_key, secret_key, bucket
+AWS = (CF.AWS_IIIF_REGION_NAME, CF.AWS_IIIF_ACCESS_KEY, CF.AWS_IIIF_SECRET_KEY, CF.AWS_IIIF_BUCKET)
+
 IMAGESERVER_URL = CF.IMAGESERVER_URL
 MANIFESTS_URL = CF.MANIFESTS_URL
 PREZI_DEBUG = CF.PREZI_DEBUG_LEVEL
-IIIF_API = CF.IIIF_API
+IIIF_API = {'image_api': CF.IIIF_IMAGE_API, 'presentation_api': CF.IIIF_PRESENTATION_API}

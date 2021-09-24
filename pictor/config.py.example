@@ -1,41 +1,24 @@
 SECRET_KEY = 'ny033+z#r)$cpjl9gnbi*v=p8rjl2(%3-f&*v(mhi4#^eur9u8'
 DEBUG = True
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'pictor-db',
-        'PORT': 5432,
-    }
-}
-
+SQL_ENGINE = 'django.db.backends.postgresql'
+SQL_DATABASE = 'postgres'
+SQL_USER = 'postgres'
+SQL_PASSWORD = 'postgres'
+SQL_HOST = 'pictor-db'
+SQL_PORT = 5432
 ALLOWED_HOSTS = ['pictor-web', 'localhost']
-
 BASE_DIR = '/pictor'
-
 SRC_DIR = '{}/src'.format(BASE_DIR)
 TMP_DIR = '{}/tmp'.format(BASE_DIR)
 DEST_DIR = '{}/dest'.format(BASE_DIR)
-
-STATIC_ROOT = "/static"
-
-# baseurl, username, password, repo_id
-ARCHIVESSPACE = (
-  "http://localhost:8089/",
-  "admin",
-  "admin",
-  2,
-)
-
-# region_name, access_key, secret_key, bucket
-AWS = (
-  "us-east-1",
-  "123456789",
-  "987654321",
-  "rac-iiif",
-)
+ARCHIVESSPACE_URL = "http://localhost:8089/"
+ARCHIVESSPACE_USER = "admin"
+ARCHIVESSPACE_PW = "admin"
+ARCHIVESSPACE_REPOSTIORY = 2
+AWS_IIIF_REGION_NAME = "us-east-1"
+AWS_IIIF_ACCESS_KEY = "123456789"
+AWS_IIIF_SECRET_KEY = "987654321"
+AWS_IIIF_BUCKET = "rac-iiif"
 
 # baseurl
 IMAGESERVER_URL = "https://images.rockarch.org"
@@ -44,6 +27,5 @@ MANIFESTS_URL = "https://iiif.rockarch.org"
 # Prezi set_debug
 PREZI_DEBUG_LEVEL = "error"
 
-IIIF_API = {
-    'image_api': 2, 'presentation_api': 3
-}
+IIIF_IMAGE_API = 2
+IIIF_PRESENTATION_API = 3
