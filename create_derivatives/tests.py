@@ -100,6 +100,10 @@ class ViewTestCase(TestCase):
                 {'detail': exception_text, 'objects': [exception_id], 'count': 1},
                 "Unexpected error response")
 
+    def test_health_check_view(self):
+        status = self.client.get(reverse('api_health_ping'))
+        self.assertEqual(status.status_code, 200, "Wrong HTTP code")
+
 
 class BagPreparerTestCase(TestCase):
     fixtures = ["created.json"]
