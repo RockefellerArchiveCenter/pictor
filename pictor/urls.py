@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^cleanup/', CleanupView.as_view(), name='cleanup'),
     url(r'^schema/', schema_view, name='schema'),
     url(r'^admin/', admin.site.urls),
+    url('status/', include('health_check.api.urls')),
 ]
