@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+# stop all running cron jobs
+if [[ `pgrep -f ${APPLICATION_NAME}.*runcrons` ]]; then
+  sudo pkill -f ${APPLICATION_NAME}.*runcrons
+  sudo rm ${DJANGO_CRON_LOCKFILE_PATH}*.lock
+fi
+
+# stop cron
+sudo systemctl stop crond

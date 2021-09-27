@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+cd ${ROOT_DIR}
+
+# recreate virtual env
+${PYTHON_PATH} -m venv env --clear
+
+# install dependencies
+env/bin/pip install --upgrade pip
+env/bin/pip install -r requirements.txt

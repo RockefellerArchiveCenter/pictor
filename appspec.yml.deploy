@@ -1,0 +1,22 @@
+version: 0.0
+os: linux
+files:
+  - source: ./
+    destination: ${ROOT_DIR}
+hooks:
+  ApplicationStop:
+    - location: deploy_scripts/stop_cron.sh
+      timeout: 30
+  AfterInstall:
+    - location: deploy_scripts/set_permissions.sh
+      timeout: 30
+    - location: deploy_scripts/install_dependencies.sh
+      timeout: 300
+    - location: deploy_scripts/run_management_commands.sh
+      timeout: 300
+  ApplicationStart:
+    - location: deploy_scripts/application_start.sh
+      timeout: 20
+  ValidateService:
+    - location: deploy_scripts/validate_service.sh
+      timeout: 10
