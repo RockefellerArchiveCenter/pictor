@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'create_derivatives',
     'rest_framework',
+    'health_check',
 ]
 
 MIDDLEWARE = [
