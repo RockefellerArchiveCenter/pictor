@@ -1,0 +1,267 @@
+{
+    "version": 1,
+    "interactions": [
+        {
+            "request": {
+                "method": "POST",
+                "uri": "http://localhost:8089/users/admin/login",
+                "body": "password=admin&expiring=False",
+                "headers": {
+                    "User-Agent": [
+                        "ArchivesSnake/0.1"
+                    ],
+                    "Accept-Encoding": [
+                        "gzip, deflate"
+                    ],
+                    "Accept": [
+                        "application/json"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "Content-Length": [
+                        "29"
+                    ],
+                    "Content-Type": [
+                        "application/x-www-form-urlencoded"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Content-Length": [
+                        "2981"
+                    ],
+                    "Date": [
+                        "Thu, 05 Nov 2020 01:18:10 GMT"
+                    ],
+                    "X-Content-Type-Options": [
+                        "nosniff"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Cache-Control": [
+                        "private, must-revalidate, max-age=0"
+                    ],
+                    "Server": [
+                        "Jetty(8.1.5.v20120716)"
+                    ]
+                },
+                "body": {
+                    "string": "{\"session\":\"e9ee915e5c5455b0bb125a45eb6e9c7e635bd449cc8b4e29a3c4725510e9c453\",\"user\":{\"lock_version\":50,\"username\":\"admin\",\"name\":\"Administrator\",\"is_system_user\":true,\"create_time\":\"2020-09-20T14:45:59Z\",\"system_mtime\":\"2020-11-05T01:18:11Z\",\"user_mtime\":\"2020-11-05T01:18:11Z\",\"jsonmodel_type\":\"user\",\"groups\":[],\"is_admin\":true,\"uri\":\"/users/1\",\"agent_record\":{\"ref\":\"/agents/people/1\"},\"permissions\":{\"/repositories/1\":[\"update_enumeration_record\",\"update_location_record\",\"delete_vocabulary_record\",\"update_subject_record\",\"delete_subject_record\",\"update_agent_record\",\"delete_agent_record\",\"update_vocabulary_record\",\"merge_subject_record\",\"merge_agent_record\",\"update_container_profile_record\",\"update_location_profile_record\",\"administer_system\",\"become_user\",\"cancel_importer_job\",\"cancel_job\",\"create_job\",\"create_repository\",\"delete_archival_record\",\"delete_assessment_record\",\"delete_classification_record\",\"delete_event_record\",\"delete_repository\",\"import_records\",\"index_system\",\"manage_agent_record\",\"manage_assessment_attributes\",\"manage_container_profile_record\",\"manage_container_record\",\"manage_enumeration_record\",\"manage_location_profile_record\",\"manage_rde_templates\",\"manage_repository\",\"manage_subject_record\",\"manage_users\",\"manage_vocabulary_record\",\"mediate_edits\",\"merge_agents_and_subjects\",\"merge_archival_record\",\"suppress_archival_record\",\"transfer_archival_record\",\"transfer_repository\",\"update_accession_record\",\"update_assessment_record\",\"update_classification_record\",\"update_container_record\",\"update_digital_object_record\",\"update_event_record\",\"update_resource_record\",\"view_agent_contact_record\",\"view_all_records\",\"view_repository\",\"view_suppressed\"],\"_archivesspace\":[\"administer_system\",\"become_user\",\"cancel_importer_job\",\"cancel_job\",\"create_job\",\"create_repository\",\"delete_archival_record\",\"delete_assessment_record\",\"delete_classification_record\",\"delete_event_record\",\"delete_repository\",\"import_records\",\"index_system\",\"manage_agent_record\",\"manage_assessment_attributes\",\"manage_container_profile_record\",\"manage_container_record\",\"manage_enumeration_record\",\"manage_location_profile_record\",\"manage_rde_templates\",\"manage_repository\",\"manage_subject_record\",\"manage_users\",\"manage_vocabulary_record\",\"mediate_edits\",\"merge_agents_and_subjects\",\"merge_archival_record\",\"suppress_archival_record\",\"transfer_archival_record\",\"transfer_repository\",\"update_accession_record\",\"update_assessment_record\",\"update_classification_record\",\"update_container_record\",\"update_digital_object_record\",\"update_event_record\",\"update_resource_record\",\"view_agent_contact_record\",\"view_all_records\",\"view_repository\",\"view_suppressed\",\"update_enumeration_record\",\"update_location_record\",\"delete_vocabulary_record\",\"update_subject_record\",\"delete_subject_record\",\"update_agent_record\",\"delete_agent_record\",\"update_vocabulary_record\",\"merge_subject_record\",\"merge_agent_record\",\"update_container_profile_record\",\"update_location_profile_record\"]}}}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "GET",
+                "uri": "http://localhost:8089/version",
+                "body": null,
+                "headers": {
+                    "User-Agent": [
+                        "ArchivesSnake/0.1"
+                    ],
+                    "Accept-Encoding": [
+                        "gzip, deflate"
+                    ],
+                    "Accept": [
+                        "application/json"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Content-Length": [
+                        "22"
+                    ],
+                    "Date": [
+                        "Thu, 05 Nov 2020 01:18:11 GMT"
+                    ],
+                    "X-Content-Type-Options": [
+                        "nosniff"
+                    ],
+                    "X-XSS-Protection": [
+                        "1; mode=block"
+                    ],
+                    "Content-Type": [
+                        "text/html;charset=UTF-8"
+                    ],
+                    "X-Frame-Options": [
+                        "SAMEORIGIN"
+                    ],
+                    "Cache-Control": [
+                        "private, must-revalidate, max-age=0"
+                    ],
+                    "Server": [
+                        "Jetty(8.1.5.v20120716)"
+                    ]
+                },
+                "body": {
+                    "string": "ArchivesSpace (v2.8.0)"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "GET",
+                "uri": "http://localhost:8089/repositories/101/find_by_id/archival_objects?ref_id%5B%5D=aspace_b1f076a9f49d369034188c232f7cdf25",
+                "body": null,
+                "headers": {
+                    "User-Agent": [
+                        "ArchivesSnake/0.1"
+                    ],
+                    "Accept-Encoding": [
+                        "gzip, deflate"
+                    ],
+                    "Accept": [
+                        "application/json"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Content-Length": [
+                        "73"
+                    ],
+                    "Date": [
+                        "Thu, 05 Nov 2020 01:18:11 GMT"
+                    ],
+                    "X-Content-Type-Options": [
+                        "nosniff"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Cache-Control": [
+                        "private, must-revalidate, max-age=0"
+                    ],
+                    "Server": [
+                        "Jetty(8.1.5.v20120716)"
+                    ]
+                },
+                "body": {
+                    "string": "{\"archival_objects\":[{\"ref\":\"/repositories/101/archival_objects/2336\"}]}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "GET",
+                "uri": "http://localhost:8089/repositories/101/archival_objects/2336",
+                "body": null,
+                "headers": {
+                    "User-Agent": [
+                        "ArchivesSnake/0.1"
+                    ],
+                    "Accept-Encoding": [
+                        "gzip, deflate"
+                    ],
+                    "Accept": [
+                        "application/json"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Content-Length": [
+                        "900"
+                    ],
+                    "Date": [
+                        "Thu, 05 Nov 2020 01:18:11 GMT"
+                    ],
+                    "X-Content-Type-Options": [
+                        "nosniff"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Cache-Control": [
+                        "private, must-revalidate, max-age=0"
+                    ],
+                    "Server": [
+                        "Jetty(8.1.5.v20120716)"
+                    ]
+                },
+                "body": {
+                    "string": "{\"lock_version\":0,\"position\":0,\"publish\":true,\"ref_id\":\"aspace_b1f076a9f49d369034188c232f7cdf25\",\"component_id\":\"3\",\"title\":\"Original Audio Tapes\",\"display_string\":\"Original Audio Tapes\",\"restrictions_apply\":false,\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:24:57Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"suppressed\":false,\"is_slug_auto\":true,\"level\":\"series\",\"jsonmodel_type\":\"archival_object\",\"external_ids\":[],\"subjects\":[],\"linked_events\":[],\"extents\":[],\"lang_materials\":[],\"dates\":[],\"external_documents\":[],\"rights_statements\":[],\"linked_agents\":[],\"ancestors\":[{\"ref\":\"/repositories/101/resources/4\",\"level\":\"collection\"}],\"instances\":[],\"notes\":[],\"uri\":\"/repositories/101/archival_objects/2336\",\"repository\":{\"ref\":\"/repositories/101\"},\"resource\":{\"ref\":\"/repositories/101/resources/4\"},\"has_unpublished_ancestor\":false}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "GET",
+                "uri": "http://localhost:8089/repositories/101/archival_objects/2336?resolve%5B%5D=ancestors",
+                "body": null,
+                "headers": {
+                    "User-Agent": [
+                        "ArchivesSnake/0.1"
+                    ],
+                    "Accept-Encoding": [
+                        "gzip, deflate"
+                    ],
+                    "Accept": [
+                        "application/json"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Content-Length": [
+                        "8667"
+                    ],
+                    "Date": [
+                        "Thu, 05 Nov 2020 01:18:11 GMT"
+                    ],
+                    "X-Content-Type-Options": [
+                        "nosniff"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Cache-Control": [
+                        "private, must-revalidate, max-age=0"
+                    ],
+                    "Server": [
+                        "Jetty(8.1.5.v20120716)"
+                    ]
+                },
+                "body": {
+                    "string": "{\"lock_version\":0,\"position\":0,\"publish\":true,\"ref_id\":\"aspace_b1f076a9f49d369034188c232f7cdf25\",\"component_id\":\"3\",\"title\":\"Original Audio Tapes\",\"display_string\":\"Original Audio Tapes\",\"restrictions_apply\":false,\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:24:57Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"suppressed\":false,\"is_slug_auto\":true,\"level\":\"series\",\"jsonmodel_type\":\"archival_object\",\"external_ids\":[],\"subjects\":[],\"linked_events\":[],\"extents\":[],\"lang_materials\":[],\"dates\":[],\"external_documents\":[],\"rights_statements\":[],\"linked_agents\":[],\"ancestors\":[{\"ref\":\"/repositories/101/resources/4\",\"level\":\"collection\",\"_resolved\":{\"lock_version\":0,\"title\":\"Cary Reich papers\",\"publish\":true,\"restrictions\":false,\"ead_id\":\"FA1275.xml\",\"finding_aid_title\":\"A Guide to the Cary Reich papers <num>FA1275</num>\",\"finding_aid_filing_title\":\"Reich, Cary papers\",\"finding_aid_date\":\"2019\",\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:24:57Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"suppressed\":false,\"is_slug_auto\":true,\"finding_aid_language_note\":\"English\",\"id_0\":\"FA1275\",\"level\":\"collection\",\"finding_aid_description_rules\":\"Describing Archives: A Content Standard\",\"finding_aid_language\":\"und\",\"finding_aid_script\":\"Zyyy\",\"jsonmodel_type\":\"resource\",\"external_ids\":[{\"external_id\":\"19141\",\"source\":\"Archivists Toolkit Database::RESOURCE\",\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:10:28Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"jsonmodel_type\":\"external_id\"}],\"subjects\":[{\"ref\":\"/subjects/42\"}],\"linked_events\":[],\"extents\":[{\"lock_version\":0,\"number\":\"13.86\",\"container_summary\":\"10 standard record storage boxes, 10 document boxes containing 565 audio cassettes, and 2 record storage boxes containing special formats.\",\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:10:28Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"portion\":\"whole\",\"extent_type\":\"Cubic Feet\",\"jsonmodel_type\":\"extent\"}],\"lang_materials\":[{\"lock_version\":0,\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:10:28Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"jsonmodel_type\":\"lang_material\",\"notes\":[],\"language_and_script\":{\"lock_version\":0,\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:10:28Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"language\":\"eng\",\"jsonmodel_type\":\"language_and_script\"}},{\"lock_version\":0,\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:10:28Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"jsonmodel_type\":\"lang_material\",\"notes\":[{\"jsonmodel_type\":\"note_langmaterial\",\"type\":\"langmaterial\",\"content\":[\"English .\"],\"persistent_id\":\"45ef50be108391678b1194a0ef2f86c9\",\"publish\":true}]}],\"dates\":[{\"lock_version\":0,\"expression\":\"1950s-1980s (Bulk 1982)\",\"begin\":\"1950\",\"end\":\"1989\",\"created_by\":\"admin\",\"last_modified_by\":\"admin\",\"create_time\":\"2020-09-21T17:10:28Z\",\"system_mtime\":\"2020-09-21T17:10:28Z\",\"user_mtime\":\"2020-09-21T17:10:28Z\",\"date_type\":\"inclusive\",\"label\":\"creation\",\"jsonmodel_type\":\"date\"}],\"external_documents\":[],\"rights_statements\":[],\"linked_agents\":[{\"role\":\"creator\",\"terms\":[],\"ref\":\"/agents/people/103\"},{\"role\":\"creator\",\"terms\":[],\"ref\":\"/agents/people/104\"}],\"revision_statements\":[],\"instances\":[],\"deaccessions\":[],\"related_accessions\":[],\"classifications\":[],\"notes\":[{\"jsonmodel_type\":\"note_multipart\",\"subnotes\":[{\"publish\":true,\"jsonmodel_type\":\"note_text\",\"content\":\"Open for research with select materials restricted as noted. Brittle or damaged items are available at the discretion of RAC.\\n\\nResearchers interested in accessing digital media (floppy disks, CDs, DVDs, etc.) or audiovisual material (audio cassettes, VHS, etc.) in this collection must use an access surrogate. The original items may not be accessed because of preservation concerns. To request an access surrogate be made, or if you are unsure if there is an access surrogate, please contact an archivist.\"}],\"type\":\"accessrestrict\",\"persistent_id\":\"aspace_afeed6d0daf4985b7b706edf7864921a\",\"label\":\"Conditions Governing Access\",\"publish\":true},{\"jsonmodel_type\":\"note_multipart\",\"subnotes\":[{\"publish\":true,\"jsonmodel_type\":\"note_text\",\"content\":\"As received.\"}],\"type\":\"arrangement\",\"persistent_id\":\"aspace_12e2f867ddb38f5f3cc31f26b0a83987\",\"label\":\"Arrangement\",\"publish\":true},{\"jsonmodel_type\":\"note_multipart\",\"subnotes\":[{\"publish\":true,\"jsonmodel_type\":\"note_text\",\"content\":\"Information regarding the Rockefeller Archive Center's preferred elements and forms of citation can be found at <extref xlink:href=\\\"http://www.rockarch.org/research/citations.php\\\">http://www.rockarch.org/research/citations.php</extref>\"}],\"type\":\"prefercite\",\"persistent_id\":\"aspace_11643d814b479b19404ff6ada035bc73\",\"label\":\"Preferred Citation\",\"publish\":true},{\"jsonmodel_type\":\"note_multipart\",\"subnotes\":[{\"publish\":true,\"jsonmodel_type\":\"note_text\",\"content\":\"This collection primarily contains transcripts, audiotapes, and notes of interviews conducted by author Cary Reich during research for the first volume, and anticipated second volume, of \\\"The Life of Nelson A. Rockefeller.\\\" Additionally, it contains partial audiotaped interviews for Reich's \\\"New York Times\\\" expose \\\"The Creative Mind: The Innovator\\\" from April 21, 1985, as well as other financial articles. \\n\\nIn addition, there are audio interviews conducted by Patricia Linden, who was gathering stories for a \\\"Town and Country\\\" magazine article (\\\"Rockefellers' Monumental Legacy,\\\" September 1982) describing the Rockefeller legacy in New York, as well as her own unrealized unauthored biography of Nelson Rockefeller.\\n\\nLastly, the collection has subject files primarily consisting of research materials and news clippings pertaining to a variety of significant events in Nelson Rockfeller's life, including but not limited to the 1964 U.S. Presidential campaign, the International Basic Economy Corporation (IBEC), his gubernatorial tenure, and the U.S. vice presidency.\"}],\"type\":\"scopecontent\",\"persistent_id\":\"aspace_c8b1072265ac8aa9abf62ef9efa8acd0\",\"label\":\"Scope and Contents\",\"publish\":true},{\"jsonmodel_type\":\"note_multipart\",\"subnotes\":[{\"publish\":true,\"jsonmodel_type\":\"note_text\",\"content\":\"Papers were transferred to RAC in 2012 by the estate of Cary Reich.\"}],\"type\":\"acqinfo\",\"persistent_id\":\"aspace_7aff0dac4210a375e8ae6d90d447fd89\",\"label\":\"Immediate Source of Acquisition\",\"publish\":true},{\"jsonmodel_type\":\"note_multipart\",\"subnotes\":[{\"publish\":true,\"jsonmodel_type\":\"note_text\",\"content\":\"The Cary Reich Papers were donated to Rockefeller Archive Center in 2012. The Cary Reich estate retains copyright and all associated intellectual property rights.\"}],\"type\":\"userestrict\",\"persistent_id\":\"aspace_3c94b4a9b787a503153fae94f3bbd4e6\",\"label\":\"Conditions Governing Use\",\"publish\":true},{\"jsonmodel_type\":\"note_multipart\",\"subnotes\":[{\"publish\":true,\"jsonmodel_type\":\"note_text\",\"content\":\"Minimal processing by Robert Battaly, 2016. Initial inventory created by Diane April, 2013. Audiocassettes were digitized in 2016-2017 and Series 2: Oral History Audio records were modified by Zachary Leming in 2019.\"}],\"type\":\"processinfo\",\"persistent_id\":\"aspace_035c673fe96290e3ff36b9e6253abd8f\",\"label\":\"Processing Information\",\"publish\":true},{\"jsonmodel_type\":\"note_multipart\",\"subnotes\":[{\"publish\":true,\"jsonmodel_type\":\"note_text\",\"content\":\"Digital audio access copies for Series 2 were often made from multiple sources as individual interviews were spread across several audiocassettes. New Identification Numbers were provided to all digital audio access copies (Series 2: Oral History Audio). For all records in Series 2, there is an unpublished processing note that identifies the audiocassette sources that correlate to each title. Box and location information for all original source audiocassettes is in the unpublished Series 3: Original Audio Tapes.\"}],\"type\":\"processinfo\",\"persistent_id\":\"aspace_ce8f7d12abed392c7b4f36258a22824f\",\"label\":\"Processing Information\",\"publish\":true}],\"uri\":\"/repositories/101/resources/4\",\"repository\":{\"ref\":\"/repositories/101\"},\"tree\":{\"ref\":\"/repositories/101/resources/4/tree\"}}}],\"instances\":[],\"notes\":[],\"uri\":\"/repositories/101/archival_objects/2336\",\"repository\":{\"ref\":\"/repositories/101\"},\"resource\":{\"ref\":\"/repositories/101/resources/4\"},\"has_unpublished_ancestor\":false}\n"
+                }
+            }
+        }
+    ]
+}

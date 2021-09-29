@@ -1,18 +1,66 @@
 language: python
-sudo: required
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.cache/pre-commit
 services:
   - docker
 env:
   global:
-    - DOCKER_COMPOSE_VERSION: 1.18.0
+    - APPLICATION_NAME: pictor
+    - CONTAINER: pictor-web
 before_install:
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
-  - cp pictor/config.py.example pictor/config.py
+  - cp ${APPLICATION_NAME}/config.py.example ${APPLICATION_NAME}/config.py
+  - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
   - docker-compose up -d
-  - sleep 20s
-install: true
+install:
+  - pip install pre-commit && pre-commit install
+  - ./wait-for-it.sh $CONTAINER:$DJANGO_PORT -- docker-compose exec $CONTAINER pip install coverage
 script:
-  - docker-compose exec pictor-web python manage.py test
+  - pre-commit run --all-files --show-diff-on-failure
+  - docker-compose exec $CONTAINER coverage run manage.py test
+after_script:
+  - docker-compose exec $CONTAINER coverage report --omit=create_derivatives/migrations/* -m
+before_deploy:
+  - sudo deploy_scripts/substitute_env.sh
+  - sudo deploy_scripts/make_zip.sh $DEPLOY_ZIP_DIR $DEPLOY_ZIP_NAME
+deploy:
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    local_dir: $DEPLOY_ZIP_DIR
+    skip_cleanup: true
+    on: 
+      repo: RockefellerArchiveCenter/${APPLICATION_NAME}
+      all_branches: true
+      condition: $TRAVIS_BRANCH =~ ^(base|development)$
+    bucket: $AWS_BUCKET_NAME
+    region: us-east-1
+  - provider: codedeploy
+    wait_until_deployed: true
+    bucket: $AWS_BUCKET_NAME
+    key: $DEPLOY_ZIP_NAME
+    bundle_type: zip
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    application: ${APPLICATION_NAME}
+    deployment_group: PictorDevelopment
+    region: us-east-1
+    on:
+      repo: RockefellerArchiveCenter/${APPLICATION_NAME}
+      branch: development
+  - provider: codedeploy
+    wait_until_deployed: true
+    bucket: $AWS_BUCKET_NAME
+    key: $DEPLOY_ZIP_NAME
+    bundle_type: zip
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    application: ${APPLICATION_NAME}
+    deployment_group: PictorProduction
+    region: us-east-1
+    on:
+      repo: RockefellerArchiveCenter/${APPLICATION_NAME}
+      branch: base
+notifications:
+  email: false

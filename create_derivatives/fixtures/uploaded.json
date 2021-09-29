@@ -1,0 +1,17 @@
+[
+  {
+		"model": "create_derivatives.bag",
+		"pk": 7,
+		"fields": {
+			"bag_identifier": "sdfjldskj",
+			"bag_path": "/code/create_derivatives/fixtures/aws_upload_bag/3aai9usY3AZzCSFkB3RSQ9",
+			"type": null,
+			"origin": "digitization",
+			"process_status": 4,
+			"data": null,
+      "dimes_identifier": "asdfjklmn",
+			"created": "2021-07-26T20:02:22.535Z",
+			"last_modified": "2021-07-26T20:02:22.535Z"
+		}
+	}
+]

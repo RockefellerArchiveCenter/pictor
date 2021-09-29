@@ -1,9 +1,8 @@
-import os
+from pathlib import Path
 
 import boto3
 from asnake import utils
 from asnake.aspace import ASpace
-from botocore.exceptions import ClientError
 
 
 class ArchivesSpaceClient:
@@ -15,25 +14,17 @@ class ArchivesSpaceClient:
             repository=repository).client
         self.repository = repository
 
-    def get_object(self, ref_id):
-        """Gets archival object title and date from an ArchivesSpace refid.
+    def get_object(self, uri):
+        """Gets archival object title and date.
 
         Args:
-            ident (str): an ArchivesSpace refid.
+            uri (str): an ArchivesSpace URI.
         Returns:
             obj (dict): A dictionary representation of an archival object from ArchivesSpace.
         """
-        results = self.client.get(
-            'repositories/{}/find_by_id/archival_objects?ref_id[]={}'.format(
-                self.repository, ref_id)).json()
-        if not results.get("archival_objects"):
-            raise Exception(
-                "Could not find an ArchivesSpace object matching refid: {}".format(ref_id))
-        else:
-            obj_ref = results["archival_objects"][0]["ref"]
-            obj = self.client.get(obj_ref).json()
-            obj["dates"] = utils.find_closest_value(obj, 'dates', self.client)
-            return self.format_data(obj)
+        obj = self.client.get(uri).json()
+        obj["dates"] = utils.find_closest_value(obj, 'dates', self.client)
+        return self.format_data(obj)
 
     def format_data(self, data):
         """Parses ArchivesSpace data.
@@ -58,45 +49,19 @@ class AWSClient:
             aws_secret_access_key=secret_key)
         self.bucket = bucket
 
-    def upload_files(self, files, destination_dir, replace=False):
+    def upload_files(self, files, destination_dir):
         """Iterates over directories and conditionally uploads files to S3.
 
         Args:
             files (list): Filepaths to be uploaded.
             destination_dir (str): Path in the bucket in which the file should be stored.
-            replace (bool): Upload files even if they exist.
         """
         for file in files:
-            key = os.path.splitext(os.path.basename(file))[0]
-            bucket_path = os.path.join(destination_dir, key)
-            if (self.object_in_bucket(bucket_path) and not replace):
-                raise FileExistsError(
-                    "Error uploading files to AWS: {} already exists in {}".format(
-                        bucket_path, self.bucket))
-            else:
-                content_type = "image/jp2"
-                if file.endswith(".json"):
-                    content_type = "application/json"
-                elif file.endswith(".pdf"):
-                    content_type = "application/pdf"
-                self.s3.meta.client.upload_file(
-                    file, self.bucket, bucket_path,
-                    ExtraArgs={'ContentType': content_type})
-
-    def object_in_bucket(self, object_path):
-        """Checks if a file already exists in an S3 bucket.
-
-        Args:
-            object_path (str): Path to the object in the bucket.
-        Returns:
-            boolean: True if file exists, false otherwise.
-        """
-        try:
-            self.s3.Object(
-                self.bucket, object_path).load()
-            return True
-        except ClientError as e:
-            if e.response['Error']['Code'] == "404":
-                return False
-            else:
-                raise Exception("Error connecting to AWS: {}".format(e)) from e
+            key = file.stem
+            bucket_path = str(Path(destination_dir, key))
+            content_type = "image/jp2"
+            if file.suffix == ".json":
+                content_type = "application/json"
+            elif file.suffix == ".pdf":
+                content_type = "application/pdf"
+            return self.s3.meta.client.upload_file(str(file), self.bucket, bucket_path, ExtraArgs={'ContentType': content_type})

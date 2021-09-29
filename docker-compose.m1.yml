@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  pictor-db:
+    image: postgres:10.4
+    volumes:
+      - db:/var/lib/postgresql/data/
+  pictor-web:
+    platform: linux/amd64
+    build: .
+    entrypoint: /code/entrypoint.sh
+    volumes:
+      - .:/code
+    ports:
+      - "8012:8012"
+    depends_on:
+      - pictor-db
+
+volumes:
+  db:
