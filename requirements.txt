@@ -16,9 +16,9 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.18.36
+boto3==1.18.52
     # via -r requirements.in
-botocore==1.21.36
+botocore==1.21.52
     # via
     #   boto3
     #   s3transfer
@@ -116,12 +116,6 @@ sqlparse==0.4.1
     # via django
 structlog==21.1.0
     # via archivessnake
-typing-extensions==3.10.0.0
-    # via
-    #   asgiref
-    #   gitpython
-    #   structlog
-    #   yarl
 urllib3==1.26.6
     # via
     #   botocore
