@@ -76,7 +76,7 @@ odin==1.7.1
     # via asterism
 pikepdf==2.16.1
     # via img2pdf
-pillow==8.3.1
+pillow==8.3.2
     # via
     #   -r requirements.in
     #   iiif-prezi
@@ -116,12 +116,6 @@ sqlparse==0.4.1
     # via django
 structlog==21.1.0
     # via archivessnake
-typing-extensions==3.10.0.0
-    # via
-    #   asgiref
-    #   gitpython
-    #   structlog
-    #   yarl
 urllib3==1.26.6
     # via
     #   botocore
