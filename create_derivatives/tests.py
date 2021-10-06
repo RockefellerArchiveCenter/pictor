@@ -249,7 +249,7 @@ class AWSUploadTestCase(TestCase):
     fixtures = ["uploaded.json"]
 
     @patch("create_derivatives.clients.AWSClient.__init__")
-    @patch("create_derivatives.routines.AWSUpload.upload_files")
+    @patch("create_derivatives.clients.AWSClient.upload_files")
     def test_run(self, mock_upload_files, mock_init):
         """Asserts that the run method produces the desired results message.
 
@@ -263,6 +263,7 @@ class AWSUploadTestCase(TestCase):
         self.assertEqual(len(object_list), 1)
         for bag in Bag.objects.all().filter(dimes_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
+        self.assertEqual(mock_upload_files.call_count, 3)
 
 
 class CleanupTestCase(TestCase):
@@ -303,7 +304,7 @@ class ClientsTestCase(TestCase):
                 self.assertTrue(key in object)
 
     @patch("boto3.s3.transfer.S3Transfer.upload_file")
-    def test_upload_file_to_bucket(self, mock_upload):
+    def test_upload_files(self, mock_upload):
         success_message = "success"
         mock_upload.return_value = success_message
         aws = AWSClient(*settings.AWS)
@@ -311,8 +312,8 @@ class ClientsTestCase(TestCase):
             for filename, key, target_dir, mimetype in [
                     ("123456.json", "123456", "manifests", "application/json"),
                     ("123456.jp2", "123456", "images", "image/jp2"),
-                    ("123456.pdf", "123456", "pdfs", "application/pdf")]:
-                self.assertEqual(aws.upload_file_to_bucket(Path(filename), target_dir, mimetype), success_message)
+                    ("123456.pdf", "123456", "pdfs", "application/pdf"), ]:
+                self.assertEqual(aws.upload_files([Path(filename)], target_dir), success_message)
                 mock_upload.assert_called_with(
                     bucket=settings.AWS[3],
                     callback=None,

@@ -49,14 +49,19 @@ class AWSClient:
             aws_secret_access_key=secret_key)
         self.bucket = bucket
 
-    def upload_file_to_bucket(self, filepath, target_dir, content_type):
-        """Uploads a file to a directory in a bucket
+    def upload_files(self, files, destination_dir):
+        """Iterates over directories and conditionally uploads files to S3.
 
         Args:
-            filepath (pathlib.Path): path to file to upload
-            target_dir (str): target directory in bucket
-            content_type (str): MIME type for file to upload
+            files (list): Filepaths to be uploaded.
+            destination_dir (str): Path in the bucket in which the file should be stored.
         """
-        key = filepath.stem
-        bucket_path = str(Path(target_dir, key))
-        return self.s3.meta.client.upload_file(str(filepath), self.bucket, bucket_path, ExtraArgs={'ContentType': content_type})
+        for file in files:
+            key = file.stem
+            bucket_path = str(Path(destination_dir, key))
+            content_type = "image/jp2"
+            if file.suffix == ".json":
+                content_type = "application/json"
+            elif file.suffix == ".pdf":
+                content_type = "application/pdf"
+            return self.s3.meta.client.upload_file(str(file), self.bucket, bucket_path, ExtraArgs={'ContentType': content_type})
