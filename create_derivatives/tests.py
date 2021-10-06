@@ -306,15 +306,13 @@ class ClientsTestCase(TestCase):
 
     @patch("boto3.s3.transfer.S3Transfer.upload_file")
     def test_upload_files(self, mock_upload):
-        success_message = "success"
-        mock_upload.return_value = success_message
         aws = AWSClient(*settings.AWS)
         with Stubber(aws.s3.meta.client):
             for filename, key, target_dir, mimetype in [
                     ("123456.json", "123456", "manifests", "application/json"),
                     ("123456.jp2", "123456", "images", "image/jp2"),
                     ("123456.pdf", "123456", "pdfs", "application/pdf"), ]:
-                self.assertEqual(aws.upload_files([Path(filename)], target_dir), success_message)
+                aws.upload_files([Path(filename)], target_dir)
                 mock_upload.assert_called_with(
                     bucket=settings.AWS[3],
                     callback=None,
