@@ -388,12 +388,21 @@ class AWSUpload(BaseRoutine):
         pdf_dir = Path(bag.bag_path, "data", "PDF")
         jp2_dir = Path(bag.bag_path, "data", "JP2")
         manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
-        for src_dir, target_dir in [
-                (pdf_dir, "pdfs"),
-                (jp2_dir, "images"),
-                (manifest_dir, "manifests")]:
-            uploads = matching_files(src_dir, prefix=bag.dimes_identifier, prepend=True)
-            self.aws_client.upload_files(uploads, target_dir)
+        for src_dir in [pdf_dir, jp2_dir, manifest_dir]:
+            self.upload_files(bag, src_dir)
+
+    def upload_files(self, bag, src_dir):
+        files_to_upload = matching_files(src_dir, prefix=bag.dimes_identifier, prepend=True)
+        for filepath in files_to_upload:
+            target_dir = "images"
+            content_type = "image/jp2"
+            if filepath.suffix == ".json":
+                target_dir = "manifests"
+                content_type = "application/json"
+            elif filepath.suffix == ".pdf":
+                target_dir = "pdfs"
+                content_type = "application/pdf"
+            self.aws_client.upload_file_to_bucket(filepath, target_dir, content_type)
 
 
 class Cleanup(BaseRoutine):
