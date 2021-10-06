@@ -181,7 +181,7 @@ class JP2Maker(BaseRoutine):
             page_number = get_page_number(tiff_file)
             jp2_path = jp2_dir.joinpath("{}_{}.jp2".format(bag.dimes_identifier, page_number))
             layers = self.calculate_layers(tiff_file)
-            cmd = ["/usr/local/bin/opj_compress",
+            cmd = [settings.OPJ_COMPRESS,
                    "-i", tiff_file,
                    "-o", jp2_path,
                    "-n", str(layers),
@@ -219,7 +219,7 @@ class PDFMaker(BaseRoutine):
         if not pdf_dir.is_dir():
             pdf_dir.mkdir()
         pdf_path = "{}.pdf".format(Path(pdf_dir, bag.dimes_identifier))
-        subprocess.run(["/usr/local/bin/img2pdf"] + jp2_files + ["-o", pdf_path], check=True)
+        subprocess.run([settings.IMG2PDF] + jp2_files + ["-o", pdf_path], check=True)
         return pdf_path
 
     def compress_pdf(self, bag):
@@ -237,7 +237,7 @@ class PDFMaker(BaseRoutine):
 
     def ocr_pdf(self):
         """Add OCR layer using ocrmypdf."""
-        subprocess.run(["ocrmypdf", self.pdf_path, self.pdf_path, "--output-type", "pdf", "--optimize", "0", "--quiet"], check=True)
+        subprocess.run([settings.OCRMYPDF, self.pdf_path, self.pdf_path, "--output-type", "pdf", "--optimize", "0", "--quiet"], check=True)
 
 
 class ManifestMaker(BaseRoutine):
