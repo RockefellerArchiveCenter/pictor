@@ -404,8 +404,11 @@ class Cleanup(BaseRoutine):
     """
     start_process_status = Bag.UPLOADED
     end_process_status = Bag.CLEANED_UP
-    success_message = "Temporary files successfully removed."
-    idle_message = "No temporary files waiting for cleanup."
+    success_message = "Source and temporary files successfully removed."
+    idle_message = "No source or temporary files waiting for cleanup."
 
     def process_bag(self, bag):
         rmtree(bag.bag_path)
+        src_file = Path(settings.SRC_DIR, f"{bag.bag_identifier}.tar.gz")
+        if src_file.exists():
+            Path(settings.SRC_DIR, f"{bag.bag_identifier}.tar.gz").unlink()

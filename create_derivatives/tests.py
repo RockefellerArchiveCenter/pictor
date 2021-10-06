@@ -277,7 +277,8 @@ class CleanupTestCase(TestCase):
     def test_run(self):
         msg, object_list = Cleanup().run()
         self.assertEqual(len(list(Path(settings.TMP_DIR).glob("*"))), 0)
-        self.assertEqual(msg, "Temporary files successfully removed.")
+        self.assertEqual(len(list(Path(settings.SRC_DIR).glob("*"))), 0)
+        self.assertEqual(msg, "Source and temporary files successfully removed.")
         self.assertTrue(isinstance(object_list, list))
         self.assertEqual(len(object_list), 1)
 
