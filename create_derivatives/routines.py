@@ -120,7 +120,7 @@ class JP2Maker(BaseRoutine):
         jp2_dir = Path(bag.bag_path, "data", "JP2")
         if not jp2_dir.is_dir():
             jp2_dir.mkdir()
-            tiff_files = self.get_tiff_file_paths(bag.bag_path)
+        tiff_files = self.get_tiff_file_paths(bag.bag_path)
         self.create_jp2s(bag, tiff_files, jp2_dir)
 
     def get_tiff_file_paths(self, bag_path):
@@ -181,7 +181,7 @@ class JP2Maker(BaseRoutine):
             page_number = get_page_number(tiff_file)
             jp2_path = jp2_dir.joinpath("{}_{}.jp2".format(bag.dimes_identifier, page_number))
             layers = self.calculate_layers(tiff_file)
-            cmd = ["/usr/local/bin/opj_compress",
+            cmd = [settings.OPJ_COMPRESS,
                    "-i", tiff_file,
                    "-o", jp2_path,
                    "-n", str(layers),
@@ -219,7 +219,7 @@ class PDFMaker(BaseRoutine):
         if not pdf_dir.is_dir():
             pdf_dir.mkdir()
         pdf_path = "{}.pdf".format(Path(pdf_dir, bag.dimes_identifier))
-        subprocess.run(["/usr/local/bin/img2pdf"] + jp2_files + ["-o", pdf_path])
+        subprocess.run([settings.IMG2PDF] + jp2_files + ["-o", pdf_path], check=True)
         return pdf_path
 
     def compress_pdf(self, bag):
@@ -230,20 +230,14 @@ class PDFMaker(BaseRoutine):
         output_pdf_path = "{}_compressed.pdf".format(
             Path(bag.bag_path, "data", "PDF", bag.dimes_identifier))
         subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS={}'.format('/screen'),
-                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), self.pdf_path], stderr=subprocess.PIPE)
+                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), self.pdf_path],
+                       stderr=subprocess.PIPE, check=True)
         Path(self.pdf_path).unlink()
         Path(output_pdf_path).rename(self.pdf_path)
 
     def ocr_pdf(self):
         """Add OCR layer using ocrmypdf."""
-        subprocess.run(["ocrmypdf",
-                        self.pdf_path,
-                        self.pdf_path,
-                        "--output-type",
-                        "pdf",
-                        "--optimize",
-                        "0",
-                        "--quiet"])
+        subprocess.run([settings.OCRMYPDF, self.pdf_path, self.pdf_path, "--output-type", "pdf", "--optimize", "0", "--quiet"], check=True)
 
 
 class ManifestMaker(BaseRoutine):
