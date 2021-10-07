@@ -64,4 +64,4 @@ class AWSClient:
                 content_type = "application/json"
             elif file.suffix == ".pdf":
                 content_type = "application/pdf"
-            return self.s3.meta.client.upload_file(str(file), self.bucket, bucket_path, ExtraArgs={'ContentType': content_type})
+            self.s3.meta.client.upload_file(str(file), self.bucket, bucket_path, ExtraArgs={'ContentType': content_type})

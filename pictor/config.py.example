@@ -27,3 +27,7 @@ PREZI_DEBUG_LEVEL = "error" # Prezi set_debug (string)
 
 IIIF_IMAGE_API = 2 # Version of IIIF Image API (integer)
 IIIF_PRESENTATION_API = 3 # Version of IIIF Presentation API (integer
+
+OPJ_COMPRESS = "/usr/local/bin/opj_compress" # Location of opj_compress installation
+IMG2PDF = "/usr/local/bin/img2pdf" # Location of img2pdf installation
+OCRMYPDF = "ocrmypdf" # Location of ocrmypdf installation
