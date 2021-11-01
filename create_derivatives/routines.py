@@ -121,6 +121,7 @@ class JP2Maker(BaseRoutine):
         if not jp2_dir.is_dir():
             jp2_dir.mkdir()
         tiff_files = self.get_tiff_file_paths(bag.bag_path)
+        self.convert_to_strips(tiff_files)
         self.create_jp2s(bag, tiff_files, jp2_dir)
 
     def get_tiff_file_paths(self, bag_path):
@@ -153,6 +154,19 @@ class JP2Maker(BaseRoutine):
             height = [h for h in img.tag[257]][0]
         return math.ceil((math.log(max(width, height)) / math.log(2)
                           ) - ((math.log(96) / math.log(2)))) + 1
+
+    def convert_to_strips(self, tiff_files):
+        """Converts tiled TIFFs to stripped TIFFs.
+
+        Args:
+            tiff_files (list): TIFF files to be converted
+        """
+
+        for tiff in tiff_files:
+            tmp_tiff = tiff.parent / (tiff.name.replace(".tif", "__copy.tif"))
+            cmd = ["tiffcp", "-s", tiff, tmp_tiff]
+            subprocess.run(cmd, check=True)
+            tmp_tiff.rename(tiff)
 
     def create_jp2s(self, bag, tiff_files, jp2_dir):
         """Creates JPEG2000 files from TIFF files.
