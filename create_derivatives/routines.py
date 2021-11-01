@@ -22,7 +22,6 @@ class BaseRoutine(object):
 
     Returns:
         msg (str): human-readable representation of the routine outcome
-        object_list (lst): list of identifiers for Bags processed by the routine
 
     Subclasses should implement a `process_bag` method which executes logic on
     one bag. They should also set the following attributes:
@@ -37,14 +36,12 @@ class BaseRoutine(object):
     """
 
     def run(self):
-        object_list = []
-        for bag in Bag.objects.filter(process_status=self.start_process_status):
-            self.process_bag(bag)
-            bag.process_status = self.end_process_status
-            bag.save()
-            object_list.append(bag.bag_identifier)
-        msg = self.success_message if len(object_list) else self.idle_message
-        return msg, object_list
+        bag = Bag.objects.filter(process_status=self.start_process_status).first()
+        self.process_bag(bag)
+        bag.process_status = self.end_process_status
+        bag.save()
+        msg = self.success_message if bag else self.idle_message
+        return msg, [bag.bag_identifier]
 
     def process_bag(self, bag):
         raise NotImplementedError("You must implement a `process_bag` method")

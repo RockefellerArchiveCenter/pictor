@@ -140,11 +140,13 @@ class BagPreparerTestCase(TestCase):
         as_data = {"uri": "foobar", "title": "baz", "dates": "January 1, 2020"}
         mock_get_object.return_value = as_data
         created_len = len(Bag.objects.filter(process_status=Bag.CREATED))
-        prepared = BagPreparer().run()
-        self.assertTrue(isinstance(prepared, tuple))
-        self.assertEqual(prepared[0], "Bags successfully prepared.")
-        self.assertEqual(len(prepared[1]), created_len, "Wrong number of bags processed")
-        self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), created_len)
+        count = 1
+        while count <= created_len:
+            prepared = BagPreparer().run()
+            self.assertTrue(isinstance(prepared, tuple))
+            self.assertEqual(prepared[0], "Bags successfully prepared.")
+            self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), count)
+            count += 1
         for bag in Bag.objects.all():
             self.assertEqual(bag.process_status, Bag.PREPARED)
             self.assertEqual(bag.bag_path, str(Path(settings.TMP_DIR, bag.bag_identifier)))
