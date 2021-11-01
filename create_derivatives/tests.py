@@ -147,6 +147,8 @@ class BagPreparerTestCase(TestCase):
             self.assertEqual(prepared[0], "Bags successfully prepared.")
             self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), count)
             count += 1
+        msg, prepared = BagPreparer().run()
+        self.assertEqual(msg, "No bags to prepare.")
         for bag in Bag.objects.all():
             self.assertEqual(bag.process_status, Bag.PREPARED)
             self.assertEqual(bag.bag_path, str(Path(settings.TMP_DIR, bag.bag_identifier)))

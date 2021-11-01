@@ -37,11 +37,14 @@ class BaseRoutine(object):
 
     def run(self):
         bag = Bag.objects.filter(process_status=self.start_process_status).first()
-        self.process_bag(bag)
-        bag.process_status = self.end_process_status
-        bag.save()
-        msg = self.success_message if bag else self.idle_message
-        return msg, [bag.bag_identifier]
+        if bag is not None:
+            self.process_bag(bag)
+            bag.process_status = self.end_process_status
+            bag.save()
+            msg = self.success_message
+        else:
+            msg = self.idle_message
+        return msg, [bag.bag_identifier] if bag else []
 
     def process_bag(self, bag):
         raise NotImplementedError("You must implement a `process_bag` method")
