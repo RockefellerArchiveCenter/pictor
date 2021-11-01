@@ -16,7 +16,7 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.19.7
+boto3==1.19.8
     # via -r requirements.in
 botocore==1.22.8
     # via
@@ -67,18 +67,12 @@ idna==3.3
     #   yarl
 iiif-prezi==0.3.0
     # via -r requirements.in
-git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
+iiif-prezi-upgrader @ git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
     # via -r requirements.in
 img2pdf==0.4.3
     # via
     #   -r requirements.in
     #   ocrmypdf
-importlib-metadata==4.8.1
-    # via
-    #   ocrmypdf
-    #   pluggy
-importlib-resources==5.4.0
-    # via ocrmypdf
 jmespath==0.10.0
     # via
     #   boto3
@@ -151,13 +145,6 @@ structlog==21.2.0
     # via archivessnake
 tqdm==4.62.3
     # via ocrmypdf
-typing-extensions==3.10.0.2
-    # via
-    #   asgiref
-    #   gitpython
-    #   importlib-metadata
-    #   structlog
-    #   yarl
 urllib3==1.26.7
     # via
     #   botocore
@@ -168,7 +155,3 @@ wrapt==1.13.3
     # via vcrpy
 yarl==1.7.0
     # via vcrpy
-zipp==3.6.0
-    # via
-    #   importlib-metadata
-    #   importlib-resources
