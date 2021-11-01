@@ -4,7 +4,7 @@ boto3==1.18.55
 Django==3.2.7
 djangorestframework==3.12.4
 health-check==3.4.1
-img2pdf==0.4.1
+img2pdf==0.4.3
 iiif-prezi==0.3.0
 ocrmypdf==12.6.0 
 psycopg2-binary==2.9.1
