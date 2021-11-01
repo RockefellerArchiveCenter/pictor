@@ -146,6 +146,7 @@ class BagPreparerTestCase(TestCase):
             self.assertTrue(isinstance(prepared, tuple))
             self.assertEqual(prepared[0], "Bags successfully prepared.")
             self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), count)
+            self.assertEqual(len(prepared[1]), 1, "Wrong number of bags processed")
             count += 1
         msg, prepared = BagPreparer().run()
         self.assertEqual(msg, "No bags to prepare.")
