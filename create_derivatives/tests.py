@@ -12,7 +12,7 @@ from rest_framework.test import APIRequestFactory
 from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import matching_files
 from .models import Bag
-from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
+from .routines import (AWSUpload, BagPreparer, BaseRoutine, Cleanup, JP2Maker,
                        ManifestMaker, PDFMaker)
 from .test_helpers import make_dir, set_up_bag
 
@@ -105,6 +105,28 @@ class ViewTestCase(TestCase):
         self.assertEqual(status.status_code, 200, "Wrong HTTP code")
 
 
+class BaseRoutineTestCase(TestCase):
+    fixtures = ["created.json"]
+
+    @patch("create_derivatives.routines.BaseRoutine.process_bag")
+    def test_run(self, mock_process_bag):
+        base_routine = BaseRoutine()
+        base_routine.start_process_status = Bag.CREATED
+        base_routine.end_process_status = Bag.PREPARED
+        base_routine.success_message = "Bags successfully prepared."
+        base_routine.idle_message = "No bags to prepare."
+        created_len = len(Bag.objects.filter(process_status=Bag.CREATED))
+        count = 1
+        while count <= created_len:
+            processed = base_routine.run()
+            self.assertTrue(isinstance(processed, tuple))
+            self.assertEqual(len(processed[1]), 1, "Wrong number of bags processed")
+            self.assertEqual(processed[0], "Bags successfully prepared.")
+            count += 1
+        msg, processed = base_routine.run()
+        self.assertEqual(msg, "No bags to prepare.")
+
+
 class BagPreparerTestCase(TestCase):
     fixtures = ["created.json"]
 
@@ -140,11 +162,12 @@ class BagPreparerTestCase(TestCase):
         as_data = {"uri": "foobar", "title": "baz", "dates": "January 1, 2020"}
         mock_get_object.return_value = as_data
         created_len = len(Bag.objects.filter(process_status=Bag.CREATED))
-        prepared = BagPreparer().run()
-        self.assertTrue(isinstance(prepared, tuple))
-        self.assertEqual(prepared[0], "Bags successfully prepared.")
-        self.assertEqual(len(prepared[1]), created_len, "Wrong number of bags processed")
-        self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), created_len)
+        count = 1
+        while count <= created_len:
+            prepared = BagPreparer().run()
+            self.assertEqual(prepared[0], "Bags successfully prepared.")
+            self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), count)
+            count += 1
         for bag in Bag.objects.all():
             self.assertEqual(bag.process_status, Bag.PREPARED)
             self.assertEqual(bag.bag_path, str(Path(settings.TMP_DIR, bag.bag_identifier)))
