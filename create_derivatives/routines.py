@@ -37,7 +37,7 @@ class BaseRoutine(object):
 
     def run(self):
         bag = Bag.objects.filter(process_status=self.start_process_status).first()
-        if bag is not None:
+        if bag:
             self.process_bag(bag)
             bag.process_status = self.end_process_status
             bag.save()
