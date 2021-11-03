@@ -1,12 +1,12 @@
 ArchivesSnake==0.9.1
 asterism==0.7.2
-boto3==1.19.7
-Django==3.2.8
+boto3==1.19.10
+Django==3.2.9
 djangorestframework==3.12.4
 health-check==3.4.1
 img2pdf==0.4.3
 iiif-prezi==0.3.0
-ocrmypdf==12.7.1 
+ocrmypdf==12.7.1
 psycopg2-binary==2.9.1
 shortuuid==1.0.1
 git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
