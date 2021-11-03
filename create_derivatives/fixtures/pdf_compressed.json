@@ -1,0 +1,17 @@
+[
+  {
+		"model": "create_derivatives.bag",
+		"pk": 1,
+		"fields": {
+			"bag_identifier": "3aai9usY3AZzCSFkB3RSQ9",
+			"bag_path": "/pictor/tmp/3aai9usY3AZzCSFkB3RSQ9",
+      "pdf_path": "/pictor/tmp/3aai9usY3AZzCSFkB3RSQ9/data/PDF/3aai9usY3AZzCSFkB3RSQ9.pdf",
+			"origin": "digitization",
+			"process_status": 8,
+			"as_data": "aljdsu9032n",
+			"dimes_identifier": "3aai9usY3AZzCSFkB3RSQ9",
+			"created": "2021-07-26T20:02:22.535Z",
+			"last_modified": "2021-07-26T20:02:22.535Z"
+		}
+	}
+]
