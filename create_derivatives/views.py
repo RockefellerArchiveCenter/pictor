@@ -3,7 +3,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
-                       ManifestMaker, PDFMaker)
+                       ManifestMaker, PDFCompressor, PDFMaker, PDFOCRer,
+                       TIFFPreparer)
 from .serializers import BagDetailSerializer, BagListSerializer
 
 
@@ -30,6 +31,11 @@ class BagPreparerView(RoutineView):
     routine = BagPreparer
 
 
+class TIFFPreparerView(RoutineView):
+    """Runs the TIFFPreparer routine. Accepts POST requests only."""
+    routine = TIFFPreparer
+
+
 class JP2MakerView(RoutineView):
     """Runs the JP2Maker routine. Accepts POST requests only."""
     routine = JP2Maker
@@ -38,6 +44,16 @@ class JP2MakerView(RoutineView):
 class PDFMakerView(RoutineView):
     """Runs the PDFMaker routine. Accepts POST requests only."""
     routine = PDFMaker
+
+
+class PDFCompressorView(RoutineView):
+    """Runs the PDFCompressor routine. Accepts POST requests only."""
+    routine = PDFCompressor
+
+
+class PDFOCRerView(RoutineView):
+    """Runs the PDFOCRer routine. Accepts POST requests only."""
+    routine = PDFOCRer
 
 
 class ManifestMakerView(RoutineView):
