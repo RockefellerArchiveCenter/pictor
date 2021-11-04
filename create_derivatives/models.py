@@ -24,7 +24,7 @@ class Bag(BasePackage):
         (CLEANED_UP, "Files removed from temp directory"),
         (TIFF_PREPARED, "TIFFs prepared for conversion"),
         (PDF_COMPRESS, "PDF compressed"),
-        (PDF_OCR), "PDF OCRed")
+        (PDF_OCR, "PDF OCRed"))
 
     as_data = models.JSONField(blank=True, null=True)
     dimes_identifier = models.CharField(max_length=255, blank=True, null=True)
