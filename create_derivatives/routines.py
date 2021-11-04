@@ -49,6 +49,21 @@ class BaseRoutine(object):
     def process_bag(self, bag):
         raise NotImplementedError("You must implement a `process_bag` method")
 
+    def get_tiff_file_paths(self, bag_path):
+        """Determines the location of TIFF files in the bag.
+
+        Args:
+            bag_path (str): root bag path.
+        Returns:
+            tiff_files (list of pathlib.Paths): absolute filepaths for TIFF files.
+        """
+        service_dir = Path(bag_path, "data", "service")
+        if service_dir.is_dir() and any(service_dir.iterdir()):
+            tiff_files_dir = Path(bag_path, "data", "service")
+        else:
+            tiff_files_dir = Path(bag_path, "data")
+        return matching_files(tiff_files_dir, prepend=True)
+
 
 class BagPreparer(BaseRoutine):
     """Prepares bags for derivative creation.
@@ -100,29 +115,19 @@ class BagPreparer(BaseRoutine):
                 bag_filepath) from e
 
 
-class JP2Maker(BaseRoutine):
-    """Creates JP2000 derivatives from TIFFs.
+class TIFFPreparer(BaseRoutine):
+    """Prepares TIFFs for JPEG2000 processing.
 
-    Creates JP2 directory in bag's data directory and JP2 derivatives.
-    TIFFs to be converted are targeted in the service directory. If the service directory is empty or
-    does not exist, target TIFFs at the root of the data directory.
-
-    Returns:
-        A tuple containing human-readable message along with list of bag identifiers.
-        Exceptions are raised for errors along the way.
+    Converts tiled TIFFs to stripped TIFFs.
     """
     start_process_status = Bag.PREPARED
-    end_process_status = Bag.JPG2000
-    success_message = "JPG2000s created."
-    idle_message = "No TIFF files ready for JP2 creation."
+    end_process_status = Bag.TIFF_PREPARED
+    success_message = "TIFFs prepared."
+    idle_message = "No TIFF files ready for preparation."
 
     def process_bag(self, bag):
-        jp2_dir = Path(bag.bag_path, "data", "JP2")
-        if not jp2_dir.is_dir():
-            jp2_dir.mkdir()
         tiff_files = self.get_tiff_file_paths(bag.bag_path)
         self.convert_to_strips(tiff_files)
-        self.create_jp2s(bag, tiff_files, jp2_dir)
 
     def get_tiff_file_paths(self, bag_path):
         """Determines the location of TIFF files in the bag.
@@ -139,6 +144,43 @@ class JP2Maker(BaseRoutine):
             tiff_files_dir = Path(bag_path, "data")
         return matching_files(tiff_files_dir, prepend=True)
 
+    def convert_to_strips(self, tiff_files):
+        """Converts tiled TIFFs to stripped TIFFs.
+
+        Args:
+            tiff_files (list): TIFF files to be converted
+        """
+
+        for tiff in tiff_files:
+            tmp_tiff = tiff.parent / (tiff.name.replace(".tif", "__copy.tif"))
+            cmd = ["tiffcp", "-s", tiff, tmp_tiff]
+            subprocess.run(cmd, check=True)
+            tmp_tiff.rename(tiff)
+
+
+class JP2Maker(BaseRoutine):
+    """Creates JP2000 derivatives from TIFFs.
+
+    Creates JP2 directory in bag's data directory and JP2 derivatives.
+    TIFFs to be converted are targeted in the service directory. If the service directory is empty or
+    does not exist, target TIFFs at the root of the data directory.
+
+    Returns:
+        A tuple containing human-readable message along with list of bag identifiers.
+        Exceptions are raised for errors along the way.
+    """
+    start_process_status = Bag.TIFF_PREPARED
+    end_process_status = Bag.JPG2000
+    success_message = "JPG2000s created."
+    idle_message = "No TIFF files ready for JP2 creation."
+
+    def process_bag(self, bag):
+        jp2_dir = Path(bag.bag_path, "data", "JP2")
+        if not jp2_dir.is_dir():
+            jp2_dir.mkdir()
+        tiff_files = self.get_tiff_file_paths(bag.bag_path)
+        self.create_jp2s(bag, tiff_files, jp2_dir)
+
     def calculate_layers(self, file):
         """Calculates the number of layers based on pixel dimensions.
         For TIFF files, image tag 256 is the width, and 257 is the height.
@@ -154,19 +196,6 @@ class JP2Maker(BaseRoutine):
             height = [h for h in img.tag[257]][0]
         return math.ceil((math.log(max(width, height)) / math.log(2)
                           ) - ((math.log(96) / math.log(2)))) + 1
-
-    def convert_to_strips(self, tiff_files):
-        """Converts tiled TIFFs to stripped TIFFs.
-
-        Args:
-            tiff_files (list): TIFF files to be converted
-        """
-
-        for tiff in tiff_files:
-            tmp_tiff = tiff.parent / (tiff.name.replace(".tif", "__copy.tif"))
-            cmd = ["tiffcp", "-s", tiff, tmp_tiff]
-            subprocess.run(cmd, check=True)
-            tmp_tiff.rename(tiff)
 
     def create_jp2s(self, bag, tiff_files, jp2_dir):
         """Creates JPEG2000 files from TIFF files.
@@ -206,37 +235,31 @@ class JP2Maker(BaseRoutine):
 
 
 class PDFMaker(BaseRoutine):
-    """Creates concatenated PDF file from JP2 derivatives.
-
-    Creates PDF directory in bag's data directory, creates PDF, then compresses and OCRs the PDF
-
-    Returns:
-        A tuple containing human-readable message along with list of bag identifiers.
-        Exceptions are raised for errors along the way.
-
-    """
+    """Creates concatenated PDF file from JP2 derivatives."""
     start_process_status = Bag.JPG2000
     end_process_status = Bag.PDF
-    success_message = "PDFs created."
+    success_message = "PDF created."
     idle_message = "No JPG2000 files ready for PDF creation."
 
     def process_bag(self, bag):
         jp2_files_dir = Path(bag.bag_path, "data", "JP2")
-        self.pdf_path = self.create_pdf(bag, jp2_files_dir)
-        self.compress_pdf(bag)
-        self.ocr_pdf()
-
-    def create_pdf(self, bag, jp2_files_dir):
-        """Creates concatenated PDF from JPEG2000 files."""
         jp2_files = matching_files(jp2_files_dir, prepend=True)
         pdf_dir = Path(bag.bag_path, "data", "PDF")
         if not pdf_dir.is_dir():
             pdf_dir.mkdir()
         pdf_path = "{}.pdf".format(Path(pdf_dir, bag.dimes_identifier))
         subprocess.run([settings.IMG2PDF] + jp2_files + ["-o", pdf_path], check=True)
-        return pdf_path
+        bag.pdf_path = pdf_path
 
-    def compress_pdf(self, bag):
+
+class PDFCompressor(BaseRoutine):
+    """Compresses PDF"""
+    start_process_status = Bag.PDF
+    end_process_status = Bag.PDF_COMPRESS
+    success_message = "PDF compressed."
+    idle_message = "No PDFs waiting for compression."
+
+    def process_bag(self, bag):
         """Compress PDF via Ghostscript command line interface.
 
         Original PDF is replaced with compressed PDF.
@@ -244,14 +267,26 @@ class PDFMaker(BaseRoutine):
         output_pdf_path = "{}_compressed.pdf".format(
             Path(bag.bag_path, "data", "PDF", bag.dimes_identifier))
         subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS={}'.format('/screen'),
-                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), self.pdf_path],
+                        '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile={}'.format(output_pdf_path), bag.pdf_path],
                        stderr=subprocess.PIPE, check=True)
-        Path(self.pdf_path).unlink()
-        Path(output_pdf_path).rename(self.pdf_path)
+        Path(output_pdf_path).rename(bag.pdf_path)
 
-    def ocr_pdf(self):
+
+class PDFOCRer(BaseRoutine):
+    """OCRs a PDF."""
+    start_process_status = Bag.PDF_COMPRESS
+    end_process_status = Bag.PDF_OCR
+    success_message = "PDF OCRed."
+    idle_message = "No PDFs waiting for OCR processing."
+
+    def process_bag(self, bag):
         """Add OCR layer using ocrmypdf."""
-        subprocess.run([settings.OCRMYPDF, self.pdf_path, self.pdf_path, "--output-type", "pdf", "--optimize", "0", "--quiet"], check=True)
+        subprocess.run([
+            settings.OCRMYPDF,
+            bag.pdf_path,
+            bag.pdf_path,
+            "--output-type", "pdf",
+            "--optimize", "0", "--quiet"], check=True)
 
 
 class ManifestMaker(BaseRoutine):
@@ -263,7 +298,7 @@ class ManifestMaker(BaseRoutine):
         A tuple containing human-readable message along with list of bag identifiers.
         Exceptions are raised for errors along the way.
     """
-    start_process_status = Bag.PDF
+    start_process_status = Bag.PDF_OCR
     end_process_status = Bag.MANIFESTS_CREATED
     success_message = "Manifests successfully created."
     idle_message = "No manifests created."
