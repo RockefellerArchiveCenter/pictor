@@ -1,6 +1,8 @@
 from create_derivatives.views import (AWSUploadView, BagPreparerView,
                                       BagViewSet, CleanupView, JP2MakerView,
-                                      ManifestMakerView, PDFMakerView)
+                                      ManifestMakerView, PDFCompressorView,
+                                      PDFMakerView, PDFOCRerView,
+                                      TIFFPreparerView)
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
@@ -14,8 +16,11 @@ schema_view = get_schema_view(title="Pictor API")
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^prepare/', BagPreparerView.as_view(), name='bag-preparer'),
+    url(r'^prepare-tiff/', TIFFPreparerView.as_view(), name='tiff-preparer'),
     url(r'^make-jp2/', JP2MakerView.as_view(), name='jp2-maker'),
     url(r'^make-pdf/', PDFMakerView.as_view(), name='pdf-maker'),
+    url(r'^compress-pdf/', PDFCompressorView.as_view(), name='pdf-compressor'),
+    url(r'^ocr-pdf/', PDFOCRerView.as_view(), name='pdf-ocrer'),
     url(r'^make-manifest/', ManifestMakerView.as_view(), name='manifest-maker'),
     url(r'^upload/', AWSUploadView.as_view(), name='aws-upload'),
     url(r'^cleanup/', CleanupView.as_view(), name='cleanup'),

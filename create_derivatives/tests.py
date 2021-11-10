@@ -12,8 +12,9 @@ from rest_framework.test import APIRequestFactory
 from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import matching_files
 from .models import Bag
-from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
-                       ManifestMaker, PDFMaker)
+from .routines import (AWSUpload, BagPreparer, BaseRoutine, Cleanup, JP2Maker,
+                       ManifestMaker, PDFCompressor, PDFMaker, PDFOCRer,
+                       TIFFPreparer)
 from .test_helpers import make_dir, set_up_bag
 
 
@@ -58,7 +59,7 @@ class ViewTestCase(TestCase):
         response = getattr(self.client, method)(url, data, **kwargs)
         self.assertEqual(
             expected_status, response.status_code,
-            "Expected status code {} but got {}".format(expected_status, response.status_code))
+            "Expected status code {} for URL {} but got {}".format(expected_status, url, response.status_code))
         return response
 
     def test_bagviewset(self):
@@ -79,15 +80,21 @@ class ViewTestCase(TestCase):
     @patch("create_derivatives.routines.ManifestMaker.run")
     @patch("create_derivatives.routines.AWSUpload.run")
     @patch("create_derivatives.routines.Cleanup.run")
-    def test_routine_views(self, mock_cleanup, mock_upload, mock_manifest, mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
+    @patch("create_derivatives.routines.TIFFPreparer.run")
+    @patch("create_derivatives.routines.PDFCompressor.run")
+    @patch("create_derivatives.routines.PDFOCRer.run")
+    def test_routine_views(self, mock_ocr_pdf, mock_compress_pdf, mock_prepare_tiff, mock_cleanup, mock_upload, mock_manifest, mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
         """Asserts routine views return expected status codes and data."""
         mock_prepare_init.return_value = None
         exception_text = "foobar"
         exception_id = "1"
         view_matrix = [
             ("bag-preparer", mock_prepare),
+            ("tiff-preparer", mock_prepare_tiff),
             ("jp2-maker", mock_jp2),
             ("pdf-maker", mock_pdf),
+            ("pdf-compressor", mock_compress_pdf),
+            ("pdf-ocrer", mock_ocr_pdf),
             ("manifest-maker", mock_manifest),
             ("aws-upload", mock_upload),
             ("cleanup", mock_cleanup)]
@@ -103,6 +110,28 @@ class ViewTestCase(TestCase):
     def test_health_check_view(self):
         status = self.client.get(reverse('api_health_ping'))
         self.assertEqual(status.status_code, 200, "Wrong HTTP code")
+
+
+class BaseRoutineTestCase(TestCase):
+    fixtures = ["created.json"]
+
+    @patch("create_derivatives.routines.BaseRoutine.process_bag")
+    def test_run(self, mock_process_bag):
+        base_routine = BaseRoutine()
+        base_routine.start_process_status = Bag.CREATED
+        base_routine.end_process_status = Bag.PREPARED
+        base_routine.success_message = "Bags successfully prepared."
+        base_routine.idle_message = "No bags to prepare."
+        created_len = len(Bag.objects.filter(process_status=Bag.CREATED))
+        count = 1
+        while count <= created_len:
+            processed = base_routine.run()
+            self.assertTrue(isinstance(processed, tuple))
+            self.assertEqual(len(processed[1]), 1, "Wrong number of bags processed")
+            self.assertEqual(processed[0], "Bags successfully prepared.")
+            count += 1
+        msg, processed = base_routine.run()
+        self.assertEqual(msg, "No bags to prepare.")
 
 
 class BagPreparerTestCase(TestCase):
@@ -140,11 +169,12 @@ class BagPreparerTestCase(TestCase):
         as_data = {"uri": "foobar", "title": "baz", "dates": "January 1, 2020"}
         mock_get_object.return_value = as_data
         created_len = len(Bag.objects.filter(process_status=Bag.CREATED))
-        prepared = BagPreparer().run()
-        self.assertTrue(isinstance(prepared, tuple))
-        self.assertEqual(prepared[0], "Bags successfully prepared.")
-        self.assertEqual(len(prepared[1]), created_len, "Wrong number of bags processed")
-        self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), created_len)
+        count = 1
+        while count <= created_len:
+            prepared = BagPreparer().run()
+            self.assertEqual(prepared[0], "Bags successfully prepared.")
+            self.assertTrue(len(list(Path(settings.TMP_DIR).glob("*"))), count)
+            count += 1
         for bag in Bag.objects.all():
             self.assertEqual(bag.process_status, Bag.PREPARED)
             self.assertEqual(bag.bag_path, str(Path(settings.TMP_DIR, bag.bag_identifier)))
@@ -156,8 +186,31 @@ class BagPreparerTestCase(TestCase):
             f.unlink()
 
 
+class TIFFPreparerTestCase(TestCase):
+    fixtures = ["prepared.json"]
+
+    def setUp(self):
+        make_dir(settings.TMP_DIR)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+
+    def test_run(self):
+        """Asserts that the run method produced a TIFF file.
+
+        Tests that the method updates the bag's process_status and produces the
+        desired results message.
+        """
+        set_up_bag(settings.TMP_DIR, "unpacked_bag_with_tiff", self.bag_id)
+        msg, tiffs = TIFFPreparer().run()
+        bag = Bag.objects.last()
+        self.assertEqual(bag.process_status, Bag.TIFF_PREPARED)
+        self.assertEqual(msg, "TIFFs prepared.")
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
+
+
 class JP2MakerTestCase(TestCase):
-    fixtures = ["jpg2000.json"]
+    fixtures = ["tiffs_prepared.json"]
 
     def setUp(self):
         make_dir(settings.TMP_DIR)
@@ -208,11 +261,53 @@ class PDFMakerTestCase(TestCase):
     def test_run(self):
         pdfs = PDFMaker().run()
         bag_path = Path(settings.TMP_DIR, self.bag_id)
-        bag = Bag.objects.get(bag_path=bag_path)
-        self.assertTrue(Path(bag_path, "data", "PDF", "{}.pdf".format(self.bag_id)).is_file())
+        bag = Bag.objects.last()
+        self.assertTrue(Path(bag.pdf_path).is_file())
         self.assertEqual(len(list(Path(bag_path, "data", "PDF").glob("*"))), 1)
         self.assertEqual(bag.process_status, Bag.PDF)
-        self.assertEqual(pdfs[0], "PDFs created.")
+        self.assertEqual(pdfs[0], "PDF created.")
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
+
+
+class PDFCompressorTestCase(TestCase):
+    fixtures = ["pdf_created.json"]
+
+    def setUp(self):
+        make_dir(settings.TMP_DIR, remove_first=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        set_up_bag(settings.TMP_DIR, "unpacked_bag_with_pdf", self.bag_id)
+
+    def test_run(self):
+        msg, _ = PDFCompressor().run()
+        bag_path = Path(settings.TMP_DIR, self.bag_id)
+        bag = Bag.objects.last()
+        self.assertTrue(Path(bag.pdf_path).is_file())
+        self.assertEqual(len(list(Path(bag_path, "data", "PDF").glob("*"))), 1)
+        self.assertEqual(bag.process_status, Bag.PDF_COMPRESS)
+        self.assertEqual(msg, "PDF compressed.")
+
+    def tearDown(self):
+        shutil.rmtree(settings.TMP_DIR)
+
+
+class PDFOCRerTestCase(TestCase):
+    fixtures = ["pdf_compressed.json"]
+
+    def setUp(self):
+        make_dir(settings.TMP_DIR, remove_first=True)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ9"
+        set_up_bag(settings.TMP_DIR, "unpacked_bag_with_pdf", self.bag_id)
+
+    def test_run(self):
+        msg, _ = PDFOCRer().run()
+        bag_path = Path(settings.TMP_DIR, self.bag_id)
+        bag = Bag.objects.last()
+        self.assertTrue(Path(bag.pdf_path).is_file())
+        self.assertEqual(len(list(Path(bag_path, "data", "PDF").glob("*"))), 1)
+        self.assertEqual(bag.process_status, Bag.PDF_OCR)
+        self.assertEqual(msg, "PDF OCRed.")
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)

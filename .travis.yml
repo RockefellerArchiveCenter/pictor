@@ -30,14 +30,14 @@ deploy:
     secret_access_key: $AWS_SECRET_KEY
     local_dir: $DEPLOY_ZIP_DIR
     skip_cleanup: true
-    on: 
+    on:
       repo: RockefellerArchiveCenter/${APPLICATION_NAME}
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(base|development)$
     bucket: $AWS_BUCKET_NAME
     region: us-east-1
   - provider: codedeploy
-    wait_until_deployed: true
+    wait_until_deployed: false
     bucket: $AWS_BUCKET_NAME
     key: $DEPLOY_ZIP_NAME
     bundle_type: zip
@@ -50,7 +50,7 @@ deploy:
       repo: RockefellerArchiveCenter/${APPLICATION_NAME}
       branch: development
   - provider: codedeploy
-    wait_until_deployed: true
+    wait_until_deployed: false
     bucket: $AWS_BUCKET_NAME
     key: $DEPLOY_ZIP_NAME
     bundle_type: zip
