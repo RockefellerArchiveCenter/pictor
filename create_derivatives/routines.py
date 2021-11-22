@@ -170,7 +170,7 @@ class JP2Maker(BaseRoutine):
         Exceptions are raised for errors along the way.
     """
     start_process_status = Bag.TIFF_PREPARED
-    end_process_status = Bag.JPG2000
+    end_process_status = Bag.PDF_OCR  # temporary change to skip PDF creation
     success_message = "JPG2000s created."
     idle_message = "No TIFF files ready for JP2 creation."
 
