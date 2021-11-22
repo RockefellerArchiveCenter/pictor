@@ -225,7 +225,7 @@ class JP2MakerTestCase(TestCase):
         set_up_bag(settings.TMP_DIR, "unpacked_bag_with_tiff", self.bag_id)
         msg, jp2s = JP2Maker().run()
         bag = Bag.objects.last()
-        self.assertEqual(bag.process_status, Bag.JPG2000)
+        self.assertEqual(bag.process_status, Bag.PDF_OCR)  # temporary change to skip PDF creation
         self.assertEqual(msg, "JPG2000s created.")
 
     def test_tiff_file_paths(self):
