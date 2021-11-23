@@ -428,11 +428,11 @@ class AWSUpload(BaseRoutine):
         self.aws_client = AWSClient(*settings.AWS)
 
     def process_bag(self, bag):
-        pdf_dir = Path(bag.bag_path, "data", "PDF")
+        # pdf_dir = Path(bag.bag_path, "data", "PDF")
         jp2_dir = Path(bag.bag_path, "data", "JP2")
         manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
         for src_dir, target_dir in [
-                (pdf_dir, "pdfs"),
+                # (pdf_dir, "pdfs"),
                 (jp2_dir, "images"),
                 (manifest_dir, "manifests")]:
             uploads = matching_files(src_dir, prefix=bag.dimes_identifier, prepend=True)

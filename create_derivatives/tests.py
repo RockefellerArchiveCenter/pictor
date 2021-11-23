@@ -358,7 +358,7 @@ class AWSUploadTestCase(TestCase):
         self.assertEqual(len(object_list), 1)
         for bag in Bag.objects.all().filter(dimes_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
-        self.assertEqual(mock_upload_files.call_count, 3)
+        self.assertEqual(mock_upload_files.call_count, 2)
 
 
 class CleanupTestCase(TestCase):
@@ -406,7 +406,7 @@ class ClientsTestCase(TestCase):
             for filename, key, target_dir, mimetype in [
                     ("123456.json", "123456", "manifests", "application/json"),
                     ("123456.jp2", "123456", "images", "image/jp2"),
-                    ("123456.pdf", "123456", "pdfs", "application/pdf"), ]:
+                    ("123456.pdf", "123456", "pdfs", "application/pdf")]:
                 aws.upload_files([Path(filename)], target_dir)
                 mock_upload.assert_called_with(
                     bucket=settings.AWS[3],
