@@ -225,7 +225,7 @@ class JP2MakerTestCase(TestCase):
         set_up_bag(settings.TMP_DIR, "unpacked_bag_with_tiff", self.bag_id)
         msg, jp2s = JP2Maker().run()
         bag = Bag.objects.last()
-        self.assertEqual(bag.process_status, Bag.JPG2000)
+        self.assertEqual(bag.process_status, Bag.PDF_OCR)  # temporary change to skip PDF creation
         self.assertEqual(msg, "JPG2000s created.")
 
     def test_tiff_file_paths(self):
@@ -358,7 +358,7 @@ class AWSUploadTestCase(TestCase):
         self.assertEqual(len(object_list), 1)
         for bag in Bag.objects.all().filter(dimes_identifier="sdfjldskj"):
             self.assertEqual(bag.process_status, Bag.UPLOADED)
-        self.assertEqual(mock_upload_files.call_count, 3)
+        self.assertEqual(mock_upload_files.call_count, 2)
 
 
 class CleanupTestCase(TestCase):
@@ -406,7 +406,7 @@ class ClientsTestCase(TestCase):
             for filename, key, target_dir, mimetype in [
                     ("123456.json", "123456", "manifests", "application/json"),
                     ("123456.jp2", "123456", "images", "image/jp2"),
-                    ("123456.pdf", "123456", "pdfs", "application/pdf"), ]:
+                    ("123456.pdf", "123456", "pdfs", "application/pdf")]:
                 aws.upload_files([Path(filename)], target_dir)
                 mock_upload.assert_called_with(
                     bucket=settings.AWS[3],
