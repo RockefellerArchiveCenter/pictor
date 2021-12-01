@@ -1,6 +1,6 @@
 ArchivesSnake==0.9.1
 asterism==0.7.2
-boto3==1.20.2
+boto3==1.20.17
 Django==3.2.9
 djangorestframework==3.12.4
 health-check==3.4.1
