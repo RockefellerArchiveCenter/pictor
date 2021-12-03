@@ -39,17 +39,17 @@ class BaseRoutine(object):
     def run(self):
         bag = Bag.objects.filter(process_status=self.start_process_status).first()
         if bag:
+            bag.process_status = self.in_process_status
+            bag.save()
             try:
-                bag.process_status = self.in_process_status
-                bag.save()
                 self.process_bag(bag)
-                bag.process_status = self.end_process_status
-                bag.save()
-                msg = self.success_message
-            except BaseException:
+            except Exception:
                 bag.process_status = self.start_process_status
                 bag.save()
                 raise
+            bag.process_status = self.end_process_status
+            bag.save()
+            msg = self.success_message
         else:
             msg = self.idle_message
         return msg, [bag.bag_identifier] if bag else []
