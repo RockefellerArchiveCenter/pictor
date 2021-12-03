@@ -8,7 +8,7 @@ archivessnake==0.9.1
     # via -r requirements.in
 asgiref==3.4.1
     # via django
-asterism==0.7.2
+asterism==0.7.4
     # via -r requirements.in
 attrs==21.2.0
     # via archivessnake
@@ -16,9 +16,9 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.20.2
+boto3==1.20.19
     # via -r requirements.in
-botocore==1.23.2
+botocore==1.23.19
     # via
     #   boto3
     #   s3transfer
@@ -32,7 +32,7 @@ cffi==1.15.0
     #   ocrmypdf
 chardet==4.0.0
     # via pdfminer.six
-charset-normalizer==2.0.7
+charset-normalizer==2.0.8
     # via requests
 clinner==1.12.3
     # via health-check
@@ -40,7 +40,7 @@ coloredlogs==15.0.1
     # via ocrmypdf
 colorlog==3.2.0
     # via clinner
-cryptography==35.0.0
+cryptography==36.0.0
     # via pdfminer.six
 django==3.2.9
     # via
@@ -51,7 +51,7 @@ djangorestframework==3.12.4
     # via
     #   -r requirements.in
     #   asterism
-frozendict==2.0.7
+frozendict==2.1.1
     # via pyld
 gitdb==4.0.9
     # via gitpython
@@ -88,11 +88,11 @@ lxml==4.6.4
     #   iiif-prezi
     #   pikepdf
     #   pyld
-more-itertools==8.11.0
+more-itertools==8.12.0
     # via archivessnake
 multidict==5.2.0
     # via yarl
-ocrmypdf==12.7.1
+ocrmypdf==12.7.2
     # via -r requirements.in
 odin==1.7.3
     # via asterism
@@ -111,7 +111,7 @@ pillow==8.4.0
     #   reportlab
 pluggy==1.0.0
     # via ocrmypdf
-psycopg2-binary==2.9.1
+psycopg2-binary==2.9.2
     # via
     #   -r requirements.in
     #   asterism
@@ -128,15 +128,15 @@ pyyaml==6.0
     #   archivessnake
     #   health-check
     #   vcrpy
-rapidfuzz==1.8.2
+rapidfuzz==1.8.3
     # via archivessnake
-reportlab==3.6.2
+reportlab==3.6.3
     # via ocrmypdf
 requests==2.26.0
     # via archivessnake
 s3transfer==0.5.0
     # via boto3
-shortuuid==1.0.1
+shortuuid==1.0.8
     # via -r requirements.in
 six==1.16.0
     # via
@@ -147,11 +147,11 @@ smmap==5.0.0
     # via gitdb
 sqlparse==0.4.2
     # via django
-structlog==21.2.0
+structlog==21.4.0
     # via archivessnake
 tqdm==4.62.3
     # via ocrmypdf
-typing-extensions==3.10.0.2
+typing-extensions==4.0.1
     # via
     #   asgiref
     #   gitpython
