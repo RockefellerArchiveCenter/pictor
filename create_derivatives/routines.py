@@ -27,6 +27,7 @@ class BaseRoutine(object):
     one bag. They should also set the following attributes:
         start_process_status (int): a Bag process status which determines the starting
             queryset.
+        in_process_status (int)L a Bag process status which indicates that a Bag is currently processing
         end_process_status (int): a Bag process status which will be applied to
             Bags after they have been successfully processed.
         success_message (str): a message indicating that the routine completed
@@ -38,7 +39,14 @@ class BaseRoutine(object):
     def run(self):
         bag = Bag.objects.filter(process_status=self.start_process_status).first()
         if bag:
-            self.process_bag(bag)
+            bag.process_status = self.in_process_status
+            bag.save()
+            try:
+                self.process_bag(bag)
+            except Exception:
+                bag.process_status = self.start_process_status
+                bag.save()
+                raise
             bag.process_status = self.end_process_status
             bag.save()
             msg = self.success_message
@@ -76,6 +84,7 @@ class BagPreparer(BaseRoutine):
 
     """
     start_process_status = Bag.CREATED
+    in_process_status = Bag.PREPARING
     end_process_status = Bag.PREPARED
     success_message = "Bags successfully prepared."
     idle_message = "No bags to prepare."
@@ -121,6 +130,7 @@ class TIFFPreparer(BaseRoutine):
     Converts tiled TIFFs to stripped TIFFs.
     """
     start_process_status = Bag.PREPARED
+    in_process_status = Bag.PREPARING_TIFF
     end_process_status = Bag.TIFF_PREPARED
     success_message = "TIFFs prepared."
     idle_message = "No TIFF files ready for preparation."
@@ -170,6 +180,7 @@ class JP2Maker(BaseRoutine):
         Exceptions are raised for errors along the way.
     """
     start_process_status = Bag.TIFF_PREPARED
+    in_process_status = Bag.CREATING_JP2
     end_process_status = Bag.PDF_OCR  # temporary change to skip PDF creation
     success_message = "JPG2000s created."
     idle_message = "No TIFF files ready for JP2 creation."
@@ -237,6 +248,7 @@ class JP2Maker(BaseRoutine):
 class PDFMaker(BaseRoutine):
     """Creates concatenated PDF file from JP2 derivatives."""
     start_process_status = Bag.JPG2000
+    in_process_status = Bag.CREATING_PDF
     end_process_status = Bag.PDF
     success_message = "PDF created."
     idle_message = "No JPG2000 files ready for PDF creation."
@@ -255,6 +267,7 @@ class PDFMaker(BaseRoutine):
 class PDFCompressor(BaseRoutine):
     """Compresses PDF"""
     start_process_status = Bag.PDF
+    in_process_status = Bag.COMPRESSING_PDF
     end_process_status = Bag.PDF_COMPRESS
     success_message = "PDF compressed."
     idle_message = "No PDFs waiting for compression."
@@ -275,6 +288,7 @@ class PDFCompressor(BaseRoutine):
 class PDFOCRer(BaseRoutine):
     """OCRs a PDF."""
     start_process_status = Bag.PDF_COMPRESS
+    in_process_status = Bag.OCRING_PDF
     end_process_status = Bag.PDF_OCR
     success_message = "PDF OCRed."
     idle_message = "No PDFs waiting for OCR processing."
@@ -299,6 +313,7 @@ class ManifestMaker(BaseRoutine):
         Exceptions are raised for errors along the way.
     """
     start_process_status = Bag.PDF_OCR
+    in_process_status = Bag.CREATING_MANIFESTS
     end_process_status = Bag.MANIFESTS_CREATED
     success_message = "Manifests successfully created."
     idle_message = "No manifests created."
@@ -420,6 +435,7 @@ class ManifestMaker(BaseRoutine):
 class AWSUpload(BaseRoutine):
     """Uploads files to AWS."""
     start_process_status = Bag.MANIFESTS_CREATED
+    in_process_status = Bag.UPLOADING
     end_process_status = Bag.UPLOADED
     success_message = "Files successfully uploaded."
     idle_message = "No files to upload."
@@ -446,6 +462,7 @@ class Cleanup(BaseRoutine):
         A tuple containing human-readable message along with list of bag identifiers.
     """
     start_process_status = Bag.UPLOADED
+    in_process_status = Bag.CLEANING_UP
     end_process_status = Bag.CLEANED_UP
     success_message = "Source and temporary files successfully removed."
     idle_message = "No source or temporary files waiting for cleanup."
