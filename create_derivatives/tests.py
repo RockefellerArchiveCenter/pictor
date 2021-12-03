@@ -119,6 +119,7 @@ class BaseRoutineTestCase(TestCase):
     def test_run(self, mock_process_bag):
         base_routine = BaseRoutine()
         base_routine.start_process_status = Bag.CREATED
+        base_routine.in_process_status = Bag.PREPARING
         base_routine.end_process_status = Bag.PREPARED
         base_routine.success_message = "Bags successfully prepared."
         base_routine.idle_message = "No bags to prepare."
