@@ -37,21 +37,24 @@ class BaseRoutine(object):
     """
 
     def run(self):
-        bag = Bag.objects.filter(process_status=self.start_process_status).first()
-        if bag:
-            bag.process_status = self.in_process_status
-            bag.save()
-            try:
-                self.process_bag(bag)
-            except Exception:
-                bag.process_status = self.start_process_status
+        if not Bag.objects.filter(process_status=self.in_process_status).exists():
+            bag = Bag.objects.filter(process_status=self.start_process_status).first()
+            if bag:
+                bag.process_status = self.in_process_status
                 bag.save()
-                raise
-            bag.process_status = self.end_process_status
-            bag.save()
-            msg = self.success_message
+                try:
+                    self.process_bag(bag)
+                except Exception:
+                    bag.process_status = self.start_process_status
+                    bag.save()
+                    raise
+                bag.process_status = self.end_process_status
+                bag.save()
+                msg = self.success_message
+            else:
+                msg = self.idle_message
         else:
-            msg = self.idle_message
+            msg = "Service currently running"
         return msg, [bag.bag_identifier] if bag else []
 
     def process_bag(self, bag):
