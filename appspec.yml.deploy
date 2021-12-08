@@ -15,5 +15,5 @@ hooks:
     - location: deploy_scripts/restart_httpd.sh
       timeout: 20
   ValidateService:
-    - location: deploy_scripts/curl_endpoint.sh
+    - location: deploy_scripts/curl_status_endpoint.sh
       timeout: 10
