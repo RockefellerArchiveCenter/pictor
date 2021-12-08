@@ -11,7 +11,7 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8012:8012"
+      - "${APPLICATION_PORT:-8012}:${APPLICATION_PORT:-8012}"
     depends_on:
       - pictor-db
 
