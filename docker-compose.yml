@@ -8,6 +8,8 @@ services:
   pictor-web:
     build: .
     entrypoint: /code/entrypoint.sh
+    environment:
+      - APPLICATION_PORT=${APPLICATION_PORT:-8012}
     volumes:
       - .:/code
     ports:

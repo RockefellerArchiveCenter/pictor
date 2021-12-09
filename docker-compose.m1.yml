@@ -9,6 +9,8 @@ services:
     platform: linux/amd64
     build: .
     entrypoint: /code/entrypoint.sh
+    environment:
+      - APPLICATION_PORT=${APPLICATION_PORT:-8012}
     volumes:
       - .:/code
     ports:
