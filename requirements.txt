@@ -16,9 +16,9 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.20.22
+boto3==1.20.23
     # via -r requirements.in
-botocore==1.23.22
+botocore==1.23.23
     # via
     #   boto3
     #   s3transfer
@@ -26,12 +26,22 @@ cachetools==4.2.4
     # via pyld
 certifi==2021.10.8
     # via requests
+cffi==1.15.0
+    # via
+    #   cryptography
+    #   ocrmypdf
+chardet==4.0.0
+    # via pdfminer.six
 charset-normalizer==2.0.9
     # via requests
 clinner==1.12.3
     # via health-check
+coloredlogs==15.0.1
+    # via ocrmypdf
 colorlog==3.2.0
     # via clinner
+cryptography==36.0.0
+    # via pdfminer.six
 django==3.2.9
     # via
     #   -r requirements.in
@@ -49,6 +59,8 @@ gitpython==3.1.18
     # via health-check
 health-check==3.4.1
     # via -r requirements.in
+humanfriendly==10.0
+    # via coloredlogs
 idna==3.3
     # via
     #   requests
@@ -58,7 +70,15 @@ iiif-prezi==0.3.0
 git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
     # via -r requirements.in
 img2pdf==0.4.3
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   ocrmypdf
+importlib-metadata==4.8.2
+    # via
+    #   ocrmypdf
+    #   pluggy
+importlib-resources==5.4.0
+    # via ocrmypdf
 jmespath==0.10.0
     # via
     #   boto3
@@ -72,19 +92,31 @@ more-itertools==8.12.0
     # via archivessnake
 multidict==5.2.0
     # via yarl
+ocrmypdf==12.7.2
+    # via -r requirements.in
 odin==1.7.3
     # via asterism
+pdfminer.six==20211012
+    # via ocrmypdf
 pikepdf==3.2.0
-    # via img2pdf
+    # via
+    #   img2pdf
+    #   ocrmypdf
 pillow==8.4.0
     # via
     #   iiif-prezi
     #   img2pdf
+    #   ocrmypdf
     #   pikepdf
+    #   reportlab
+pluggy==1.0.0
+    # via ocrmypdf
 psycopg2-binary==2.9.2
     # via
     #   -r requirements.in
     #   asterism
+pycparser==2.21
+    # via cffi
 pyld==2.0.3
     # via iiif-prezi
 python-dateutil==2.8.2
@@ -98,6 +130,8 @@ pyyaml==6.0
     #   vcrpy
 rapidfuzz==1.8.3
     # via archivessnake
+reportlab==3.6.3
+    # via ocrmypdf
 requests==2.26.0
     # via archivessnake
 s3transfer==0.5.0
@@ -115,10 +149,13 @@ sqlparse==0.4.2
     # via django
 structlog==21.4.0
     # via archivessnake
+tqdm==4.62.3
+    # via ocrmypdf
 typing-extensions==4.0.1
     # via
     #   asgiref
     #   gitpython
+    #   importlib-metadata
     #   structlog
     #   yarl
 urllib3==1.26.7
@@ -131,3 +168,7 @@ wrapt==1.13.3
     # via vcrpy
 yarl==1.7.2
     # via vcrpy
+zipp==3.6.0
+    # via
+    #   importlib-metadata
+    #   importlib-resources
