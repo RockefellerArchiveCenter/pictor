@@ -1,8 +1,0 @@
-#!/bin/bash
-set -e
-
-# set correct ownership of files
-sudo chown apache:apache -R ${ROOT_DIR}
-
-#set correct permissions on files
-sudo chmod 775 -R ${ROOT_DIR}
