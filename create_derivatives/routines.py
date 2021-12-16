@@ -53,6 +53,7 @@ class BaseRoutine(object):
                 msg = self.success_message
             else:
                 msg = self.idle_message
+                bag = None
         else:
             msg = "Service currently running"
         return msg, [bag.bag_identifier] if bag else []
