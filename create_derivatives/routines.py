@@ -7,6 +7,7 @@ from shutil import rmtree
 import bagit
 import shortuuid
 from asterism.file_helpers import anon_extract_all
+from iiif_prezi3 import AnnotationPage, Annotation, Canvas, Manifest, Metadata, Resource, ResourceItem, ServiceItem1
 from iiif_prezi.factory import ManifestFactory
 from iiif_prezi_upgrader import Upgrader
 from pictor import settings
@@ -305,6 +306,120 @@ class PDFOCRer(BaseRoutine):
             bag.pdf_path,
             "--output-type", "pdf",
             "--optimize", "0", "--quiet"], check=True)
+
+
+class ManifestMaker():
+    """Creates a IIIF presentation manifest from JP2 files.
+
+    Creates manifest directory in bag's data directory and then creates manifest.
+
+    Returns:
+        A tuple containing human-readable message along with list of bag identifiers.
+        Exceptions are raised for errors along the way.
+    """
+    success_message = "Manifests successfully created."
+    idle_message = "No manifests created."
+
+    def __init__(self):
+        server_url = settings.IMAGESERVER_URL
+        self.image_api_version = settings.IIIF_API['image_api']
+        self.presentation_api_version = settings.IIIF_API['presentation_api']
+        if self.image_api_version not in [2, 3]:
+            raise Exception("Version {} of IIIF Image API not supported.".format(self.image_api_version))
+        elif self.presentation_api_version not in [2, 3]:
+            raise Exception("Version {} of IIIF Presentation API not supported.".format(self.presentation_api_version))
+        self.resource_url = "{}/iiif/{}/".format(server_url, self.image_api_version)
+        self.manifest_url = "{}/manifests/".format(settings.MANIFESTS_URL)
+
+    def process_bag(self, bag):
+        self.jp2_path = Path(bag.bag_path, "data", "JP2")
+        self.jp2_files = sorted([f for f in matching_files(self.jp2_path)])
+        self.manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+        if not self.manifest_dir.is_dir():
+            self.manifest_dir.mkdir()
+        self.create_manifest(bag.dimes_identifier, bag.as_data)
+
+    def create_manifest(self, identifier, obj_data):
+        """Method that runs the other methods to build a manifest file and populate
+        it with information.
+
+        Args:
+            identifier (str): A unique identifier.
+            obj_data (dict): Data about the archival object.
+        """
+        manifest_path = Path(self.manifest_dir, "{}.json".format(identifier))
+        manifest = Manifest(id="{}{}.json".format(self.manifest_url, identifier),
+                            type="Manifest",
+                            label={"en": [obj_data["title"]]},
+                            context="https://iiif.io/api/image/{}/context.json".format(self.image_api_version),
+                            thumbnail=[self.set_thumbnail(self.jp2_files[0].stem)])
+        items = []
+        for jp2_file in self.jp2_files:
+            page_number = get_page_number(jp2_file).lstrip("0")
+            jp2_filename = jp2_file.stem
+            width, height = self.get_image_info(jp2_file)
+            """Creates a canvas, annotation pages, a list of annotations on those pages,
+            and bodies with targets for those annotations.
+            """
+            canvas = Canvas(id="{}canvas/{}.json".format(self.manifest_url, jp2_filename),
+                            type="Canvas",
+                            label={"none": "Page {}".format(page_number)},
+                            height=height,
+                            width=width,
+                            thumbnail=[self.set_thumbnail(jp2_filename)])
+            annotation_page = AnnotationPage(id="{}{}/page/p{}.json".format(self.manifest_url, jp2_filename, page_number),
+                                             type="AnnotationPage")
+            annotation_page_items = Annotation(type="Annotation",
+                                               id="{}annotation/{}.json".format(self.manifest_url, jp2_filename),
+                                               motivation="painting",
+                                               target=[canvas.id.__root__])
+            annotation_body = ResourceItem(id="{}{}/full/max/0/default.jpg".format(self.resource_url, jp2_filename),
+                                           type="Image",
+                                           height=height,
+                                           width=width,
+                                           service=[self.set_service(jp2_filename)])
+            annotation_page_items.body = annotation_body
+            annotation_page.items = [annotation_page_items]
+            canvas.items = [annotation_page]
+            items.append(canvas)
+        manifest.items = items
+        with open(manifest_path, 'w', encoding='utf-8') as jf:
+            json.dump(manifest, jf, ensure_ascii=False, indent=4)
+
+    def get_image_info(self, file):
+        """Gets information about the image file.
+
+        Args:
+            file (str): filename of the image file
+        Returns:
+            img.size (tuple): A tuple containing the width and height of an image.
+        """
+        with Image.open(Path(self.jp2_path, file)) as img:
+            return img.size
+
+    def set_thumbnail(self, identifier):
+        """Creates a IIIF-compatible thumbnail.
+
+        Args:
+            identifier (str): A string identifier to use as the thumbnail id.
+        Returns:
+            thumbnail (object): A prezi3 ResourceItem object.
+        """
+        thumbnail_height = 200
+        thumbnail_width = 200
+        thumbnail = ResourceItem(id="{}{}/square/{},/0/default.jpg".format(self.resource_url, identifier, 200),
+                                 type="Image",
+                                 format="image/jpeg",
+                                 height=thumbnail_height,
+                                 width=thumbnail_width,
+                                 service=[self.set_service(identifier)])
+        return thumbnail
+
+    def set_service(self, identifier):
+        return ServiceItem1(
+            id="{}{}".format(self.resource_url, identifier),
+            context="http://iiif.io/api/image/{}/context.json".format(self.image_api_version),
+            profile="http://iiif.io/api/image/{}/level2.json".format(self.image_api_version))
 
 
 class ManifestMaker(BaseRoutine):
