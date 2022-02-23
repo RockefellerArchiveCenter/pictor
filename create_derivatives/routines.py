@@ -7,10 +7,8 @@ from shutil import rmtree
 import bagit
 import shortuuid
 from asterism.file_helpers import anon_extract_all
-from iiif_prezi3 import (AnnotationPage, Annotation, Canvas, Manifest,
+from iiif_prezi3 import (Annotation, AnnotationPage, Canvas, Manifest,
                          ResourceItem, ServiceItem1)
-from iiif_prezi.factory import ManifestFactory
-from iiif_prezi_upgrader import Upgrader
 from pictor import settings
 from PIL import Image
 
