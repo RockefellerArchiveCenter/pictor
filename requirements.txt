@@ -18,7 +18,7 @@ boltons==21.0.0
     # via archivessnake
 boto3==1.20.52
     # via -r requirements.in
-botocore==1.23.52
+botocore==1.23.54
     # via
     #   boto3
     #   s3transfer
@@ -32,7 +32,7 @@ cffi==1.15.0
     #   ocrmypdf
 chardet==4.0.0
     # via pdfminer.six
-charset-normalizer==2.0.11
+charset-normalizer==2.0.12
     # via requests
 clinner==1.12.3
     # via health-check
@@ -42,6 +42,8 @@ colorlog==3.2.0
     # via clinner
 cryptography==36.0.1
     # via pdfminer.six
+dataclasses==0.8
+    # via pydantic
 django==3.2.11
     # via
     #   -r requirements.in
@@ -67,7 +69,9 @@ idna==3.3
     #   yarl
 iiif-prezi==0.3.0
     # via -r requirements.in
-git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
+iiif-prezi-upgrader @ git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
+    # via -r requirements.in
+iiif-prezi3==0.0.2.2
     # via -r requirements.in
 img2pdf==0.4.3
     # via
@@ -83,7 +87,7 @@ jmespath==0.10.0
     # via
     #   boto3
     #   botocore
-lxml==4.7.1
+lxml==4.8.0
     # via
     #   iiif-prezi
     #   pikepdf
@@ -117,6 +121,8 @@ psycopg2-binary==2.9.3
     #   asterism
 pycparser==2.21
     # via cffi
+pydantic==1.9.0
+    # via iiif-prezi3
 pyld==2.0.3
     # via iiif-prezi
 python-dateutil==2.8.2
@@ -130,9 +136,9 @@ pyyaml==6.0
     #   archivessnake
     #   health-check
     #   vcrpy
-rapidfuzz==2.0.0
+rapidfuzz==2.0.3
     # via archivessnake
-reportlab==3.6.6
+reportlab==3.6.7
     # via ocrmypdf
 requests==2.27.1
     # via archivessnake
@@ -153,11 +159,12 @@ structlog==21.5.0
     # via archivessnake
 tqdm==4.62.3
     # via ocrmypdf
-typing-extensions==4.0.1
+typing-extensions==4.1.1
     # via
     #   asgiref
     #   gitpython
     #   importlib-metadata
+    #   pydantic
     #   structlog
     #   yarl
 urllib3==1.26.8
