@@ -418,7 +418,6 @@ class ManifestMaker(BaseRoutine):
     def set_service(self, identifier):
         return ServiceItem1(
             id="{}{}".format(self.resource_url, identifier),
-            context="http://iiif.io/api/image/{}/context.json".format(self.image_api_version),
             profile="http://iiif.io/api/image/{}/level2.json".format(self.image_api_version))
 
 
