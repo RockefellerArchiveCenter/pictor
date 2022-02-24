@@ -374,6 +374,7 @@ class ManifestMaker(BaseRoutine):
                                                target=[canvas.id.__root__])
             annotation_body = ResourceItem(id="{}{}/full/max/0/default.jpg".format(self.resource_url, jp2_filename),
                                            type="Image",
+                                           format="image/jpeg",
                                            height=height,
                                            width=width,
                                            service=[self.set_service(jp2_filename)])
