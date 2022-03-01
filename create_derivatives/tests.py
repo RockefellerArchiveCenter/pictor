@@ -6,8 +6,9 @@ import vcr
 from botocore.stub import Stubber
 from django.test import TestCase
 from django.urls import reverse
-from pictor import settings
 from rest_framework.test import APIRequestFactory
+
+from pictor import settings
 
 from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import matching_files
@@ -108,7 +109,7 @@ class ViewTestCase(TestCase):
                 "Unexpected error response")
 
     def test_health_check_view(self):
-        status = self.client.get(reverse('api_health_ping'))
+        status = self.client.get(reverse('ping'))
         self.assertEqual(status.status_code, 200, "Wrong HTTP code")
 
 
