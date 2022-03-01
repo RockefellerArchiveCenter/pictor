@@ -1,5 +1,5 @@
 ArchivesSnake==0.9.1
-asterism==0.8
+asterism==0.9.0
 boto3==1.21.8
 Django==4.0.2
 djangorestframework==3.13.1
