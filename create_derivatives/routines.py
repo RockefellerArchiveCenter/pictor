@@ -9,8 +9,9 @@ import shortuuid
 from asterism.file_helpers import anon_extract_all
 from iiif_prezi.factory import ManifestFactory
 from iiif_prezi_upgrader import Upgrader
-from pictor import settings
 from PIL import Image
+
+from pictor import settings
 
 from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import check_dir_exists, get_page_number, matching_files
