@@ -16,7 +16,7 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.21.31
+boto3==1.21.33
     # via -r requirements.in
 botocore==1.24.33
     # via
@@ -76,7 +76,7 @@ more-itertools==8.12.0
     # via archivessnake
 multidict==6.0.2
     # via yarl
-ocrmypdf==13.4.1
+ocrmypdf==13.4.2
     # via -r requirements.in
 odin==1.7.3
     # via asterism
