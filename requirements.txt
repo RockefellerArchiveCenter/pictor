@@ -16,7 +16,7 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.21.31
+boto3==1.21.33
     # via -r requirements.in
 botocore==1.24.33
     # via
