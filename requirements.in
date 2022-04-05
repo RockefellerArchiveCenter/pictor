@@ -5,7 +5,7 @@ Django==4.0.3
 djangorestframework==3.13.1
 img2pdf==0.4.3
 iiif-prezi==0.3.0
-ocrmypdf==13.4.1
+ocrmypdf==13.4.2
 psycopg2-binary==2.9.3
 shortuuid==1.0.8
 git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
