@@ -57,7 +57,7 @@ iiif-prezi==0.3.0
     # via -r requirements.in
 iiif-prezi-upgrader @ git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
     # via -r requirements.in
-img2pdf==0.4.3
+img2pdf==0.4.4
     # via
     #   -r requirements.in
     #   ocrmypdf

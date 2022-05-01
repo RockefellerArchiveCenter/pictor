@@ -3,7 +3,7 @@ asterism==0.9.0
 boto3==1.21.33
 Django==4.0.3
 djangorestframework==3.13.1
-img2pdf==0.4.3
+img2pdf==0.4.4
 iiif-prezi==0.3.0
 ocrmypdf==13.4.2
 psycopg2-binary==2.9.3
