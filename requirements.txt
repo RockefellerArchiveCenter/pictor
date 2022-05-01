@@ -36,7 +36,7 @@ coloredlogs==15.0.1
     # via ocrmypdf
 cryptography==36.0.1
     # via pdfminer-six
-django==4.0.3
+django==4.0.4
     # via
     #   -r requirements.in
     #   asterism
