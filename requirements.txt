@@ -18,24 +18,26 @@ boltons==21.0.0
     # via archivessnake
 boto3==1.24.23
     # via -r requirements.in
-botocore==1.27.23
+botocore==1.27.24
     # via
     #   boto3
     #   s3transfer
 cachetools==5.2.0
     # via pyld
-certifi==2022.5.18.1
+certifi==2022.6.15
     # via requests
-cffi==1.15.0
+cffi==1.15.1
     # via cryptography
-charset-normalizer==2.0.12
+charset-normalizer==2.1.0
     # via
     #   pdfminer-six
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==37.0.2
+cryptography==37.0.4
     # via pdfminer-six
+deprecation==2.1.0
+    # via pikepdf
 django==4.0.5
     # via
     #   -r requirements.in
@@ -61,13 +63,13 @@ img2pdf==0.4.4
     # via
     #   -r requirements.in
     #   ocrmypdf
-jarowinkler==1.0.2
+jarowinkler==1.1.0
     # via rapidfuzz
-jmespath==1.0.0
+jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-lxml==4.9.0
+lxml==4.9.1
     # via
     #   iiif-prezi
     #   pikepdf
@@ -82,15 +84,16 @@ odin==1.8.1
     # via asterism
 packaging==21.3
     # via
+    #   deprecation
     #   ocrmypdf
     #   pikepdf
 pdfminer-six==20220524
     # via ocrmypdf
-pikepdf==5.1.5
+pikepdf==5.3.1
     # via
     #   img2pdf
     #   ocrmypdf
-pillow==9.1.1
+pillow==9.2.0
     # via
     #   iiif-prezi
     #   img2pdf
@@ -117,11 +120,11 @@ pyyaml==6.0
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==2.0.11
+rapidfuzz==2.1.2
     # via archivessnake
 reportlab==3.6.10
     # via ocrmypdf
-requests==2.28.0
+requests==2.28.1
     # via archivessnake
 s3transfer==0.6.0
     # via boto3
