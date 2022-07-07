@@ -38,7 +38,7 @@ cryptography==37.0.4
     # via pdfminer-six
 deprecation==2.1.0
     # via pikepdf
-django==4.0.5
+django==4.0.6
     # via
     #   -r requirements.in
     #   asterism
@@ -141,7 +141,7 @@ structlog==21.5.0
     # via archivessnake
 tqdm==4.64.0
     # via ocrmypdf
-urllib3==1.26.9
+urllib3==1.26.10
     # via
     #   botocore
     #   requests
