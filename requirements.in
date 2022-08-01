@@ -1,6 +1,6 @@
 ArchivesSnake==0.9.1
 asterism==0.9.0
-boto3==1.24.23
+boto3==1.24.24
 Django==4.0.6
 djangorestframework==3.13.1
 img2pdf==0.4.4
