@@ -10,15 +10,15 @@ asgiref==3.5.2
     # via django
 asterism==0.9.0
     # via -r requirements.in
-attrs==21.4.0
+attrs==22.1.0
     # via archivessnake
 bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.24.23
+boto3==1.24.42
     # via -r requirements.in
-botocore==1.27.24
+botocore==1.27.42
     # via
     #   boto3
     #   s3transfer
@@ -47,7 +47,7 @@ djangorestframework==3.13.1
     # via
     #   -r requirements.in
     #   asterism
-frozendict==2.3.2
+frozendict==2.3.4
     # via pyld
 humanfriendly==10.0
     # via coloredlogs
@@ -63,7 +63,7 @@ img2pdf==0.4.4
     # via
     #   -r requirements.in
     #   ocrmypdf
-jarowinkler==1.1.0
+jarowinkler==1.2.0
     # via rapidfuzz
 jmespath==1.0.1
     # via
@@ -78,7 +78,7 @@ more-itertools==8.13.0
     # via archivessnake
 multidict==6.0.2
     # via yarl
-ocrmypdf==13.6.0
+ocrmypdf==13.7.0
     # via -r requirements.in
 odin==1.8.1
     # via asterism
@@ -89,7 +89,7 @@ packaging==21.3
     #   pikepdf
 pdfminer-six==20220524
     # via ocrmypdf
-pikepdf==5.3.1
+pikepdf==5.4.2
     # via
     #   img2pdf
     #   ocrmypdf
@@ -120,9 +120,9 @@ pyyaml==6.0
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==2.1.2
+rapidfuzz==2.4.2
     # via archivessnake
-reportlab==3.6.10
+reportlab==3.6.11
     # via ocrmypdf
 requests==2.28.1
     # via archivessnake
@@ -137,11 +137,11 @@ six==1.16.0
     #   vcrpy
 sqlparse==0.4.2
     # via django
-structlog==21.5.0
+structlog==22.1.0
     # via archivessnake
 tqdm==4.64.0
     # via ocrmypdf
-urllib3==1.26.10
+urllib3==1.26.11
     # via
     #   botocore
     #   requests
