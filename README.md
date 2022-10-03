@@ -62,6 +62,7 @@ pictor has 6 services:
 4. Make Manifest: creates a IIIF presentation manifest from JPG2000 files.
 5. AWS Upload: uploads bags with derivatives and Manifest to Amazon Web Services (AWS).
 6. Cleanup: removes bag files that have been processed.
+7. Recreate Manifest: given a DIMES identifier, recreates a manifest.
 
 ### Routes
 
@@ -74,9 +75,16 @@ pictor has 6 services:
 | POST | /make-jp2 | | 200 | Runs the JP2Maker routine |
 | POST | /make-pdf | | 200 | Runs the PDFMaker routine |
 | POST | /make-manifest | | 200 | Runs the ManifestMaker routine |
+| POST | /recreate-manifest | | 200 | Runs the ManifestRecreator routine |
 | POST | /upload| |200|Runs the AWSUpload routine |
 | POST | /cleanup | | 200 | Runs the Cleanup routine |
 | POST | /schema/ | | 200 | Returns the OpenAPI schema |
+
+### Management Commands
+
+Pictor includes a custom management command to recreate all manifests. To run this,
+execute `python manage.py recreate_manifests` from within the application's Python
+virtual environment.
 
 ## License
 
