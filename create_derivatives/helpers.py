@@ -1,5 +1,17 @@
 from pathlib import Path
 
+from PIL import Image
+
+
+def image_dimensions_from_file(filepath):
+    """Returns a tuple (width, height) representing image dimensions.
+
+    Args:
+        filepath (str or pathlib.Path): location of file
+    """
+    with Image.open(filepath) as img:
+        return img.size
+
 
 def check_dir_exists(dir):
     if not Path(dir).is_dir():
