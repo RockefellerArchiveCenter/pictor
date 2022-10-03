@@ -7,7 +7,7 @@ RUN apt-get update -y && apt-get install -y ghostscript \
   make \
   libtiff-dev \
   libtiff-tools \
-  ocrmypdf
+  tesseract-ocr
 
 # Download and compile openjpeg2.3
 WORKDIR /tmp/openjpeg
