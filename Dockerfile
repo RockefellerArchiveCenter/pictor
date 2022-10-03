@@ -10,7 +10,7 @@ RUN apt-get update -y && apt-get install -y ghostscript \
   libzstd-dev \
   ocrmypdf
 
-# Download and compile openjpeg2.3
+# Download and compile openjpeg2.5
 WORKDIR /tmp/openjpeg
 RUN git clone https://github.com/uclouvain/openjpeg.git ./
 RUN git checkout tags/v2.5.0
