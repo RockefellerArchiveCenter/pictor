@@ -1,10 +1,10 @@
-from asterism.views import RoutineView
+from asterism.views import BaseServiceView, RoutineView
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
-                       ManifestMaker, PDFCompressor, PDFMaker, PDFOCRer,
-                       TIFFPreparer)
+                       ManifestMaker, ManifestRecreator, PDFCompressor,
+                       PDFMaker, PDFOCRer, TIFFPreparer)
 from .serializers import BagDetailSerializer, BagListSerializer
 
 
@@ -59,6 +59,16 @@ class PDFOCRerView(RoutineView):
 class ManifestMakerView(RoutineView):
     """Runs the ManifestMaker routine. Accepts POST requests only."""
     routine = ManifestMaker
+
+
+class ManifestRecreatorView(BaseServiceView):
+    """Runs the ManifestRecreator routine. Accepts POST requests only."""
+    routine = ManifestRecreator
+
+    def get_service_response(self, request):
+        if "manifest" not in request.POST:
+            raise Exception("A manifest identifier is required.")
+        return self.routine().run(request.POST["manifest"])
 
 
 class AWSUploadView(RoutineView):
