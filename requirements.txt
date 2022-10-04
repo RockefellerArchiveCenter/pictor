@@ -16,15 +16,15 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.24.67
+boto3==1.24.84
     # via -r requirements.in
-botocore==1.27.67
+botocore==1.27.84
     # via
     #   boto3
     #   s3transfer
 cachetools==5.2.0
     # via pyld
-certifi==2022.6.15
+certifi==2022.9.24
     # via requests
 cffi==1.15.1
     # via cryptography
@@ -34,7 +34,7 @@ charset-normalizer==2.1.1
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==37.0.4
+cryptography==38.0.1
     # via pdfminer-six
 deprecation==2.1.0
     # via pikepdf
@@ -43,7 +43,7 @@ django==4.0.7
     #   -r requirements.in
     #   asterism
     #   djangorestframework
-djangorestframework==3.13.1
+djangorestframework==3.14.0
     # via
     #   -r requirements.in
     #   asterism
@@ -51,7 +51,7 @@ frozendict==2.3.4
     # via pyld
 humanfriendly==10.0
     # via coloredlogs
-idna==3.3
+idna==3.4
     # via
     #   requests
     #   yarl
@@ -63,7 +63,7 @@ img2pdf==0.4.4
     # via
     #   -r requirements.in
     #   ocrmypdf
-jarowinkler==1.2.1
+jarowinkler==1.2.3
     # via rapidfuzz
 jmespath==1.0.1
     # via
@@ -89,7 +89,7 @@ packaging==21.3
     #   pikepdf
 pdfminer-six==20220524
     # via ocrmypdf
-pikepdf==5.6.1
+pikepdf==6.0.2
     # via
     #   img2pdf
     #   ocrmypdf
@@ -120,7 +120,7 @@ pyyaml==6.0
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==2.6.1
+rapidfuzz==2.10.3
     # via archivessnake
 reportlab==3.6.11
     # via ocrmypdf
@@ -135,7 +135,7 @@ six==1.16.0
     #   odin
     #   python-dateutil
     #   vcrpy
-sqlparse==0.4.2
+sqlparse==0.4.3
     # via django
 structlog==22.1.0
     # via archivessnake
