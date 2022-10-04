@@ -7,12 +7,13 @@ RUN apt-get update -y && apt-get install -y ghostscript \
   make \
   libtiff-dev \
   libtiff-tools \
+  libzstd-dev \
   tesseract-ocr
 
-# Download and compile openjpeg2.3
+# Download and compile openjpeg2.5
 WORKDIR /tmp/openjpeg
 RUN git clone https://github.com/uclouvain/openjpeg.git ./
-RUN git checkout tags/v2.3.1
+RUN git checkout tags/v2.5.0
 RUN cmake . && make && make install
 
 WORKDIR /code
