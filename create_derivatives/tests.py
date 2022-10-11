@@ -1,9 +1,11 @@
 import shutil
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
 import vcr
 from botocore.stub import Stubber
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIRequestFactory
@@ -14,8 +16,8 @@ from .clients import ArchivesSpaceClient, AWSClient
 from .helpers import matching_files
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, BaseRoutine, Cleanup, JP2Maker,
-                       ManifestMaker, PDFCompressor, PDFMaker, PDFOCRer,
-                       TIFFPreparer)
+                       ManifestMaker, ManifestRecreator, PDFCompressor,
+                       PDFMaker, PDFOCRer, TIFFPreparer)
 from .test_helpers import make_dir, set_up_bag
 
 
@@ -84,25 +86,29 @@ class ViewTestCase(TestCase):
     @patch("create_derivatives.routines.TIFFPreparer.run")
     @patch("create_derivatives.routines.PDFCompressor.run")
     @patch("create_derivatives.routines.PDFOCRer.run")
-    def test_routine_views(self, mock_ocr_pdf, mock_compress_pdf, mock_prepare_tiff, mock_cleanup, mock_upload, mock_manifest, mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
+    @patch("create_derivatives.routines.ManifestRecreator.run")
+    def test_routine_views(self, mock_recreate_manifest, mock_ocr_pdf, mock_compress_pdf,
+                           mock_prepare_tiff, mock_cleanup, mock_upload, mock_manifest,
+                           mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
         """Asserts routine views return expected status codes and data."""
         mock_prepare_init.return_value = None
         exception_text = "foobar"
         exception_id = "1"
         view_matrix = [
-            ("bag-preparer", mock_prepare),
-            ("tiff-preparer", mock_prepare_tiff),
-            ("jp2-maker", mock_jp2),
-            ("pdf-maker", mock_pdf),
-            ("pdf-compressor", mock_compress_pdf),
-            ("pdf-ocrer", mock_ocr_pdf),
-            ("manifest-maker", mock_manifest),
-            ("aws-upload", mock_upload),
-            ("cleanup", mock_cleanup)]
-        for view, routine in view_matrix:
-            self.assert_status_code("post", reverse(view), 200)
+            ("manifest-recreator", mock_recreate_manifest, {"manifest": "22fgXvhwBrfbKwz9B6G2oz"}),
+            ("bag-preparer", mock_prepare, None),
+            ("tiff-preparer", mock_prepare_tiff, None),
+            ("jp2-maker", mock_jp2, None),
+            ("pdf-maker", mock_pdf, None),
+            ("pdf-compressor", mock_compress_pdf, None),
+            ("pdf-ocrer", mock_ocr_pdf, None),
+            ("manifest-maker", mock_manifest, None),
+            ("aws-upload", mock_upload, None),
+            ("cleanup", mock_cleanup, None)]
+        for view, routine, data in view_matrix:
+            self.assert_status_code("post", reverse(view), 200, data=data)
             routine.side_effect = Exception(exception_text, exception_id)
-            error_response = self.assert_status_code("post", reverse(view), 500)
+            error_response = self.assert_status_code("post", reverse(view), 500, data=data)
             self.assertEqual(
                 error_response.json(),
                 {'detail': exception_text, 'objects': [exception_id], 'count': 1},
@@ -325,7 +331,7 @@ class ManifestMakerTestCase(TestCase):
         set_up_bag(settings.TMP_DIR, "manifest_generation_bag", self.bag_id)
 
     def test_run(self):
-        for bag in Bag.objects.all().filter(process_status=3):
+        for bag in Bag.objects.all():
             manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
             routine = ManifestMaker()
             msg, object_list = routine.run()
@@ -340,6 +346,40 @@ class ManifestMakerTestCase(TestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.TMP_DIR)
+
+
+class ManifestRecreatorTestCase(TestCase):
+    fixtures = ["manifests.json"]
+
+    def setUp(self):
+        """Sets paths for fixture directories and copies files over if needed."""
+        make_dir(settings.TMP_DIR)
+        self.bag_id = "3aai9usY3AZzCSFkB3RSQ8"
+        set_up_bag(settings.TMP_DIR, "manifest_generation_bag", self.bag_id)
+
+    @patch("create_derivatives.clients.AWSClient.__init__")
+    @patch("create_derivatives.clients.AWSClient.list_objects")
+    @patch("create_derivatives.clients.AWSClient.upload_files")
+    @patch("create_derivatives.clients.AWSClient.get_image_dimensions")
+    def test_run(self, mock_dimensions, mock_upload, mock_list, mock_init):
+        mock_init.return_value = None
+        jp2_files = ["images/22fgXvhwBrfbKwz9B6G2oz_00503", "images/22fgXvhwBrfbKwz9B6G2oz_00504", "images/22fgXvhwBrfbKwz9B6G2oz_00505"]
+        mock_list.return_value = jp2_files
+        mock_dimensions.return_value = 100, 200
+        for bag in Bag.objects.all():
+            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
+            routine = ManifestRecreator()
+            msg, object_list = routine.run(bag.dimes_identifier)
+            bag.refresh_from_db()
+            manifests = [str(f) for f in Path(manifest_dir).iterdir()]
+            self.assertEqual(len(manifests), 0)
+            self.assertFalse(Path(manifest_dir, "{}.json".format("asdfjklmn")).is_file())
+            self.assertEqual(msg, "Manifest recreated.")
+            self.assertTrue(isinstance(object_list, list))
+            self.assertEqual(len(object_list), 1)
+        self.assertEqual(mock_dimensions.call_count, len(jp2_files) * len(Bag.objects.all()))
+        self.assertEqual(mock_upload.call_count, len(Bag.objects.all()))
+        self.assertEqual(mock_list.call_count, len(Bag.objects.all()))
 
 
 class AWSUploadTestCase(TestCase):
@@ -402,12 +442,13 @@ class ClientsTestCase(TestCase):
                 self.assertTrue(key in object)
 
     @patch("boto3.s3.transfer.S3Transfer.upload_file")
-    def test_upload_files(self, mock_upload):
+    @patch("create_derivatives.clients.image_dimensions_from_file")
+    def test_upload_files(self, mock_dimensions, mock_upload):
+        mock_dimensions.return_value = 500, 600
         aws = AWSClient(*settings.AWS)
-        with Stubber(aws.s3.meta.client):
+        with Stubber(aws.s3_client):
             for filename, key, target_dir, mimetype in [
                     ("123456.json", "123456", "manifests", "application/json"),
-                    ("123456.jp2", "123456", "images", "image/jp2"),
                     ("123456.pdf", "123456", "pdfs", "application/pdf")]:
                 aws.upload_files([Path(filename)], target_dir)
                 mock_upload.assert_called_with(
@@ -416,3 +457,63 @@ class ClientsTestCase(TestCase):
                     extra_args={"ContentType": mimetype},
                     filename=filename,
                     key="{}/{}".format(target_dir, key))
+            aws.upload_files([Path("123456.jp2")], "images")
+            mock_upload.assert_called_with(
+                bucket=settings.AWS[3],
+                callback=None,
+                extra_args={"ContentType": "image/jp2", "Metadata": {"width": "500", 'height': "600"}},
+                filename="123456.jp2",
+                key="images/123456")
+
+    @patch("boto3.client")
+    @patch("create_derivatives.clients.image_dimensions_from_file")
+    @patch("pathlib.Path.unlink")
+    def test_get_dimensions(self, mock_unlink, mock_dimensions, mock_client):
+        mock_dimensions.return_value = 500, 600
+        filename = "foo.jp2"
+        mock_client().head_object.return_value = {"Metadata": {"width": "500", "height": "600"}}
+        aws = AWSClient(*settings.AWS)
+        result = aws.get_image_dimensions(filename)
+        self.assertEqual(result, (500, 600))
+
+        mock_client().head_object.return_value = {}
+
+        result = aws.get_image_dimensions(filename)
+        self.assertEqual(result, (500, 600))
+        mock_client().download_file.assert_called_once_with(
+            settings.AWS[3], filename, str(Path(settings.TMP_DIR, filename)))
+        mock_client().copy_object.assert_called_once_with(
+            Bucket=settings.AWS[3],
+            Key=filename,
+            CopySource={'Bucket': settings.AWS[3], 'Key': filename},
+            ContentType='image/jp2',
+            Metadata={'width': '500', 'height': '600'},
+            MetadataDirective='REPLACE')
+        mock_unlink.assert_called_once()
+
+    @patch("boto3.client")
+    def test_list_objects(self, mock_boto):
+        mock_boto().get_paginator().paginate.return_value = [
+            {"KeyCount": 3, "Contents": [
+                {"Key": "images/22fgXvhwBrfbKwz9B6G2oz_002"},
+                {"Key": "images/22fgXvhwBrfbKwz9B6G2oz_001"},
+                {"Key": "images/22fgXvhwBrfbKwz9B6G2oz_003"},
+            ]}
+        ]
+        expected = ["images/22fgXvhwBrfbKwz9B6G2oz_001", "images/22fgXvhwBrfbKwz9B6G2oz_002", "images/22fgXvhwBrfbKwz9B6G2oz_003"]
+        aws = AWSClient(*settings.AWS)
+        objects = aws.list_objects()
+        self.assertEqual(objects, expected)
+
+
+class ManagementCommandTestCase(TestCase):
+
+    @patch("create_derivatives.clients.AWSClient.list_objects")
+    @patch("create_derivatives.routines.ManifestRecreator.run")
+    def test_recreate_manifest(self, mock_recreate, mock_list):
+        manifests = ["manifests/22fgXvhwBrfbKwz9B6G2oz", "manifests/5VzqzVKn7sQzJ9bag3tEUz", "manifests/5XApfr9peVKdgkuFvqfu49"]
+        mock_list.return_value = manifests
+        out = StringIO()
+        call_command('recreate_manifests', stdout=out)
+        self.assertEqual(mock_recreate.call_count, len(manifests))
+        self.assertIn("Successfully recreated 3 manifests.", out.getvalue())
