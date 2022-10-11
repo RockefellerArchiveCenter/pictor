@@ -6,9 +6,9 @@ from rest_framework.schemas import get_schema_view
 
 from create_derivatives.views import (AWSUploadView, BagPreparerView,
                                       BagViewSet, CleanupView, JP2MakerView,
-                                      ManifestMakerView, PDFCompressorView,
-                                      PDFMakerView, PDFOCRerView,
-                                      TIFFPreparerView)
+                                      ManifestMakerView, ManifestRecreatorView,
+                                      PDFCompressorView, PDFMakerView,
+                                      PDFOCRerView, TIFFPreparerView)
 
 router = DefaultRouter()
 router.register(r'bags', BagViewSet, basename='bag')
@@ -24,6 +24,7 @@ urlpatterns = [
     re_path(r'^compress-pdf/', PDFCompressorView.as_view(), name='pdf-compressor'),
     re_path(r'^ocr-pdf/', PDFOCRerView.as_view(), name='pdf-ocrer'),
     re_path(r'^make-manifest/', ManifestMakerView.as_view(), name='manifest-maker'),
+    re_path(r'^recreate-manifest/', ManifestRecreatorView.as_view(), name='manifest-recreator'),
     re_path(r'^upload/', AWSUploadView.as_view(), name='aws-upload'),
     re_path(r'^cleanup/', CleanupView.as_view(), name='cleanup'),
     re_path(r'^schema/', schema_view, name='schema'),

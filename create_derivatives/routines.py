@@ -14,7 +14,8 @@ from PIL import Image
 from pictor import settings
 
 from .clients import ArchivesSpaceClient, AWSClient
-from .helpers import check_dir_exists, get_page_number, matching_files
+from .helpers import (check_dir_exists, get_page_number,
+                      image_dimensions_from_file, matching_files)
 from .models import Bag
 
 
@@ -28,7 +29,7 @@ class BaseRoutine(object):
     one bag. They should also set the following attributes:
         start_process_status (int): a Bag process status which determines the starting
             queryset.
-        in_process_status (int)L a Bag process status which indicates that a Bag is currently processing
+        in_process_status (int): a Bag process status which indicates that a Bag is currently processing
         end_process_status (int): a Bag process status which will be applied to
             Bags after they have been successfully processed.
         success_message (str): a message indicating that the routine completed
@@ -338,16 +339,16 @@ class ManifestMaker(BaseRoutine):
         self.fac.set_debug(settings.PREZI_DEBUG)
         self.upgrader = Upgrader()
 
-    def process_bag(self, bag):
+    def process_bag(self, bag, jp2_files=None, recreate=False):
         self.jp2_path = Path(bag.bag_path, "data", "JP2")
-        self.jp2_files = sorted([f for f in matching_files(self.jp2_path)])
+        self.jp2_files = jp2_files if jp2_files else sorted([f for f in matching_files(self.jp2_path)])
         self.manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
         if not self.manifest_dir.is_dir():
-            self.manifest_dir.mkdir()
+            self.manifest_dir.mkdir(parents=True)
         self.fac.set_base_prezi_dir(str(self.manifest_dir))
-        self.create_manifest(bag.dimes_identifier, bag.as_data)
+        self.create_manifest(bag.dimes_identifier, bag.as_data, recreate)
 
-    def create_manifest(self, identifier, obj_data):
+    def create_manifest(self, identifier, obj_data, file_uploaded):
         """Method that runs the other methods to build a manifest file and populate
         it with information.
 
@@ -363,7 +364,7 @@ class ManifestMaker(BaseRoutine):
         for jp2_file in self.jp2_files:
             page_number = get_page_number(jp2_file).lstrip("0")
             jp2_filename = jp2_file.stem
-            width, height = self.get_image_info(jp2_file)
+            width, height = self.get_image_info(jp2_file, file_uploaded)
             """Set the canvas ID, which starts the same as the manifest ID,
             and then include page_number as the canvas ID.
             """
@@ -383,16 +384,19 @@ class ManifestMaker(BaseRoutine):
         with open(manifest_path, 'w', encoding='utf-8') as jf:
             json.dump(manifest_json, jf, ensure_ascii=False, indent=4)
 
-    def get_image_info(self, file):
+    def get_image_info(self, file, file_uploaded):
         """Gets information about the image file.
 
         Args:
             file (str): filename of the image file
+            file_uploaded (bool): indicates whether or not the file has already
+                been uploaded to S3 (in cases where the manifest is being recreated).
         Returns:
-            img.size (tuple): A tuple containing the width and height of an image.
+            width, height (tuple): A tuple containing the width and height of an image.
         """
-        with Image.open(Path(self.jp2_path, file)) as img:
-            return img.size
+        if file_uploaded:
+            return AWSClient(*settings.AWS).get_image_dimensions(str(file))
+        return image_dimensions_from_file(Path(self.jp2_path, file))
 
     def set_image_data(self, img, height, width, ref):
         """Sets the image height and width. Creates the image object.
@@ -477,3 +481,26 @@ class Cleanup(BaseRoutine):
         src_file = Path(settings.SRC_DIR, f"{bag.bag_identifier}.tar.gz")
         if src_file.exists():
             Path(settings.SRC_DIR, f"{bag.bag_identifier}.tar.gz").unlink()
+
+
+class ManifestRecreator(object):
+    """Recreates a manifest."""
+
+    def __init__(self):
+        self.aws_client = AWSClient(*settings.AWS)
+
+    def run(self, dimes_identifier):
+        """Creates and uploads an updated manifest.
+
+        Args:
+            dimes_identifier (string): a DIMES identifier for the manifest to be
+            recreated.
+        """
+        bag = Bag.objects.get(dimes_identifier=dimes_identifier)
+        jp2_files = [Path(f) for f in self.aws_client.list_objects(f"images/{dimes_identifier}")]
+        ManifestMaker().process_bag(bag, jp2_files, True)
+        uploads = matching_files(Path(bag.bag_path, "data", "MANIFEST"), prefix=bag.dimes_identifier, prepend=True)
+        self.aws_client.upload_files(uploads, "manifests")
+        for filepath in uploads:
+            filepath.unlink()
+        return "Manifest recreated.", [dimes_identifier]
