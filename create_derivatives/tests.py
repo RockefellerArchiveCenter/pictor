@@ -86,12 +86,14 @@ class ViewTestCase(TestCase):
     @patch("create_derivatives.routines.TIFFPreparer.run")
     @patch("create_derivatives.routines.PDFCompressor.run")
     @patch("create_derivatives.routines.PDFOCRer.run")
+    @patch("create_derivatives.routines.ManifestRecreator.__init__")
     @patch("create_derivatives.routines.ManifestRecreator.run")
-    def test_routine_views(self, mock_recreate_manifest, mock_ocr_pdf, mock_compress_pdf,
+    def test_routine_views(self, mock_recreate_manifest, mock_recreate_init, mock_ocr_pdf, mock_compress_pdf,
                            mock_prepare_tiff, mock_cleanup, mock_upload, mock_manifest,
                            mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
         """Asserts routine views return expected status codes and data."""
         mock_prepare_init.return_value = None
+        mock_recreate_init.return_value = None
         exception_text = "foobar"
         exception_id = "1"
         view_matrix = [
@@ -361,11 +363,25 @@ class ManifestRecreatorTestCase(TestCase):
     @patch("create_derivatives.clients.AWSClient.list_objects")
     @patch("create_derivatives.clients.AWSClient.upload_files")
     @patch("create_derivatives.clients.AWSClient.get_image_dimensions")
-    def test_run(self, mock_dimensions, mock_upload, mock_list, mock_init):
+    @patch("create_derivatives.clients.ArchivesSpaceClient.__init__")
+    @patch("create_derivatives.clients.ArchivesSpaceClient.get_object")
+    @patch("create_derivatives.routines.requests.get")
+    def test_run_with_bag(self, mock_get, mock_object, mock_as_init, mock_dimensions, mock_upload, mock_list, mock_init):
+        as_uri = "/repositories/2/archival_objects/39140"
+        as_data = {"dates": "June 1, 2022", "title": "Annual Meeting", "uri": as_uri}
         mock_init.return_value = None
+        mock_as_init.return_value = None
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {
+            "external_identifiers": [{
+                "identifier": as_uri,
+                "source": "archivesspace"}]}
+        mock_object.return_value = as_data
         jp2_files = ["images/22fgXvhwBrfbKwz9B6G2oz_00503", "images/22fgXvhwBrfbKwz9B6G2oz_00504", "images/22fgXvhwBrfbKwz9B6G2oz_00505"]
         mock_list.return_value = jp2_files
         mock_dimensions.return_value = 100, 200
+        
+        """When bag exists."""
         for bag in Bag.objects.all():
             manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
             routine = ManifestRecreator()
@@ -380,6 +396,19 @@ class ManifestRecreatorTestCase(TestCase):
         self.assertEqual(mock_dimensions.call_count, len(jp2_files) * len(Bag.objects.all()))
         self.assertEqual(mock_upload.call_count, len(Bag.objects.all()))
         self.assertEqual(mock_list.call_count, len(Bag.objects.all()))
+
+        """When bag does not exist."""
+        Bag.objects.all().delete()
+        dimes_identifier = "asdfjklmn"
+        msg, object_list = routine.run(dimes_identifier)
+        self.assertEqual(Bag.objects.all().count(), 1)
+        bag = Bag.objects.all().first()
+        self.assertEqual(bag.origin, "digitization")
+        self.assertEqual(bag.process_status, Bag.CLEANED_UP)
+        self.assertEqual(bag.dimes_identifier, dimes_identifier)
+        self.assertEqual(bag.as_data, as_data)
+        mock_get.assert_called_once_with(f"https://api.rockarch.org/objects/{dimes_identifier}")
+        mock_object.assert_called_once_with(as_uri)
 
 
 class AWSUploadTestCase(TestCase):
@@ -510,9 +539,11 @@ class ManagementCommandTestCase(TestCase):
 
     @patch("create_derivatives.clients.AWSClient.list_objects")
     @patch("create_derivatives.routines.ManifestRecreator.run")
-    def test_recreate_manifest(self, mock_recreate, mock_list):
+    @patch("create_derivatives.routines.ManifestRecreator.__init__")
+    def test_recreate_manifest(self, mock_init, mock_recreate, mock_list):
         manifests = ["manifests/22fgXvhwBrfbKwz9B6G2oz", "manifests/5VzqzVKn7sQzJ9bag3tEUz", "manifests/5XApfr9peVKdgkuFvqfu49"]
         mock_list.return_value = manifests
+        mock_init.return_value = None
         out = StringIO()
         call_command('recreate_manifests', stdout=out)
         self.assertEqual(mock_recreate.call_count, len(manifests))
