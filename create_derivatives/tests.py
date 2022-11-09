@@ -380,7 +380,7 @@ class ManifestRecreatorTestCase(TestCase):
         jp2_files = ["images/22fgXvhwBrfbKwz9B6G2oz_00503", "images/22fgXvhwBrfbKwz9B6G2oz_00504", "images/22fgXvhwBrfbKwz9B6G2oz_00505"]
         mock_list.return_value = jp2_files
         mock_dimensions.return_value = 100, 200
-        
+
         """When bag exists."""
         for bag in Bag.objects.all():
             manifest_dir = Path(bag.bag_path, "data", "MANIFEST")

@@ -1,18 +1,18 @@
 import json
 import math
-import requests
 import subprocess
 from pathlib import Path
-from shortuuid import uuid
 from shutil import rmtree
 
 import bagit
+import requests
 import shortuuid
-from django.core.exceptions import ObjectDoesNotExist
 from asterism.file_helpers import anon_extract_all
+from django.core.exceptions import ObjectDoesNotExist
 from iiif_prezi.factory import ManifestFactory
 from iiif_prezi_upgrader import Upgrader
 from PIL import Image
+from shortuuid import uuid
 
 from pictor import settings
 
@@ -514,7 +514,7 @@ class ManifestRecreator(object):
                 bag_path=str(Path(settings.TMP_DIR, bag_identifier)),
                 dimes_identifier=dimes_identifier,
                 origin="digitization",
-                as_data=as_data, 
+                as_data=as_data,
                 process_status=Bag.CLEANED_UP)
         jp2_files = [Path(f) for f in self.aws_client.list_objects(f"images/{dimes_identifier}")]
         ManifestMaker().process_bag(bag, jp2_files, True)
