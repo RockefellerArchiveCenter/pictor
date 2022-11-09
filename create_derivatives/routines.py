@@ -5,11 +5,14 @@ from pathlib import Path
 from shutil import rmtree
 
 import bagit
+import requests
 import shortuuid
 from asterism.file_helpers import anon_extract_all
+from django.core.exceptions import ObjectDoesNotExist
 from iiif_prezi.factory import ManifestFactory
 from iiif_prezi_upgrader import Upgrader
 from PIL import Image
+from shortuuid import uuid
 
 from pictor import settings
 
@@ -488,6 +491,7 @@ class ManifestRecreator(object):
 
     def __init__(self):
         self.aws_client = AWSClient(*settings.AWS)
+        self.as_client = ArchivesSpaceClient(*settings.ARCHIVESSPACE)
 
     def run(self, dimes_identifier):
         """Creates and uploads an updated manifest.
@@ -496,10 +500,25 @@ class ManifestRecreator(object):
             dimes_identifier (string): a DIMES identifier for the manifest to be
             recreated.
         """
-        bag = Bag.objects.get(dimes_identifier=dimes_identifier)
+        try:
+            bag = Bag.objects.get(dimes_identifier=dimes_identifier)
+        except ObjectDoesNotExist:
+            resp = requests.get(f"https://api.rockarch.org/objects/{dimes_identifier}")
+            resp.raise_for_status()
+            obj_data = resp.json()
+            as_uri = [ident["identifier"] for ident in obj_data["external_identifiers"] if ident["source"] == "archivesspace"][0]
+            as_data = self.as_client.get_object(as_uri)
+            bag_identifier = uuid(name=as_uri)
+            bag = Bag.objects.create(
+                bag_identifier=bag_identifier,
+                bag_path=str(Path(settings.TMP_DIR, bag_identifier)),
+                dimes_identifier=dimes_identifier,
+                origin="digitization",
+                as_data=as_data,
+                process_status=Bag.CLEANED_UP)
         jp2_files = [Path(f) for f in self.aws_client.list_objects(f"images/{dimes_identifier}")]
         ManifestMaker().process_bag(bag, jp2_files, True)
-        uploads = matching_files(Path(bag.bag_path, "data", "MANIFEST"), prefix=bag.dimes_identifier, prepend=True)
+        uploads = matching_files(Path(bag.bag_path, "data", "MANIFEST"), prefix=dimes_identifier, prepend=True)
         self.aws_client.upload_files(uploads, "manifests")
         for filepath in uploads:
             filepath.unlink()
