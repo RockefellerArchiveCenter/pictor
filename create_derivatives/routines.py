@@ -520,6 +520,5 @@ class ManifestRecreator(object):
         ManifestMaker().process_bag(bag, jp2_files, True)
         uploads = matching_files(Path(bag.bag_path, "data", "MANIFEST"), prefix=dimes_identifier, prepend=True)
         self.aws_client.upload_files(uploads, "manifests")
-        for filepath in uploads:
-            filepath.unlink()
+        rmtree(bag.bag_path)
         return "Manifest recreated.", [dimes_identifier]
