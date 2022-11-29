@@ -383,13 +383,8 @@ class ManifestRecreatorTestCase(TestCase):
 
         """When bag exists."""
         for bag in Bag.objects.all():
-            manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
             routine = ManifestRecreator()
             msg, object_list = routine.run(bag.dimes_identifier)
-            bag.refresh_from_db()
-            manifests = [str(f) for f in Path(manifest_dir).iterdir()]
-            self.assertEqual(len(manifests), 0)
-            self.assertFalse(Path(manifest_dir, "{}.json".format("asdfjklmn")).is_file())
             self.assertEqual(msg, "Manifest recreated.")
             self.assertTrue(isinstance(object_list, list))
             self.assertEqual(len(object_list), 1)
