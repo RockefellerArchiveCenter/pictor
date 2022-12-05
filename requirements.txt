@@ -16,9 +16,9 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.26.5
+boto3==1.26.20
     # via -r requirements.in
-botocore==1.29.5
+botocore==1.29.20
     # via
     #   boto3
     #   s3transfer
@@ -34,7 +34,7 @@ charset-normalizer==2.1.1
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==38.0.3
+cryptography==38.0.4
     # via pdfminer-six
 deprecation==2.1.0
     # via pikepdf
@@ -87,7 +87,7 @@ packaging==21.3
     #   pikepdf
 pdfminer-six==20221105
     # via ocrmypdf
-pikepdf==6.2.2
+pikepdf==6.2.4
     # via
     #   img2pdf
     #   ocrmypdf
@@ -128,7 +128,7 @@ requests==2.28.1
     #   archivessnake
 s3transfer==0.6.0
     # via boto3
-shortuuid==1.0.10
+shortuuid==1.0.11
     # via -r requirements.in
 six==1.16.0
     # via
@@ -136,11 +136,11 @@ six==1.16.0
     #   vcrpy
 sqlparse==0.4.3
     # via django
-structlog==22.1.0
+structlog==22.3.0
     # via archivessnake
 tqdm==4.64.1
     # via ocrmypdf
-urllib3==1.26.12
+urllib3==1.26.13
     # via
     #   botocore
     #   requests
