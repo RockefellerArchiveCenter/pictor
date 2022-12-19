@@ -21,7 +21,7 @@ AWS_IIIF_SECRET_KEY = "987654321" # Secret key for AWS bucket that images will b
 AWS_IIIF_BUCKET = "rac-iiif" # Bucket name for AWS bucket that images will be stored in (string)
 
 IMAGESERVER_URL = "https://images.rockarch.org" # base URL for IIIF images (string)
-MANIFESTS_URL = "https://iiif.rockarch.org" # base URL for IIIF manifests (string)
+IIIF_URL = "https://iiif.rockarch.org" # base URL for IIIF assets (string)
 
 PREZI_DEBUG_LEVEL = "error" # Prezi set_debug (string)
 
