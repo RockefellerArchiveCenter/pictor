@@ -368,10 +368,17 @@ class ManifestMaker(BaseRoutine):
             canvas.add_image(
                 anno_page_id=f"{canvas_id}/annotation-page/1",
                 anno_id=f"{canvas_id}/annotation/1",
-                image_url=f"{self.resource_url}/{jp2_filename}/full/max/0/default.jpg",
+                image_url=f"{self.resource_url.rstrip('/')}/{jp2_filename}/full/max/0/default.jpg",
                 format="image/jpeg",
                 height=height,
                 width=width)
+            canvas.thumbnail = [{
+                "id": f"{self.resource_url.rstrip('/')}/{jp2_filename}/square/200,/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 200,
+                "width": 200,
+            }]
         with open(manifest_path, 'w', encoding='utf-8') as jf:
             json.dump(json.loads(manifest.jsonld()), jf, ensure_ascii=False, indent=4)
 
