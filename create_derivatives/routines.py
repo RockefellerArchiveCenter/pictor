@@ -373,7 +373,7 @@ class ManifestMaker(BaseRoutine):
                 height=height,
                 width=width)
         with open(manifest_path, 'w', encoding='utf-8') as jf:
-            json.dump(manifest.jsonld(), jf, ensure_ascii=False, indent=4)
+            json.dump(json.loads(manifest.jsonld()), jf, ensure_ascii=False, indent=4)
 
     def get_image_info(self, file, file_uploaded):
         """Gets information about the image file.
