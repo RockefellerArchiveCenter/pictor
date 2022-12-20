@@ -16,15 +16,13 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.26.20
+boto3==1.26.32
     # via -r requirements.in
-botocore==1.29.20
+botocore==1.29.32
     # via
     #   boto3
     #   s3transfer
-cachetools==5.2.0
-    # via pyld
-certifi==2022.9.24
+certifi==2022.12.7
     # via requests
 cffi==1.15.1
     # via cryptography
@@ -47,17 +45,13 @@ djangorestframework==3.14.0
     # via
     #   -r requirements.in
     #   asterism
-frozendict==2.3.4
-    # via pyld
 humanfriendly==10.0
     # via coloredlogs
 idna==3.4
     # via
     #   requests
     #   yarl
-iiif-prezi==0.3.0
-    # via -r requirements.in
-iiif-prezi-upgrader @ git+https://github.com/IIIF/prezi-2-to-3@6fb21e0643e47e7fb9cbf8468d5bfa0de258aa13
+iiif-prezi3==1.0.3
     # via -r requirements.in
 img2pdf==0.4.4
     # via
@@ -67,33 +61,30 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-lxml==4.9.1
-    # via
-    #   iiif-prezi
-    #   pikepdf
-    #   pyld
+lxml==4.9.2
+    # via pikepdf
 more-itertools==9.0.0
     # via archivessnake
-multidict==6.0.2
+multidict==6.0.3
     # via yarl
 ocrmypdf==13.7.0
     # via -r requirements.in
 odin==2.0
     # via asterism
-packaging==21.3
+packaging==22.0
     # via
     #   deprecation
     #   ocrmypdf
     #   pikepdf
 pdfminer-six==20221105
     # via ocrmypdf
-pikepdf==6.2.4
+pikepdf==6.2.6
     # via
     #   img2pdf
     #   ocrmypdf
 pillow==9.3.0
     # via
-    #   iiif-prezi
+    #   iiif-prezi3
     #   img2pdf
     #   ocrmypdf
     #   pikepdf
@@ -106,19 +97,17 @@ psycopg2-binary==2.9.5
     #   asterism
 pycparser==2.21
     # via cffi
-pyld==2.0.3
-    # via iiif-prezi
-pyparsing==3.0.9
-    # via packaging
+pydantic==1.10.2
+    # via iiif-prezi3
 python-dateutil==2.8.2
     # via botocore
-pytz==2022.6
+pytz==2022.7
     # via djangorestframework
 pyyaml==6.0
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==2.13.2
+rapidfuzz==2.13.6
     # via archivessnake
 reportlab==3.6.12
     # via ocrmypdf
@@ -126,6 +115,7 @@ requests==2.28.1
     # via
     #   -r requirements.in
     #   archivessnake
+    #   iiif-prezi3
 s3transfer==0.6.0
     # via boto3
 shortuuid==1.0.11
@@ -140,6 +130,8 @@ structlog==22.3.0
     # via archivessnake
 tqdm==4.64.1
     # via ocrmypdf
+typing-extensions==4.4.0
+    # via pydantic
 urllib3==1.26.13
     # via
     #   botocore
@@ -148,5 +140,5 @@ vcrpy==4.2.1
     # via -r requirements.in
 wrapt==1.14.1
     # via vcrpy
-yarl==1.8.1
+yarl==1.8.2
     # via vcrpy
