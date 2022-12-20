@@ -364,7 +364,14 @@ class ManifestMaker(BaseRoutine):
             and then include page_number as the canvas ID.
             """
             canvas_id = f"{manifest_id}/canvas/{page_number}"
-            canvas = manifest.make_canvas(id=canvas_id, height=height, width=width)
+            thumbnail = [{
+                "id": f"{self.resource_url.rstrip('/')}/{jp2_filename}/square/200,/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 200,
+                "width": 200,
+            }]
+            canvas = manifest.make_canvas(id=canvas_id, height=height, width=width, label=f"Page {page_number}", thumbnail=thumbnail)
             canvas.add_image(
                 anno_page_id=f"{canvas_id}/annotation-page/1",
                 anno_id=f"{canvas_id}/annotation/1",
@@ -372,13 +379,6 @@ class ManifestMaker(BaseRoutine):
                 format="image/jpeg",
                 height=height,
                 width=width)
-            canvas.thumbnail = [{
-                "id": f"{self.resource_url.rstrip('/')}/{jp2_filename}/square/200,/0/default.jpg",
-                "type": "Image",
-                "format": "image/jpeg",
-                "height": 200,
-                "width": 200,
-            }]
         with open(manifest_path, 'w', encoding='utf-8') as jf:
             json.dump(json.loads(manifest.jsonld()), jf, ensure_ascii=False, indent=4)
 
