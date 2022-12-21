@@ -9,8 +9,7 @@ import requests
 import shortuuid
 from asterism.file_helpers import anon_extract_all
 from django.core.exceptions import ObjectDoesNotExist
-from iiif_prezi.factory import ManifestFactory
-from iiif_prezi_upgrader import Upgrader
+from iiif_prezi3 import Manifest, config
 from PIL import Image
 from shortuuid import uuid
 
@@ -328,19 +327,14 @@ class ManifestMaker(BaseRoutine):
     idle_message = "No manifests created."
 
     def __init__(self):
-        server_url = settings.IMAGESERVER_URL
         self.image_api_version = settings.IIIF_API['image_api']
         self.presentation_api_version = settings.IIIF_API['presentation_api']
         if self.image_api_version not in [2, 3]:
             raise Exception("Version {} of IIIF Image API not supported.".format(self.image_api_version))
         elif self.presentation_api_version not in [2, 3]:
             raise Exception("Version {} of IIIF Presentation API not supported.".format(self.presentation_api_version))
-        self.resource_url = "{}/iiif/{}/".format(server_url, self.image_api_version)
-        self.fac = ManifestFactory()
-        self.fac.set_base_prezi_uri("{}/manifests/".format(settings.MANIFESTS_URL))
-        self.fac.set_base_image_uri(self.resource_url)
-        self.fac.set_debug(settings.PREZI_DEBUG)
-        self.upgrader = Upgrader()
+        self.resource_url = "{}/iiif/{}/".format(settings.IMAGESERVER_URL, self.image_api_version)
+        config.configs['helpers.auto_fields.AutoLang'].auto_lang = "en"
 
     def process_bag(self, bag, jp2_files=None, recreate=False):
         self.jp2_path = Path(bag.bag_path, "data", "JP2")
@@ -348,7 +342,6 @@ class ManifestMaker(BaseRoutine):
         self.manifest_dir = Path(bag.bag_path, "data", "MANIFEST")
         if not self.manifest_dir.is_dir():
             self.manifest_dir.mkdir(parents=True)
-        self.fac.set_base_prezi_dir(str(self.manifest_dir))
         self.create_manifest(bag.dimes_identifier, bag.as_data, recreate)
 
     def create_manifest(self, identifier, obj_data, file_uploaded):
@@ -359,11 +352,10 @@ class ManifestMaker(BaseRoutine):
             identifier (str): A unique identifier.
             obj_data (dict): Data about the archival object.
         """
-        manifest_path = Path(self.manifest_dir, "{}.json".format(identifier))
-        manifest = self.fac.manifest(ident="{}{}".format(self.fac.prezi_base, identifier), label=obj_data["title"])
-        manifest.set_metadata({"Date": obj_data["dates"]})
-        manifest.thumbnail = self.set_thumbnail(self.jp2_files[0].stem)
-        sequence = manifest.sequence(ident=identifier)
+        manifest_path = Path(self.manifest_dir, f"{identifier}.json")
+        manifest_id = f"{settings.IIIF_URL.rstrip('/')}/manifests/{identifier}"
+        manifest = Manifest(id=manifest_id, label=obj_data["title"])
+        manifest.add_metadata("Date", obj_data["dates"])
         for jp2_file in self.jp2_files:
             page_number = get_page_number(jp2_file).lstrip("0")
             jp2_filename = jp2_file.stem
@@ -371,21 +363,24 @@ class ManifestMaker(BaseRoutine):
             """Set the canvas ID, which starts the same as the manifest ID,
             and then include page_number as the canvas ID.
             """
-            canvas_id = "{}/canvas/{}".format(manifest.id, page_number)
-            canvas = sequence.canvas(ident=canvas_id, label="Page {}".format(page_number))
-            canvas.set_hw(height, width)
-            annotation = canvas.annotation("{}/annotation/1".format(canvas_id))
-            img = annotation.image(
-                ident="/{}/full/max/0/default.jpg".format(jp2_filename))
-            self.set_image_data(img, height, width, jp2_filename)
-            canvas.thumbnail = self.set_thumbnail(jp2_filename)
-        v2_json = manifest.toJSON(top=True)
-        if self.presentation_api_version == 2:
-            manifest_json = v2_json
-        else:
-            manifest_json = self.upgrader.process_resource(v2_json, top=True)
+            canvas_id = f"{manifest_id}/canvas/{page_number}"
+            thumbnail = [{
+                "id": f"{self.resource_url.rstrip('/')}/{jp2_filename}/square/200,/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 200,
+                "width": 200,
+            }]
+            canvas = manifest.make_canvas(id=canvas_id, height=height, width=width, label=f"Page {page_number}", thumbnail=thumbnail)
+            canvas.add_image(
+                anno_page_id=f"{canvas_id}/annotation-page/1",
+                anno_id=f"{canvas_id}/annotation/1",
+                image_url=f"{self.resource_url.rstrip('/')}/{jp2_filename}/full/max/0/default.jpg",
+                format="image/jpeg",
+                height=height,
+                width=width)
         with open(manifest_path, 'w', encoding='utf-8') as jf:
-            json.dump(manifest_json, jf, ensure_ascii=False, indent=4)
+            json.dump(json.loads(manifest.jsonld()), jf, ensure_ascii=False, indent=4)
 
     def get_image_info(self, file, file_uploaded):
         """Gets information about the image file.
@@ -400,48 +395,6 @@ class ManifestMaker(BaseRoutine):
         if file_uploaded:
             return AWSClient(*settings.AWS).get_image_dimensions(str(file))
         return image_dimensions_from_file(Path(self.jp2_path, file))
-
-    def set_image_data(self, img, height, width, ref):
-        """Sets the image height and width. Creates the image object.
-
-        Args:
-            img (object): An iiif-prezi Image object.
-            height (int): Pixel height of the image.
-            width (int): Pixel width of the image.
-            ref (string): Reference identifier for the file, including page in filename.
-        Returns:
-            img (object): A iiif_prezi image object with data.
-        """
-        img.height = height
-        img.width = width
-        img.format = "image/jpeg"
-        img.service = self.set_service(ref)
-        return img
-
-    def set_thumbnail(self, identifier):
-        """Creates a IIIF-compatible thumbnail.
-
-        Args:
-            identifier (str): A string identifier to use as the thumbnail id.
-        Returns:
-            thumbnail (object): An iiif_prezi Image object.
-        """
-        thumbnail_height = 200
-        thumbnail_width = 200
-        thumbnail = self.fac.image(
-            ident="/{}/square/{},/0/default.jpg".format(identifier, thumbnail_width))
-        self.set_image_data(
-            thumbnail,
-            thumbnail_height,
-            thumbnail_width,
-            identifier)
-        return thumbnail
-
-    def set_service(self, identifier):
-        return self.fac.service(
-            ident="{}{}".format(self.resource_url, identifier),
-            context="http://iiif.io/api/image/{}/context.json".format(self.image_api_version),
-            profile="http://iiif.io/api/image/{}/level2.json".format(self.image_api_version))
 
 
 class AWSUpload(BaseRoutine):
