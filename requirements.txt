@@ -16,9 +16,9 @@ bagit==1.8.1
     # via asterism
 boltons==21.0.0
     # via archivessnake
-boto3==1.26.61
+boto3==1.26.64
     # via -r requirements.in
-botocore==1.29.61
+botocore==1.29.64
     # via
     #   boto3
     #   s3transfer
@@ -36,7 +36,7 @@ cryptography==39.0.0
     # via pdfminer-six
 deprecation==2.1.0
     # via pikepdf
-django==4.0.8
+django==4.0.9
     # via
     #   -r requirements.in
     #   asterism
@@ -69,7 +69,7 @@ multidict==6.0.4
     # via yarl
 ocrmypdf==13.7.0
     # via -r requirements.in
-odin==2.1
+odin==2.2
     # via asterism
 packaging==23.0
     # via
@@ -78,7 +78,7 @@ packaging==23.0
     #   pikepdf
 pdfminer-six==20221105
     # via ocrmypdf
-pikepdf==6.2.9
+pikepdf==7.0.0
     # via
     #   img2pdf
     #   ocrmypdf
