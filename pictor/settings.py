@@ -132,6 +132,13 @@ STATIC_ROOT = str(Path(BASE_DIR, 'static'))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Django Rest Framework settings
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 100
+}
+
 SRC_DIR = CF.SRC_DIR
 TMP_DIR = CF.TMP_DIR
 DEST_DIR = CF.DEST_DIR
