@@ -14,11 +14,11 @@ attrs==22.2.0
     # via archivessnake
 bagit==1.8.1
     # via asterism
-boltons==21.0.0
+boltons==23.0.0
     # via archivessnake
-boto3==1.26.64
+boto3==1.26.81
     # via -r requirements.in
-botocore==1.29.64
+botocore==1.29.81
     # via
     #   boto3
     #   s3transfer
@@ -32,11 +32,11 @@ charset-normalizer==3.0.1
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==39.0.0
+cryptography==39.0.1
     # via pdfminer-six
 deprecation==2.1.0
     # via pikepdf
-django==4.0.9
+django==4.0.10
     # via
     #   -r requirements.in
     #   asterism
@@ -63,13 +63,13 @@ jmespath==1.0.1
     #   botocore
 lxml==4.9.2
     # via pikepdf
-more-itertools==9.0.0
+more-itertools==9.1.0
     # via archivessnake
 multidict==6.0.4
     # via yarl
 ocrmypdf==13.7.0
     # via -r requirements.in
-odin==2.2
+odin==2.4
     # via asterism
 packaging==23.0
     # via
@@ -78,7 +78,7 @@ packaging==23.0
     #   pikepdf
 pdfminer-six==20221105
     # via ocrmypdf
-pikepdf==7.0.0
+pikepdf==7.1.1
     # via
     #   img2pdf
     #   ocrmypdf
@@ -97,7 +97,7 @@ psycopg2-binary==2.9.5
     #   asterism
 pycparser==2.21
     # via cffi
-pydantic==1.10.4
+pydantic==1.10.5
     # via iiif-prezi3
 python-dateutil==2.8.2
     # via botocore
@@ -130,7 +130,7 @@ structlog==22.3.0
     # via archivessnake
 tqdm==4.64.1
     # via ocrmypdf
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via pydantic
 urllib3==1.26.14
     # via
@@ -138,7 +138,7 @@ urllib3==1.26.14
     #   requests
 vcrpy==4.2.1
     # via -r requirements.in
-wrapt==1.14.1
+wrapt==1.15.0
     # via vcrpy
 yarl==1.8.2
     # via vcrpy
