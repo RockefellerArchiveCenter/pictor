@@ -16,7 +16,12 @@ RUN git clone https://github.com/uclouvain/openjpeg.git ./
 RUN git checkout tags/v2.5.0
 RUN cmake . && make && make install
 
-WORKDIR /code
-ADD requirements.txt /code/
-RUN pip install --upgrade pip && pip install -r requirements.txt
-ADD . /code/
+WORKDIR /code/
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY . /code/
+
+EXPOSE 8012
+
+ENTRYPOINT ["/code/entrypoint.sh"]

@@ -5,15 +5,27 @@ services:
     image: postgres:10.4
     volumes:
       - db:/var/lib/postgresql/data/
+        ports:
+      - "5432:5432"
+    environment:
+      - SQL_PASSWORD=postgres
+      - SQL_DATABASE=postgres
+      - SQL_USER=postgres
+      - SQL_HOST=pictor-db
   pictor-web:
     build: .
+    image: ${CONTAINER:-pictor}
     entrypoint: /code/entrypoint.sh
-    environment:
-      - APPLICATION_PORT=${APPLICATION_PORT:-8012}
     volumes:
       - .:/code
     ports:
-      - "${APPLICATION_PORT:-8012}:${APPLICATION_PORT:-8012}"
+      - "8012:8012"
+    environment:
+      - APPLICATION_PORT=${APPLICATION_PORT:-8012}
+      - SQL_DATABASE=postgres
+      - SQL_USER=postgres
+      - SQL_PASSWORD=postgres
+      - SQL_HOST=pictor-db
     depends_on:
       - pictor-db
 

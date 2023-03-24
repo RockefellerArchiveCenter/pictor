@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 from pathlib import Path
 
-import pictor.config as CF
+import pictor as config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = CF.SECRET_KEY
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = CF.DEBUG
+DEBUG = os.getenv('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = CF.ALLOWED_HOSTS
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS').split()
 
 
 # Application definition
@@ -78,12 +78,12 @@ WSGI_APPLICATION = 'pictor.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": CF.SQL_ENGINE,
-        "NAME": CF.SQL_DATABASE,
-        "USER": CF.SQL_USER,
-        "PASSWORD": CF.SQL_PASSWORD,
-        "HOST": CF.SQL_HOST,
-        "PORT": CF.SQL_PORT,
+        "ENGINE": os.getenv('SQL_ENGINE'),
+        "NAME": os.getenv('SQL_DATABASE'),
+        "USER": os.getenv('SQL_USER'),
+        "PASSWORD": os.getenv('SQL_PASSWORD'),
+        "HOST": os.getenv('SQL_HOST'),
+        "PORT": os.getenv('SQL_PORT'),
     }
 }
 
@@ -139,21 +139,21 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100
 }
 
-SRC_DIR = CF.SRC_DIR
-TMP_DIR = CF.TMP_DIR
-DEST_DIR = CF.DEST_DIR
+SRC_DIR = os.getenv('SRC_DIR')
+TMP_DIR = os.getenv('STORAGE_TMP_DIR')
+DEST_DIR = os.getenv('DEST_DIR')
 
 # baseurl, username, password, repo_id
-ARCHIVESSPACE = (CF.ARCHIVESSPACE_URL, CF.ARCHIVESSPACE_USER, CF.ARCHIVESSPACE_PW, CF.ARCHIVESSPACE_REPOSITORY)
+ARCHIVESSPACE = (os.getenv('ARCHIVESSPACE_URL'), os.getenv('ARCHIVESSPACE_USER'), os.getenv('ARCHIVESSPACE_PW'), os.getenv('ARCHIVESSPACE_REPOSITORY'))
 
 # region_name, access_key, secret_key, bucket
-AWS = (CF.AWS_IIIF_REGION_NAME, CF.AWS_IIIF_ACCESS_KEY, CF.AWS_IIIF_SECRET_KEY, CF.AWS_IIIF_BUCKET)
+AWS = (os.getenv('AWS_IIIF_REGION_NAME'), os.getenv('AWS_IIIF_ACCESS_KEY'), os.getenv('AWS_IIIF_SECRET_KEY'), os.getenv('AWS_IIIF_BUCKET'))
 
-IMAGESERVER_URL = CF.IMAGESERVER_URL
-IIIF_URL = CF.IIIF_URL
-PREZI_DEBUG = CF.PREZI_DEBUG_LEVEL
-IIIF_API = {'image_api': CF.IIIF_IMAGE_API, 'presentation_api': CF.IIIF_PRESENTATION_API}
+IMAGESERVER_URL = os.getenv('IMAGESERVER_URL')
+IIIF_URL = os.getenv('IIIF_URL')
+PREZI_DEBUG = os.getenv('PREZI_DEBUG_LEVEL')
+IIIF_API = {'image_api': os.getenv('IIIF_IMAGE_API'), 'presentation_api': os.getenv('IIIF_PRESENTATION_API')}
 
-OPJ_COMPRESS = CF.OPJ_COMPRESS
-IMG2PDF = CF.IMG2PDF
-OCRMYPDF = CF.OCRMYPDF
+OPJ_COMPRESS = os.getenv('OPJ_COMPRESS')
+IMG2PDF = os.getenv('IMG2PDF')
+OCRMYPDF = os.getenv('OCRMYPDF')

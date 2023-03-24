@@ -10,7 +10,7 @@ services:
 env:
   global:
     - APPLICATION_NAME: pictor
-    - CONTAINER: pictor-web
+    - CONTAINER: pictor
 before_install:
   - cp ${APPLICATION_NAME}/config.py.example ${APPLICATION_NAME}/config.py
   - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
@@ -25,28 +25,11 @@ script:
 before_deploy:
   - if [ ! -d deploy_scripts ]; then git clone https://github.com/RockefellerArchiveCenter/deploy_scripts.git; fi
   - sudo deploy_scripts/substitute_env.sh
-  - sudo deploy_scripts/make_zip_django.sh $DEPLOY_ZIP_DIR $DEPLOY_ZIP_NAME
+  - ./deploy_scripts/containers/push_image_to_ecr.sh
+  - ./deploy_scripts/container/install_kubectl.sh
 deploy:
-  - provider: s3
-    access_key_id: $AWS_ACCESS_KEY
-    secret_access_key: $AWS_SECRET_KEY
-    local_dir: $DEPLOY_ZIP_DIR
-    skip_cleanup: true
-    on:
-      repo: RockefellerArchiveCenter/${APPLICATION_NAME}
-      all_branches: true
-      condition: $TRAVIS_BRANCH =~ ^(base|development)$
-    bucket: $AWS_BUCKET_NAME
-    region: us-east-1
-  - provider: codedeploy
-    bucket: $AWS_BUCKET_NAME
-    key: $DEPLOY_ZIP_NAME
-    bundle_type: zip
-    access_key_id: $AWS_ACCESS_KEY
-    secret_access_key: $AWS_SECRET_KEY
-    application: ${APPLICATION_NAME}
-    deployment_group: ${DEPLOYMENT_GROUP}
-    region: us-east-1
+    provider: script
+    script: bash deploy_scripts/containers/deploy_image_k8s.sh
     on:
       repo: RockefellerArchiveCenter/${APPLICATION_NAME}
       all_branches: true
