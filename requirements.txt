@@ -16,9 +16,9 @@ bagit==1.8.1
     # via asterism
 boltons==23.0.0
     # via archivessnake
-boto3==1.26.144
+boto3==1.26.165
     # via -r requirements.in
-botocore==1.29.144
+botocore==1.29.165
     # via
     #   boto3
     #   s3transfer
@@ -32,7 +32,7 @@ charset-normalizer==3.1.0
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==41.0.0
+cryptography==41.0.1
     # via pdfminer-six
 deprecation==2.1.0
     # via pikepdf
@@ -45,17 +45,13 @@ djangorestframework==3.14.0
     # via
     #   -r requirements.in
     #   asterism
-freetype-py==2.3.0
-    # via
-    #   reportlab
-    #   rlpycairo
 humanfriendly==10.0
     # via coloredlogs
 idna==3.4
     # via
     #   requests
     #   yarl
-iiif-prezi3==1.1.1
+iiif-prezi3==1.2.1
     # via -r requirements.in
 img2pdf==0.4.4
     # via
@@ -91,15 +87,13 @@ pillow==9.5.0
     #   ocrmypdf
     #   pikepdf
     #   reportlab
-pluggy==1.0.0
+pluggy==1.2.0
     # via ocrmypdf
 psycopg2==2.9.6
     # via -r requirements.in
-pycairo==1.23.0
-    # via rlpycairo
 pycparser==2.21
     # via cffi
-pydantic==1.10.8
+pydantic==1.10.10
     # via iiif-prezi3
 python-dateutil==2.8.2
     # via botocore
@@ -109,17 +103,15 @@ pyyaml==6.0
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==3.0.0
+rapidfuzz==3.1.1
     # via archivessnake
-reportlab==4.0.0
+reportlab==4.0.4
     # via ocrmypdf
 requests==2.31.0
     # via
     #   -r requirements.in
     #   archivessnake
     #   iiif-prezi3
-rlpycairo==0.2.0
-    # via reportlab
 s3transfer==0.6.1
     # via boto3
 shortuuid==1.0.11
@@ -134,7 +126,7 @@ structlog==23.1.0
     # via archivessnake
 tqdm==4.65.0
     # via ocrmypdf
-typing-extensions==4.6.2
+typing-extensions==4.7.0
     # via
     #   asgiref
     #   pydantic
@@ -142,7 +134,7 @@ urllib3==1.26.16
     # via
     #   botocore
     #   requests
-vcrpy==4.3.1
+vcrpy==4.4.0
     # via -r requirements.in
 wrapt==1.15.0
     # via vcrpy
