@@ -20,6 +20,8 @@ from .helpers import (check_dir_exists, get_page_number,
                       image_dimensions_from_file, matching_files)
 from .models import Bag
 
+Image.MAX_IMAGE_PIXELS = 200000000
+
 
 class BaseRoutine(object):
     """Base class which all routines inherit.
