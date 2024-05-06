@@ -16,9 +16,9 @@ bagit==1.8.1
     # via asterism
 boltons==24.0.0
     # via archivessnake
-boto3==1.34.74
+boto3==1.34.95
     # via -r requirements.in
-botocore==1.34.74
+botocore==1.34.95
     # via
     #   boto3
     #   s3transfer
@@ -49,7 +49,7 @@ djangorestframework==3.15.1
     #   asterism
 humanfriendly==10.0
     # via coloredlogs
-idna==3.6
+idna==3.7
     # via
     #   requests
     #   yarl
@@ -63,7 +63,7 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-lxml==5.2.0
+lxml==5.2.1
     # via pikepdf
 more-itertools==10.2.0
     # via archivessnake
@@ -89,13 +89,13 @@ pillow==9.5.0
     #   ocrmypdf
     #   pikepdf
     #   reportlab
-pluggy==1.4.0
+pluggy==1.5.0
     # via ocrmypdf
 psycopg2==2.9.9
     # via -r requirements.in
 pycparser==2.22
     # via cffi
-pydantic==1.10.14
+pydantic==1.10.15
     # via iiif-prezi3
 python-dateutil==2.9.0.post0
     # via botocore
@@ -103,9 +103,9 @@ pyyaml==6.0.1
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==3.7.0
+rapidfuzz==3.8.1
     # via archivessnake
-reportlab==4.1.0
+reportlab==4.2.0
     # via ocrmypdf
 requests==2.31.0
     # via
@@ -120,13 +120,13 @@ six==1.16.0
     # via
     #   python-dateutil
     #   vcrpy
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via django
 structlog==24.1.0
     # via archivessnake
 tqdm==4.66.2
     # via ocrmypdf
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via
     #   asgiref
     #   pydantic
