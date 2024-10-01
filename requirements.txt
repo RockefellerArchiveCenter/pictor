@@ -16,15 +16,15 @@ bagit==1.8.1
     # via asterism
 boltons==24.0.0
     # via archivessnake
-boto3==1.35.10
+boto3==1.35.29
     # via -r requirements.in
-botocore==1.35.10
+botocore==1.35.29
     # via
     #   boto3
     #   s3transfer
 certifi==2024.8.30
     # via requests
-cffi==1.17.0
+cffi==1.17.1
     # via cryptography
 chardet==5.2.0
     # via reportlab
@@ -34,7 +34,7 @@ charset-normalizer==3.3.2
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==43.0.0
+cryptography==43.0.1
     # via pdfminer-six
 deprecation==2.1.0
     # via pikepdf
@@ -49,7 +49,7 @@ djangorestframework==3.15.1
     #   asterism
 humanfriendly==10.0
     # via coloredlogs
-idna==3.8
+idna==3.10
     # via
     #   requests
     #   yarl
@@ -65,9 +65,9 @@ jmespath==1.0.1
     #   botocore
 lxml==5.3.0
     # via pikepdf
-more-itertools==10.4.0
+more-itertools==10.5.0
     # via archivessnake
-multidict==6.0.5
+multidict==6.1.0
     # via yarl
 ocrmypdf==13.7.0
     # via -r requirements.in
@@ -103,9 +103,9 @@ pyyaml==6.0.2
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==3.9.6
+rapidfuzz==3.10.0
     # via archivessnake
-reportlab==4.2.2
+reportlab==4.2.4
     # via ocrmypdf
 requests==2.32.3
     # via
@@ -129,8 +129,9 @@ tqdm==4.66.5
 typing-extensions==4.12.2
     # via
     #   asgiref
+    #   multidict
     #   pydantic
-urllib3==2.2.2
+urllib3==2.2.3
     # via
     #   botocore
     #   requests
@@ -138,5 +139,5 @@ vcrpy==4.4.0
     # via -r requirements.in
 wrapt==1.16.0
     # via vcrpy
-yarl==1.9.6
+yarl==1.13.1
     # via vcrpy
