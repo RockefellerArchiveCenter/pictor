@@ -158,8 +158,11 @@ class TIFFPreparer(BaseRoutine):
             tiff_files (list of pathlib.Paths): absolute filepaths for TIFF files.
         """
         service_dir = Path(bag_path, "data", "service")
-        if service_dir.is_dir() and any(service_dir.iterdir()):
-            tiff_files_dir = Path(bag_path, "data", "service")
+        master_dir = Path(bag_path, "data", "master")
+        for tiff_dir in service_dir, master_dir:
+            if tiff_dir.is_dir() and any(tiff_dir.iterdir()):
+                tiff_files_dir = tiff_dir
+                break
         else:
             tiff_files_dir = Path(bag_path, "data")
         return matching_files(tiff_files_dir, prepend=True)
