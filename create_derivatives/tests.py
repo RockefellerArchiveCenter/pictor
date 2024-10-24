@@ -247,7 +247,7 @@ class JP2MakerTestCase(TestCase):
         for fixture_path, expected_service, expected_master in [
                 ("unpacked_bag_with_tiff", False, False),
                 ("unpacked_bag_with_tiff_empty_service", False, False),
-                ("unpacked_bag_with_tiff_master", False, True),
+                ("unpacked_bag_with_tiff_master_edited", False, True),
                 ("unpacked_bag_with_tiff_service", True, False)]:
             set_up_bag(settings.TMP_DIR, fixture_path, self.bag_id)
             bag = Bag.objects.last()
@@ -255,7 +255,7 @@ class JP2MakerTestCase(TestCase):
             for path in tiffs:
                 self.assertTrue("data" in str(path))
                 self.assertEqual("service" in str(path), expected_service)
-                self.assertEqual("master" in str(path), expected_master)
+                self.assertEqual("master_edited" in str(path), expected_master)
             shutil.rmtree(bag.bag_path)
 
     def tearDown(self):
