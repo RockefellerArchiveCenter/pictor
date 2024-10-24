@@ -76,8 +76,8 @@ class BaseRoutine(object):
             tiff_files (list of pathlib.Paths): absolute filepaths for TIFF files.
         """
         service_dir = Path(bag_path, "data", "service")
-        master_dir = Path(bag_path, "data", "master")
-        for tiff_dir in service_dir, master_dir:
+        master_edited_dir = Path(bag_path, "data", "master_edited")
+        for tiff_dir in service_dir, master_edited_dir:
             if tiff_dir.is_dir() and any(tiff_dir.iterdir()):
                 tiff_files_dir = tiff_dir
                 break
