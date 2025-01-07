@@ -9,4 +9,4 @@ ocrmypdf~=13.6
 psycopg2~=2.9
 requests~=2.28
 shortuuid~=1.0
-vcrpy~=4.2
+vcrpy~=7.0
