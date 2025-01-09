@@ -93,7 +93,7 @@ pluggy==1.5.0
     # via ocrmypdf
 propcache==0.2.1
     # via yarl
-psycopg2-binary==2.9.10
+psycopg2==2.9.10
     # via -r requirements.in
 pycparser==2.22
     # via cffi
