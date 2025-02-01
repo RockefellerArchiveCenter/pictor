@@ -10,19 +10,19 @@ asgiref==3.8.1
     # via django
 asterism==1.1.0
     # via -r requirements.in
-attrs==24.3.0
+attrs==25.1.0
     # via archivessnake
 bagit==1.8.1
     # via asterism
 boltons==24.1.0
     # via archivessnake
-boto3==1.35.94
+boto3==1.36.11
     # via -r requirements.in
-botocore==1.35.94
+botocore==1.36.11
     # via
     #   boto3
     #   s3transfer
-certifi==2024.12.14
+certifi==2025.1.31
     # via requests
 cffi==1.17.1
     # via cryptography
@@ -65,7 +65,7 @@ jmespath==1.0.1
     #   botocore
 lxml==5.3.0
     # via pikepdf
-more-itertools==10.5.0
+more-itertools==10.6.0
     # via archivessnake
 multidict==6.1.0
     # via yarl
@@ -97,7 +97,7 @@ psycopg2==2.9.10
     # via -r requirements.in
 pycparser==2.22
     # via cffi
-pydantic==1.10.20
+pydantic==1.10.21
     # via iiif-prezi3
 python-dateutil==2.9.0.post0
     # via botocore
@@ -105,7 +105,7 @@ pyyaml==6.0.2
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==3.11.0
+rapidfuzz==3.12.1
     # via archivessnake
 reportlab==4.2.5
     # via ocrmypdf
@@ -114,7 +114,7 @@ requests==2.32.3
     #   -r requirements.in
     #   archivessnake
     #   iiif-prezi3
-s3transfer==0.10.4
+s3transfer==0.11.2
     # via boto3
 shortuuid==1.0.13
     # via -r requirements.in
@@ -122,7 +122,7 @@ six==1.17.0
     # via python-dateutil
 sqlparse==0.5.3
     # via django
-structlog==24.4.0
+structlog==25.1.0
     # via archivessnake
 tqdm==4.67.1
     # via ocrmypdf
@@ -131,6 +131,7 @@ typing-extensions==4.12.2
     #   asgiref
     #   multidict
     #   pydantic
+    #   structlog
 urllib3==2.3.0
     # via
     #   botocore
@@ -138,7 +139,7 @@ urllib3==2.3.0
     #   vcrpy
 vcrpy==7.0.0
     # via -r requirements.in
-wrapt==1.17.0
+wrapt==1.17.2
     # via vcrpy
 yarl==1.18.3
     # via vcrpy
