@@ -9,7 +9,7 @@ import requests
 import shortuuid
 from asterism.file_helpers import anon_extract_all
 from django.core.exceptions import ObjectDoesNotExist
-from iiif_prezi3 import Manifest, config
+from iiif_prezi3 import Manifest, ServiceItem, config
 from PIL import Image
 from shortuuid import uuid
 
@@ -354,12 +354,17 @@ class ManifestMaker(BaseRoutine):
             and then include page_number as the canvas ID.
             """
             canvas_id = f"{manifest_id}/canvas/{page_number}"
+            service = ServiceItem(
+                id=f"{self.resource_url.rstrip('/')}/{jp2_filename}",
+                type="ImageService3",
+                profile="level2")
             thumbnail = [{
                 "id": f"{self.resource_url.rstrip('/')}/{jp2_filename}/square/200,/0/default.jpg",
                 "type": "Image",
                 "format": "image/jpeg",
                 "height": 200,
                 "width": 200,
+                "service": json.loads(service.jsonld())
             }]
             canvas = manifest.make_canvas(id=canvas_id, height=height, width=width, label=f"Page {page_number}", thumbnail=thumbnail)
             canvas.add_image(
@@ -368,7 +373,8 @@ class ManifestMaker(BaseRoutine):
                 image_url=f"{self.resource_url.rstrip('/')}/{jp2_filename}/full/max/0/default.jpg",
                 format="image/jpeg",
                 height=height,
-                width=width)
+                width=width,
+                service=service)
         with open(manifest_path, 'w', encoding='utf-8') as jf:
             json.dump(json.loads(manifest.jsonld()), jf, ensure_ascii=False, indent=4)
 
