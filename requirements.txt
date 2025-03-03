@@ -14,11 +14,11 @@ attrs==25.1.0
     # via archivessnake
 bagit==1.8.1
     # via asterism
-boltons==24.1.0
+boltons==25.0.0
     # via archivessnake
-boto3==1.36.11
+boto3==1.37.4
     # via -r requirements.in
-botocore==1.36.11
+botocore==1.37.4
     # via
     #   boto3
     #   s3transfer
@@ -34,7 +34,7 @@ charset-normalizer==3.4.1
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==44.0.0
+cryptography==44.0.2
     # via pdfminer-six
 deprecation==2.1.0
     # via pikepdf
@@ -55,7 +55,7 @@ idna==3.10
     #   yarl
 iiif-prezi3==1.2.1
     # via -r requirements.in
-img2pdf==0.5.1
+img2pdf==0.6.0
     # via
     #   -r requirements.in
     #   ocrmypdf
@@ -63,7 +63,7 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-lxml==5.3.0
+lxml==5.3.1
     # via pikepdf
 more-itertools==10.6.0
     # via archivessnake
@@ -91,7 +91,7 @@ pillow==9.5.0
     #   reportlab
 pluggy==1.5.0
     # via ocrmypdf
-propcache==0.2.1
+propcache==0.3.0
     # via yarl
 psycopg2==2.9.10
     # via -r requirements.in
@@ -105,16 +105,16 @@ pyyaml==6.0.2
     # via
     #   archivessnake
     #   vcrpy
-rapidfuzz==3.12.1
+rapidfuzz==3.12.2
     # via archivessnake
-reportlab==4.2.5
+reportlab==4.3.1
     # via ocrmypdf
 requests==2.32.3
     # via
     #   -r requirements.in
     #   archivessnake
     #   iiif-prezi3
-s3transfer==0.11.2
+s3transfer==0.11.3
     # via boto3
 shortuuid==1.0.13
     # via -r requirements.in
