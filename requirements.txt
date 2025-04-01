@@ -10,15 +10,15 @@ asgiref==3.8.1
     # via django
 asterism==1.1.0
     # via -r requirements.in
-attrs==25.1.0
+attrs==25.3.0
     # via archivessnake
 bagit==1.8.1
     # via asterism
 boltons==25.0.0
     # via archivessnake
-boto3==1.37.4
+boto3==1.37.24
     # via -r requirements.in
-botocore==1.37.4
+botocore==1.37.24
     # via
     #   boto3
     #   s3transfer
@@ -67,7 +67,7 @@ lxml==5.3.1
     # via pikepdf
 more-itertools==10.6.0
     # via archivessnake
-multidict==6.1.0
+multidict==6.3.0
     # via yarl
 ocrmypdf==13.7.0
     # via -r requirements.in
@@ -76,7 +76,7 @@ packaging==24.2
     #   deprecation
     #   ocrmypdf
     #   pikepdf
-pdfminer-six==20240706
+pdfminer-six==20250327
     # via ocrmypdf
 pikepdf==8.4.1
     # via
@@ -91,7 +91,7 @@ pillow==9.5.0
     #   reportlab
 pluggy==1.5.0
     # via ocrmypdf
-propcache==0.3.0
+propcache==0.3.1
     # via yarl
 psycopg2==2.9.10
     # via -r requirements.in
@@ -114,7 +114,7 @@ requests==2.32.3
     #   -r requirements.in
     #   archivessnake
     #   iiif-prezi3
-s3transfer==0.11.3
+s3transfer==0.11.4
     # via boto3
 shortuuid==1.0.13
     # via -r requirements.in
@@ -122,11 +122,11 @@ six==1.17.0
     # via python-dateutil
 sqlparse==0.5.3
     # via django
-structlog==25.1.0
+structlog==25.2.0
     # via archivessnake
 tqdm==4.67.1
     # via ocrmypdf
-typing-extensions==4.12.2
+typing-extensions==4.13.0
     # via
     #   asgiref
     #   multidict
