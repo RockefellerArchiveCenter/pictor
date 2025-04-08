@@ -44,13 +44,14 @@ class ArchivesSpaceClient:
 
 
 class AWSClient:
-    def __init__(self, region_name, access_key, secret_key, bucket):
+    def __init__(self, region_name, access_key, secret_key, destination_bucket, source_bucket):
         self.s3_client = boto3.client(
             's3',
             region_name=region_name,
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key)
-        self.bucket = bucket
+        self.destination_bucket = destination_bucket
+        self.source_bucket = source_bucket
 
     def get_content_type(self, file):
         """Returns a content type for images, PDFs and Manifests.
@@ -79,10 +80,10 @@ class AWSClient:
             if content_type == "image/jp2":
                 width, height = image_dimensions_from_file(file)
                 self.s3_client.upload_file(
-                    str(file), self.bucket, bucket_path,
+                    str(file), self.destination_bucket, bucket_path,
                     ExtraArgs={'ContentType': content_type, 'Metadata': {"width": str(width), "height": str(height)}})
             else:
-                self.s3_client.upload_file(str(file), self.bucket, bucket_path, ExtraArgs={'ContentType': content_type})
+                self.s3_client.upload_file(str(file), self.destination_bucket, bucket_path, ExtraArgs={'ContentType': content_type})
 
     def list_objects(self, prefix=None):
         """Returns a list of keys in a bucket.
@@ -95,7 +96,7 @@ class AWSClient:
         """
         objects = []
         paginator = self.s3_client.get_paginator('list_objects_v2')
-        results = paginator.paginate(Bucket=self.bucket, Prefix=prefix)
+        results = paginator.paginate(Bucket=self.destination_bucket, Prefix=prefix)
         for page in results:
             objects += [item["Key"] for item in page.get("Contents", [])]
         return sorted(objects)
@@ -109,19 +110,19 @@ class AWSClient:
         Args:
             key (str): key for the object.
         """
-        metadata = self.s3_client.head_object(Bucket=self.bucket, Key=key).get("Metadata", {})
+        metadata = self.s3_client.head_object(Bucket=self.destination_bucket, Key=key).get("Metadata", {})
         try:
             width = int(metadata["width"])
             height = int(metadata["height"])
         except KeyError:
             target_path = Path(settings.TMP_DIR, key.split("/")[-1])
-            self.s3_client.download_file(self.bucket, key, str(target_path))
+            self.s3_client.download_file(self.destination_bucket, key, str(target_path))
             width, height = image_dimensions_from_file(target_path)
             metadata.update({"width": str(width), "height": str(height)})
             self.s3_client.copy_object(
-                Bucket=self.bucket,
+                Bucket=self.destination_bucket,
                 Key=key,
-                CopySource={"Bucket": self.bucket, "Key": key},
+                CopySource={"Bucket": self.destination_bucket, "Key": key},
                 ContentType=self.get_content_type(target_path),
                 Metadata=metadata,
                 MetadataDirective="REPLACE")

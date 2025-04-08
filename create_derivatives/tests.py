@@ -153,7 +153,7 @@ class S3Tests(TestCase):
     def test_find_object(self):
         bag_identifier = "single-file-service"
         routine = S3ObjectFinder()
-        _, _, _, bucket_name = settings.S3
+        bucket_name = settings.AWS[-1]
         s3 = boto3.client('s3', region_name='us-east-1')
         s3.create_bucket(Bucket=bucket_name)
         s3.put_object(
@@ -179,7 +179,7 @@ class S3Tests(TestCase):
         object_key = f"{bag_identifier}.tar.gz"
         expected_path = Path(settings.SRC_DIR, object_key)
         routine = S3ObjectDownloader()
-        _, _, _, bucket_name = settings.S3
+        bucket_name = settings.AWS[-1]
         s3 = boto3.client('s3', region_name='us-east-1')
         s3.create_bucket(Bucket=bucket_name)
         s3.put_object(

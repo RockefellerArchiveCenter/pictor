@@ -5,7 +5,6 @@ from pathlib import Path
 from shutil import rmtree
 
 import bagit
-import boto3
 import requests
 import shortuuid
 from asterism.file_helpers import anon_extract_all
@@ -24,21 +23,13 @@ from .models import Bag
 Image.MAX_IMAGE_PIXELS = 500000000
 
 
-class S3ClientMixin(object):
-    """Mixin to handle communication with S3."""
+class S3ObjectFinder():
+    """Finds objects in S3 waiting to be downloaded."""
 
     def __init__(self):
-        region_name, access_key, secret_key, bucket_name = settings.S3
-        self.s3_client = boto3.client(
-            's3',
-            region_name=region_name,
-            aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key)
-        self.s3_bucket = bucket_name
-
-
-class S3ObjectFinder(S3ClientMixin):
-    """Finds objects in S3 waiting to be downloaded."""
+        aws_client = AWSClient(*settings.AWS)
+        self.s3_client = aws_client.s3_client
+        self.s3_bucket = aws_client.source_bucket
 
     def run(self):
         in_bucket = [r['Key'] for r in self.s3_client.list_objects_v2(Bucket=self.s3_bucket)['Contents']]
@@ -119,7 +110,7 @@ class BaseRoutine(object):
         return matching_files(tiff_files_dir, prepend=True)
 
 
-class S3ObjectDownloader(BaseRoutine, S3ClientMixin):
+class S3ObjectDownloader(BaseRoutine):
     """Downloads and then deletes objects from S3."""
 
     start_process_status = Bag.SAVED
@@ -129,8 +120,9 @@ class S3ObjectDownloader(BaseRoutine, S3ClientMixin):
     idle_message = "No files ready to be downloaded."
 
     def __init__(self):
-        super().__init__()
-        self.src_dir = settings.SRC_DIR
+        aws_client = AWSClient(*settings.AWS)
+        self.s3_client = aws_client.s3_client
+        self.s3_bucket = aws_client.source_bucket
 
     def process_bag(self, bag):
         object_key = f'{bag.bag_identifier}.tar.gz'
