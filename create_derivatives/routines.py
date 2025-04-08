@@ -32,7 +32,7 @@ class S3ObjectFinder():
         self.s3_bucket = aws_client.source_bucket
 
     def run(self):
-        in_bucket = [r['Key'] for r in self.s3_client.list_objects_v2(Bucket=self.s3_bucket)['Contents']]
+        in_bucket = [r['Key'] for r in self.s3_client.list_objects_v2(Bucket=self.s3_bucket).get('Contents', [])]
         saved = []
         for obj_key in in_bucket:
             bag_identifier = obj_key.split('.')[0]
