@@ -80,6 +80,8 @@ class ViewTestCase(TestCase):
             "identifier": "foo"}
         self.assert_status_code("post", reverse("bag-list"), 201, data=data, content_type="application/json")
 
+    @patch("create_derivatives.routines.S3ObjectFinder.run")
+    @patch("create_derivatives.routines.S3ObjectDownloader.run")
     @patch("create_derivatives.routines.BagPreparer.__init__")
     @patch("create_derivatives.routines.BagPreparer.run")
     @patch("create_derivatives.routines.JP2Maker.run")
@@ -94,7 +96,7 @@ class ViewTestCase(TestCase):
     @patch("create_derivatives.routines.ManifestRecreator.run")
     def test_routine_views(self, mock_recreate_manifest, mock_recreate_init, mock_ocr_pdf, mock_compress_pdf,
                            mock_prepare_tiff, mock_cleanup, mock_upload, mock_manifest,
-                           mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
+                           mock_pdf, mock_jp2, mock_prepare, mock_prepare_init, mock_download, mock_find):
         """Asserts routine views return expected status codes and data."""
         mock_prepare_init.return_value = None
         mock_recreate_init.return_value = None
@@ -102,6 +104,8 @@ class ViewTestCase(TestCase):
         exception_id = "1"
         view_matrix = [
             ("manifest-recreator", mock_recreate_manifest, {"manifest": "22fgXvhwBrfbKwz9B6G2oz"}),
+            ("s3-find", mock_find, None),
+            ("s3-download", mock_download, None),
             ("bag-preparer", mock_prepare, None),
             ("tiff-preparer", mock_prepare_tiff, None),
             ("jp2-maker", mock_jp2, None),
