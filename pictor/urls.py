@@ -8,7 +8,8 @@ from create_derivatives.views import (AWSUploadView, BagPreparerView,
                                       BagViewSet, CleanupView, JP2MakerView,
                                       ManifestMakerView, ManifestRecreatorView,
                                       PDFCompressorView, PDFMakerView,
-                                      PDFOCRerView, TIFFPreparerView)
+                                      PDFOCRerView, S3ObjectDownloaderView,
+                                      S3ObjectFinderView, TIFFPreparerView)
 
 router = DefaultRouter()
 router.register(r'bags', BagViewSet, basename='bag')
@@ -17,6 +18,8 @@ schema_view = get_schema_view(title="Pictor API")
 
 urlpatterns = [
     re_path(r'^', include(router.urls)),
+    re_path(r'^find/', S3ObjectFinderView.as_view(), name='s3-find'),
+    re_path(r'^download/', S3ObjectDownloaderView.as_view(), name='s3-download'),
     re_path(r'^prepare/', BagPreparerView.as_view(), name='bag-preparer'),
     re_path(r'^prepare-tiff/', TIFFPreparerView.as_view(), name='tiff-preparer'),
     re_path(r'^make-jp2/', JP2MakerView.as_view(), name='jp2-maker'),

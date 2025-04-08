@@ -4,7 +4,8 @@ from rest_framework.viewsets import ModelViewSet
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, Cleanup, JP2Maker,
                        ManifestMaker, ManifestRecreator, PDFCompressor,
-                       PDFMaker, PDFOCRer, TIFFPreparer)
+                       PDFMaker, PDFOCRer, S3ObjectDownloader, S3ObjectFinder,
+                       TIFFPreparer)
 from .serializers import BagDetailSerializer, BagListSerializer
 
 
@@ -24,6 +25,16 @@ class BagViewSet(ModelViewSet):
         request.data["data"] = request.data.get("bag_data")
         request.data["process_status"] = Bag.CREATED
         return super().create(request, *args, **kwargs)
+
+
+class S3ObjectFinderView(RoutineView):
+    """Runs the S3ObjectFinder routine. Accepts POST requests only."""
+    routine = S3ObjectFinder
+
+
+class S3ObjectDownloaderView(RoutineView):
+    """Runs the S3ObjectDownloader routine. Accepts POST requests only."""
+    routine = S3ObjectDownloader
 
 
 class BagPreparerView(RoutineView):
