@@ -1,10 +1,12 @@
 ArchivesSnake~=0.9
+boto3~=1.37
 asterism~=1.0
 boto3~=1.24
 Django~=4.0.9
 djangorestframework~=3.13
 img2pdf~=0.4
 iiif-prezi3~=1.0
+moto~=5.1
 ocrmypdf~=13.6
 psycopg2~=2.9
 requests~=2.28
