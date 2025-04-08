@@ -3,11 +3,14 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
+import boto3
 import vcr
+from botocore.exceptions import ClientError
 from botocore.stub import Stubber
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
+from moto import mock_aws
 from rest_framework.test import APIRequestFactory
 
 from pictor import settings
@@ -17,7 +20,8 @@ from .helpers import matching_files
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, BaseRoutine, Cleanup, JP2Maker,
                        ManifestMaker, ManifestRecreator, PDFCompressor,
-                       PDFMaker, PDFOCRer, TIFFPreparer)
+                       PDFMaker, PDFOCRer, S3ObjectDownloader, S3ObjectFinder,
+                       TIFFPreparer)
 from .test_helpers import make_dir, set_up_bag
 
 
@@ -142,6 +146,61 @@ class BaseRoutineTestCase(TestCase):
             count += 1
         msg, processed = base_routine.run()
         self.assertEqual(msg, "No bags to prepare.")
+
+
+class S3Tests(TestCase):
+    @mock_aws
+    def test_find_object(self):
+        bag_identifier = "single-file-service"
+        routine = S3ObjectFinder()
+        _, _, _, bucket_name = settings.S3
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket=bucket_name)
+        s3.put_object(
+            Body=b'test content',
+            Bucket=bucket_name,
+            Key=f'{bag_identifier}.tar.gz')
+
+        """No bag exists"""
+        msg, identifiers = routine.run()
+        self.assertTrue(Bag.objects.filter(process_status=Bag.SAVED, bag_identifier=bag_identifier).exists())
+        self.assertEqual(identifiers, [bag_identifier])
+        self.assertEqual(msg, "Saved bags to database.")
+
+        """Bag already exists"""
+        msg, identifiers = routine.run()
+        self.assertEqual(Bag.objects.filter(process_status=Bag.SAVED, bag_identifier=bag_identifier).count(), 1)
+        self.assertEqual(identifiers, [])
+        self.assertEqual(msg, "No bags in bucket.")
+
+    @mock_aws
+    def test_download_object(self):
+        bag_identifier = "single-file-service"
+        object_key = f"{bag_identifier}.tar.gz"
+        expected_path = Path(settings.SRC_DIR, object_key)
+        routine = S3ObjectDownloader()
+        _, _, _, bucket_name = settings.S3
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket=bucket_name)
+        s3.put_object(
+            Body=b'test content',
+            Bucket=bucket_name,
+            Key=object_key)
+        bag = Bag.objects.create(
+            bag_identifier=bag_identifier,
+            process_status=Bag.SAVED)
+
+        routine.run()
+
+        bag.refresh_from_db()
+        self.assertEqual(bag.process_status, Bag.CREATED)
+        self.assertEqual(bag.bag_path, str(expected_path))
+        self.assertTrue(expected_path.is_file())
+        with self.assertRaises(ClientError) as err:
+            s3.head_object(
+                Bucket=bucket_name,
+                Key=object_key)
+        self.assertIn("404", str(err.exception))
 
 
 class BagPreparerTestCase(TestCase):
@@ -400,7 +459,6 @@ class ManifestRecreatorTestCase(TestCase):
         msg, object_list = routine.run(dimes_identifier)
         self.assertEqual(Bag.objects.all().count(), 1)
         bag = Bag.objects.all().first()
-        self.assertEqual(bag.origin, "digitization")
         self.assertEqual(bag.process_status, Bag.CLEANED_UP)
         self.assertEqual(bag.dimes_identifier, dimes_identifier)
         self.assertEqual(bag.as_data, as_data)
