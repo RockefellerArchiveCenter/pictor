@@ -26,8 +26,13 @@ IIIF_URL = "https://iiif.rockarch.org" # base URL for IIIF assets (string)
 PREZI_DEBUG_LEVEL = "error" # Prezi set_debug (string)
 
 IIIF_IMAGE_API = 2 # Version of IIIF Image API (integer)
-IIIF_PRESENTATION_API = 3 # Version of IIIF Presentation API (integer
+IIIF_PRESENTATION_API = 3 # Version of IIIF Presentation API (integer)
 
 OPJ_COMPRESS = "/usr/local/bin/opj_compress" # Location of opj_compress installation
 IMG2PDF = "/usr/local/bin/img2pdf" # Location of img2pdf installation
 OCRMYPDF = "ocrmypdf" # Location of ocrmypdf installation
+
+AWS_REGION_NAME = "us-east-1"  # Region name for AWS bucket that bags will be downloaded from (string)
+AWS_ACCESS_KEY = "123456789"  # Access key for AWS bucket that bags will be downloaded from (string)
+AWS_SECRET_KEY = "987654321"  # Secret key for AWS bucket that bags will be downloaded from (string)
+AWS_BUCKET_NAME = "rac-dev-iiif-upload"  # Bucket name for AWS bucket that bags will be downloaded from (string)
