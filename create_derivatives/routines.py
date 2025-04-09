@@ -23,6 +23,30 @@ from .models import Bag
 Image.MAX_IMAGE_PIXELS = 500000000
 
 
+class S3ObjectFinder():
+    """Finds objects in S3 waiting to be downloaded."""
+
+    def __init__(self):
+        aws_client = AWSClient(*settings.AWS)
+        self.s3_client = aws_client.s3_client
+        self.s3_bucket = aws_client.source_bucket
+
+    def run(self):
+        in_bucket = [r['Key'] for r in self.s3_client.list_objects_v2(Bucket=self.s3_bucket).get('Contents', [])]
+        saved = []
+        for obj_key in in_bucket:
+            bag_identifier = obj_key.split('.')[0]
+            if not Bag.objects.filter(
+                    bag_identifier=bag_identifier,
+                    process_status__in=[Bag.SAVED, Bag.DOWNLOADING]).exists():
+                Bag.objects.create(
+                    bag_identifier=bag_identifier,
+                    process_status=Bag.SAVED)
+                saved.append(bag_identifier)
+        msg = "Saved bags to database." if len(saved) else "No bags in bucket."
+        return msg, saved if len(saved) else []
+
+
 class BaseRoutine(object):
     """Base class which all routines inherit.
 
@@ -86,6 +110,33 @@ class BaseRoutine(object):
         return matching_files(tiff_files_dir, prepend=True)
 
 
+class S3ObjectDownloader(BaseRoutine):
+    """Downloads and then deletes objects from S3."""
+
+    start_process_status = Bag.SAVED
+    in_process_status = Bag.DOWNLOADING
+    end_process_status = Bag.CREATED
+    success_message = "File downloaded."
+    idle_message = "No files ready to be downloaded."
+
+    def __init__(self):
+        aws_client = AWSClient(*settings.AWS)
+        self.s3_client = aws_client.s3_client
+        self.s3_bucket = aws_client.source_bucket
+
+    def process_bag(self, bag):
+        object_key = f'{bag.bag_identifier}.tar.gz'
+        download_path = Path(settings.SRC_DIR, object_key)
+        self.s3_client.download_file(
+            self.s3_bucket,
+            f'{bag.bag_identifier}.tar.gz',
+            download_path)
+        self.s3_client.delete_object(
+            Bucket=self.s3_bucket,
+            Key=object_key)
+        bag.bag_path = download_path
+
+
 class BagPreparer(BaseRoutine):
     """Prepares bags for derivative creation.
 
@@ -108,10 +159,6 @@ class BagPreparer(BaseRoutine):
         check_dir_exists(settings.TMP_DIR)
 
     def process_bag(self, bag):
-        # TODO: presumes bag.bag_identifier and bag.origin are already set
-        # TODO: we should also be sure that Ursa Major is delivering to two directories, or we will run into conflicts with Fornax
-        if bag.origin != "digitization":
-            raise Exception("Bags from origin {} cannot be processed".format(bag.origin), bag.bag_identifier)
         unpacked_path = self.unpack_bag(bag.bag_identifier)
         as_uri = self.get_as_uri(unpacked_path)
         bag.bag_path = unpacked_path
@@ -462,7 +509,6 @@ class ManifestRecreator(object):
                 bag_identifier=bag_identifier,
                 bag_path=str(Path(settings.TMP_DIR, bag_identifier)),
                 dimes_identifier=dimes_identifier,
-                origin="digitization",
                 as_data=as_data,
                 process_status=Bag.CLEANED_UP)
         jp2_files = [Path(f) for f in self.aws_client.list_objects(f"images/{dimes_identifier}")]

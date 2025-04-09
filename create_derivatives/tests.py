@@ -3,11 +3,14 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
+import boto3
 import vcr
+from botocore.exceptions import ClientError
 from botocore.stub import Stubber
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
+from moto import mock_aws
 from rest_framework.test import APIRequestFactory
 
 from pictor import settings
@@ -17,7 +20,8 @@ from .helpers import matching_files
 from .models import Bag
 from .routines import (AWSUpload, BagPreparer, BaseRoutine, Cleanup, JP2Maker,
                        ManifestMaker, ManifestRecreator, PDFCompressor,
-                       PDFMaker, PDFOCRer, TIFFPreparer)
+                       PDFMaker, PDFOCRer, S3ObjectDownloader, S3ObjectFinder,
+                       TIFFPreparer)
 from .test_helpers import make_dir, set_up_bag
 
 
@@ -76,6 +80,8 @@ class ViewTestCase(TestCase):
             "identifier": "foo"}
         self.assert_status_code("post", reverse("bag-list"), 201, data=data, content_type="application/json")
 
+    @patch("create_derivatives.routines.S3ObjectFinder.run")
+    @patch("create_derivatives.routines.S3ObjectDownloader.run")
     @patch("create_derivatives.routines.BagPreparer.__init__")
     @patch("create_derivatives.routines.BagPreparer.run")
     @patch("create_derivatives.routines.JP2Maker.run")
@@ -90,7 +96,7 @@ class ViewTestCase(TestCase):
     @patch("create_derivatives.routines.ManifestRecreator.run")
     def test_routine_views(self, mock_recreate_manifest, mock_recreate_init, mock_ocr_pdf, mock_compress_pdf,
                            mock_prepare_tiff, mock_cleanup, mock_upload, mock_manifest,
-                           mock_pdf, mock_jp2, mock_prepare, mock_prepare_init):
+                           mock_pdf, mock_jp2, mock_prepare, mock_prepare_init, mock_download, mock_find):
         """Asserts routine views return expected status codes and data."""
         mock_prepare_init.return_value = None
         mock_recreate_init.return_value = None
@@ -98,6 +104,8 @@ class ViewTestCase(TestCase):
         exception_id = "1"
         view_matrix = [
             ("manifest-recreator", mock_recreate_manifest, {"manifest": "22fgXvhwBrfbKwz9B6G2oz"}),
+            ("s3-find", mock_find, None),
+            ("s3-download", mock_download, None),
             ("bag-preparer", mock_prepare, None),
             ("tiff-preparer", mock_prepare_tiff, None),
             ("jp2-maker", mock_jp2, None),
@@ -142,6 +150,61 @@ class BaseRoutineTestCase(TestCase):
             count += 1
         msg, processed = base_routine.run()
         self.assertEqual(msg, "No bags to prepare.")
+
+
+class S3Tests(TestCase):
+    @mock_aws
+    def test_find_object(self):
+        bag_identifier = "single-file-service"
+        routine = S3ObjectFinder()
+        bucket_name = settings.AWS[-1]
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket=bucket_name)
+        s3.put_object(
+            Body=b'test content',
+            Bucket=bucket_name,
+            Key=f'{bag_identifier}.tar.gz')
+
+        """No bag exists"""
+        msg, identifiers = routine.run()
+        self.assertTrue(Bag.objects.filter(process_status=Bag.SAVED, bag_identifier=bag_identifier).exists())
+        self.assertEqual(identifiers, [bag_identifier])
+        self.assertEqual(msg, "Saved bags to database.")
+
+        """Bag already exists"""
+        msg, identifiers = routine.run()
+        self.assertEqual(Bag.objects.filter(process_status=Bag.SAVED, bag_identifier=bag_identifier).count(), 1)
+        self.assertEqual(identifiers, [])
+        self.assertEqual(msg, "No bags in bucket.")
+
+    @mock_aws
+    def test_download_object(self):
+        bag_identifier = "single-file-service"
+        object_key = f"{bag_identifier}.tar.gz"
+        expected_path = Path(settings.SRC_DIR, object_key)
+        routine = S3ObjectDownloader()
+        bucket_name = settings.AWS[-1]
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket=bucket_name)
+        s3.put_object(
+            Body=b'test content',
+            Bucket=bucket_name,
+            Key=object_key)
+        bag = Bag.objects.create(
+            bag_identifier=bag_identifier,
+            process_status=Bag.SAVED)
+
+        routine.run()
+
+        bag.refresh_from_db()
+        self.assertEqual(bag.process_status, Bag.CREATED)
+        self.assertEqual(bag.bag_path, str(expected_path))
+        self.assertTrue(expected_path.is_file())
+        with self.assertRaises(ClientError) as err:
+            s3.head_object(
+                Bucket=bucket_name,
+                Key=object_key)
+        self.assertIn("404", str(err.exception))
 
 
 class BagPreparerTestCase(TestCase):
@@ -400,7 +463,6 @@ class ManifestRecreatorTestCase(TestCase):
         msg, object_list = routine.run(dimes_identifier)
         self.assertEqual(Bag.objects.all().count(), 1)
         bag = Bag.objects.all().first()
-        self.assertEqual(bag.origin, "digitization")
         self.assertEqual(bag.process_status, Bag.CLEANED_UP)
         self.assertEqual(bag.dimes_identifier, dimes_identifier)
         self.assertEqual(bag.as_data, as_data)

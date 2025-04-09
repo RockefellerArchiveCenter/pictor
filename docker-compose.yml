@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   pictor-db:
     image: postgres:10.4

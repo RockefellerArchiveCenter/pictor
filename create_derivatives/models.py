@@ -4,6 +4,8 @@ from django.db import models
 
 
 class Bag(BasePackage):
+    SAVED = 20
+    DOWNLOADING = 21
     CREATED = 0
     PREPARED = 1
     JPG2000 = 2
@@ -24,6 +26,8 @@ class Bag(BasePackage):
     COMPRESSING_PDF = 17
     OCRING_PDF = 18
     PROCESS_STATUS_CHOICES = (
+        (SAVED, "Saved"),
+        (DOWNLOADING, "Downloading from S3"),
         (CREATED, "Created"),
         (PREPARED, "Prepared"),
         (JPG2000, "JPG2000 derivatives created"),
