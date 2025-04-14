@@ -39,9 +39,9 @@ class S3ObjectFinder():
             if not Bag.objects.filter(
                     bag_identifier=bag_identifier,
                     process_status__in=[Bag.SAVED, Bag.DOWNLOADING]).exists():
-                Bag.objects.create(
-                    bag_identifier=bag_identifier,
-                    process_status=Bag.SAVED)
+                bag, _ = Bag.objects.get_or_create(bag_identifier=bag_identifier)
+                bag.process_status = Bag.SAVED
+                bag.save()
                 saved.append(bag_identifier)
         msg = "Saved bags to database." if len(saved) else "No bags in bucket."
         return msg, saved if len(saved) else []
