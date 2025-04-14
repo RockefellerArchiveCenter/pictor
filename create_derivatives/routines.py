@@ -9,6 +9,7 @@ import requests
 import shortuuid
 from asterism.file_helpers import anon_extract_all
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
 from iiif_prezi3 import Manifest, ServiceItem, config
 from PIL import Image
 from shortuuid import uuid
@@ -39,9 +40,14 @@ class S3ObjectFinder():
             if not Bag.objects.filter(
                     bag_identifier=bag_identifier,
                     process_status__in=[Bag.SAVED, Bag.DOWNLOADING]).exists():
-                Bag.objects.create(
-                    bag_identifier=bag_identifier,
-                    process_status=Bag.SAVED)
+                try:
+                    Bag.objects.create(
+                        bag_identifier=bag_identifier,
+                        process_status=Bag.SAVED)
+                except IntegrityError:
+                    bag = Bag.objects.get(bag_identifier=bag_identifier)
+                    bag.process_status = Bag.SAVED
+                    bag.save()
                 saved.append(bag_identifier)
         msg = "Saved bags to database." if len(saved) else "No bags in bucket."
         return msg, saved if len(saved) else []
