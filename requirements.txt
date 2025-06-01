@@ -16,11 +16,11 @@ bagit==1.8.1
     # via asterism
 boltons==25.0.0
     # via archivessnake
-boto3==1.38.6
+boto3==1.38.27
     # via
     #   -r requirements.in
     #   moto
-botocore==1.38.6
+botocore==1.38.27
     # via
     #   boto3
     #   moto
@@ -31,13 +31,13 @@ cffi==1.17.1
     # via cryptography
 chardet==5.2.0
     # via reportlab
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via
     #   pdfminer-six
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==44.0.2
+cryptography==45.0.3
     # via
     #   moto
     #   pdfminer-six
@@ -78,9 +78,9 @@ markupsafe==3.0.2
     #   werkzeug
 more-itertools==10.7.0
     # via archivessnake
-moto==5.1.4
+moto==5.1.5
     # via -r requirements.in
-multidict==6.4.3
+multidict==6.4.4
     # via yarl
 ocrmypdf==13.7.0
     # via -r requirements.in
@@ -89,7 +89,7 @@ packaging==25.0
     #   deprecation
     #   ocrmypdf
     #   pikepdf
-pdfminer-six==20250416
+pdfminer-six==20250506
     # via ocrmypdf
 pikepdf==8.4.1
     # via
@@ -102,7 +102,7 @@ pillow==9.5.0
     #   ocrmypdf
     #   pikepdf
     #   reportlab
-pluggy==1.5.0
+pluggy==1.6.0
     # via ocrmypdf
 propcache==0.3.1
     # via yarl
@@ -123,7 +123,7 @@ pyyaml==6.0.2
     #   vcrpy
 rapidfuzz==3.13.0
     # via archivessnake
-reportlab==4.4.0
+reportlab==4.4.1
     # via ocrmypdf
 requests==2.32.3
     # via
@@ -134,7 +134,7 @@ requests==2.32.3
     #   responses
 responses==0.25.7
     # via moto
-s3transfer==0.12.0
+s3transfer==0.13.0
     # via boto3
 shortuuid==1.0.13
     # via -r requirements.in
