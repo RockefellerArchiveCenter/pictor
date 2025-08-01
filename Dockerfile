@@ -1,4 +1,4 @@
-FROM python:3.10-buster
+FROM python:3.10-bookworm
 
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
