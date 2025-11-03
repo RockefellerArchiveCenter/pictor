@@ -1,36 +1,36 @@
 archivessnake==0.10.1
     # via -r requirements.in
-asgiref==3.9.2
+asgiref==3.10.0
     # via django
 asterism==1.1.0
     # via -r requirements.in
-attrs==25.3.0
+attrs==25.4.0
     # via archivessnake
 bagit==1.9.0
     # via asterism
 boltons==25.0.0
     # via archivessnake
-boto3==1.40.42
+boto3==1.40.64
     # via
     #   -r requirements.in
     #   moto
-botocore==1.40.42
+botocore==1.40.64
     # via
     #   boto3
     #   moto
     #   s3transfer
-certifi==2025.8.3
+certifi==2025.10.5
     # via requests
 cffi==2.0.0
     # via cryptography
-charset-normalizer==3.4.3
+charset-normalizer==3.4.4
     # via
     #   pdfminer-six
     #   reportlab
     #   requests
 coloredlogs==15.0.1
     # via ocrmypdf
-cryptography==46.0.1
+cryptography==46.0.3
     # via
     #   moto
     #   pdfminer-six
@@ -47,7 +47,7 @@ djangorestframework==3.15.1
     #   asterism
 humanfriendly==10.0
     # via coloredlogs
-idna==3.10
+idna==3.11
     # via
     #   requests
     #   yarl
@@ -71,9 +71,9 @@ markupsafe==3.0.3
     #   werkzeug
 more-itertools==10.8.0
     # via archivessnake
-moto==5.1.13
+moto==5.1.16
     # via -r requirements.in
-multidict==6.6.4
+multidict==6.7.0
     # via yarl
 ocrmypdf==13.7.0
     # via -r requirements.in
@@ -97,9 +97,9 @@ pillow==9.5.0
     #   reportlab
 pluggy==1.6.0
     # via ocrmypdf
-propcache==0.3.2
+propcache==0.4.1
     # via yarl
-psycopg2==2.9.10
+psycopg2==2.9.11
     # via -r requirements.in
 pycparser==2.23
     # via cffi
@@ -114,7 +114,7 @@ pyyaml==6.0.3
     #   archivessnake
     #   responses
     #   vcrpy
-rapidfuzz==3.14.1
+rapidfuzz==3.14.3
     # via archivessnake
 reportlab==4.4.4
     # via ocrmypdf
@@ -135,7 +135,7 @@ six==1.17.0
     # via python-dateutil
 sqlparse==0.5.3
     # via django
-structlog==25.4.0
+structlog==25.5.0
     # via archivessnake
 tqdm==4.67.1
     # via ocrmypdf
@@ -156,9 +156,9 @@ vcrpy==7.0.0
     # via -r requirements.in
 werkzeug==3.1.3
     # via moto
-wrapt==1.17.3
+wrapt==2.0.0
     # via vcrpy
 xmltodict==1.0.2
     # via moto
-yarl==1.20.1
+yarl==1.22.0
     # via vcrpy
