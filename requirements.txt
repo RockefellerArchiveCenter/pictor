@@ -10,11 +10,11 @@ bagit==1.9.0
     # via asterism
 boltons==25.0.0
     # via archivessnake
-boto3==1.41.5
+boto3==1.42.19
     # via
     #   -r requirements.in
     #   moto
-botocore==1.41.5
+botocore==1.42.19
     # via
     #   boto3
     #   moto
@@ -71,7 +71,7 @@ markupsafe==3.0.3
     #   werkzeug
 more-itertools==10.8.0
     # via archivessnake
-moto==5.1.18
+moto==5.1.19
     # via -r requirements.in
 multidict==6.7.0
     # via yarl
@@ -82,7 +82,7 @@ packaging==25.0
     #   deprecation
     #   ocrmypdf
     #   pikepdf
-pdfminer-six==20251107
+pdfminer-six==20251230
     # via ocrmypdf
 pikepdf==8.4.1
     # via
@@ -103,7 +103,7 @@ psycopg2==2.9.11
     # via -r requirements.in
 pycparser==2.23
     # via cffi
-pydantic==1.10.24
+pydantic==1.10.26
     # via iiif-prezi3
 python-dateutil==2.9.0.post0
     # via
@@ -116,7 +116,7 @@ pyyaml==6.0.3
     #   vcrpy
 rapidfuzz==3.14.3
     # via archivessnake
-reportlab==4.4.5
+reportlab==4.4.7
     # via ocrmypdf
 requests==2.32.5
     # via
@@ -127,13 +127,13 @@ requests==2.32.5
     #   responses
 responses==0.25.8
     # via moto
-s3transfer==0.15.0
+s3transfer==0.16.0
     # via boto3
 shortuuid==1.0.13
     # via -r requirements.in
 six==1.17.0
     # via python-dateutil
-sqlparse==0.5.4
+sqlparse==0.5.5
     # via django
 structlog==25.5.0
     # via archivessnake
@@ -146,7 +146,7 @@ typing-extensions==4.15.0
     #   multidict
     #   pydantic
     #   structlog
-urllib3==2.5.0
+urllib3==2.6.2
     # via
     #   botocore
     #   requests
