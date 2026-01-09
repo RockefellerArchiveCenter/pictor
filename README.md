@@ -1,3 +1,6 @@
+This application has been marked as read-only and is no longer actively maintained or supported. Application functionality has been reimplemented in the [iiif_derivatives](https://github.com/RockefellerArchiveCenter/iiif_derivatives) and [iiif_manifests](https://github.com/RockefellerArchiveCenter/iiif_manifests) applications.
+
+
 # pictor
 
 A microservice to create image derivatives (JPG2000 and PDF files) and IIIF Manifests from digital content (TIFF files).
