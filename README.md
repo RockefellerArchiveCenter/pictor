@@ -1,5 +1,7 @@
 # pictor
 
+This application has been marked as read-only and is no longer actively maintained or supported. Application functionality has been reimplemented in the [iiif_derivatives](https://github.com/RockefellerArchiveCenter/iiif_derivatives) and [iiif_manifests](https://github.com/RockefellerArchiveCenter/iiif_manifests) applications.
+
 A microservice to create image derivatives (JPG2000 and PDF files) and IIIF Manifests from digital content (TIFF files).
 
 pictor is part of [Project Electron](https://github.com/RockefellerArchiveCenter/project_electron), an initiative to build sustainable, open and user-centered infrastructure for the archival management of digital records at the [Rockefeller Archive Center](http://rockarch.org/).
